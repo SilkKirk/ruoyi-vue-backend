@@ -165,7 +165,6 @@ public class VelocityUtils
         templates.add("vm/java/service.java.vm");
         templates.add("vm/java/serviceImpl.java.vm");
         templates.add("vm/java/controller.java.vm");
-        templates.add("vm/xml/mapper.xml.vm");
         templates.add("vm/sql/sql.vm");
         templates.add(apiTemplate);
         if (StringUtils.equals(ELEMENT_PLUS_TYPESSRIPT, tplWebType))

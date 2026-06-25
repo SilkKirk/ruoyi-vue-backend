@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.DataScope;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -39,6 +40,7 @@ public class SysDeptController extends BaseController
      * 获取部门列表
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
+    @DataScope(deptAlias = "sys_dept")
     @GetMapping("/list")
     public AjaxResult list(SysDept dept)
     {

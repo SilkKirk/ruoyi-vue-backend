@@ -3,17 +3,23 @@ package com.ruoyi.generator.domain;
 import jakarta.validation.constraints.NotBlank;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.utils.StringUtils;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 代码生成业务字段表 gen_table_column
  * 
  * @author ruoyi
  */
+@Table("gen_table_column")
 public class GenTableColumn extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 编号 */
+@Id
     private Long columnId;
 
     /** 归属表编号 */
@@ -67,6 +73,10 @@ public class GenTableColumn extends BaseEntity
 
     /** 排序 */
     private Integer sort;
+
+    /** 备注 */
+    @Column(ignore = true)
+    private String remark;
 
     public void setColumnId(Long columnId)
     {

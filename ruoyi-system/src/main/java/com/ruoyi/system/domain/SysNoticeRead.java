@@ -3,15 +3,20 @@ package com.ruoyi.system.domain;
 import java.util.Date;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 
 /**
  * 公告已读记录表 sys_notice_read
  *
  * @author ruoyi
  */
+@Table("sys_notice_read")
 public class SysNoticeRead
 {
     /** 主键 */
+@Id(keyType = KeyType.Auto)
     private Long readId;
 
     /** 公告ID */

@@ -1,8 +1,11 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysOperLog;
 import com.ruoyi.system.mapper.SysOperLogMapper;
 import com.ruoyi.system.service.ISysOperLogService;
@@ -26,7 +29,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public void insertOperlog(SysOperLog operLog)
     {
-        operLogMapper.insertOperlog(operLog);
+        operLogMapper.insertSelective(operLog);
     }
 
     /**
@@ -38,7 +41,16 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public List<SysOperLog> selectOperLogList(SysOperLog operLog)
     {
-        return operLogMapper.selectOperLogList(operLog);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(operLog.getOperIp())) qw.like(SysOperLog::getOperIp, operLog.getOperIp());
+        if (StringUtils.isNotEmpty(operLog.getTitle())) qw.like(SysOperLog::getTitle, operLog.getTitle());
+        if (StringUtils.isNotNull(operLog.getBusinessType())) qw.eq(SysOperLog::getBusinessType, operLog.getBusinessType());
+        if (StringUtils.isNotNull(operLog.getStatus())) qw.eq(SysOperLog::getStatus, operLog.getStatus());
+        if (StringUtils.isNotEmpty(operLog.getOperName())) qw.like(SysOperLog::getOperName, operLog.getOperName());
+        if (StringUtils.isNotNull(operLog.getParams().get("beginTime"))) qw.ge(SysOperLog::getOperTime, operLog.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(operLog.getParams().get("endTime"))) qw.le(SysOperLog::getOperTime, operLog.getParams().get("endTime"));
+        qw.orderBy(SysOperLog::getOperId, false);
+        return operLogMapper.selectListByQuery(qw);
     }
 
     /**
@@ -50,7 +62,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public int deleteOperLogByIds(Long[] operIds)
     {
-        return operLogMapper.deleteOperLogByIds(operIds);
+        return operLogMapper.deleteBatchByIds(Arrays.asList(operIds));
     }
 
     /**
@@ -62,7 +74,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public SysOperLog selectOperLogById(Long operId)
     {
-        return operLogMapper.selectOperLogById(operId);
+        return operLogMapper.selectOneById(operId);
     }
 
     /**
@@ -71,6 +83,6 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public void cleanOperLog()
     {
-        operLogMapper.cleanOperLog();
+        operLogMapper.deleteByQuery(QueryWrapper.create().where("1=1"));
     }
 }

@@ -2,18 +2,23 @@ package com.ruoyi.system.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
 
 /**
  * 角色和菜单关联 sys_role_menu
  * 
  * @author ruoyi
  */
+@Table("sys_role_menu")
 public class SysRoleMenu
 {
     /** 角色ID */
+@Id
     private Long roleId;
     
     /** 菜单ID */
+@Id
     private Long menuId;
 
     public Long getRoleId()

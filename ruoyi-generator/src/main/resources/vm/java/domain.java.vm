@@ -6,6 +6,9 @@ import ${import};
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 #if($table.crud || $table.sub)
 import com.ruoyi.common.core.domain.BaseEntity;
 #elseif($table.tree)
@@ -23,6 +26,7 @@ import com.ruoyi.common.core.domain.TreeEntity;
 #elseif($table.tree)
 #set($Entity="TreeEntity")
 #end
+@Table("${tableName}")
 public class ${ClassName} extends ${Entity}
 {
     private static final long serialVersionUID = 1L;
@@ -45,6 +49,9 @@ public class ${ClassName} extends ${Entity}
 #else
     @Excel(name = "${comment}")
 #end
+#end
+#if($column.isPk == "1")
+    @Id(keyType = KeyType.Auto)
 #end
     private $column.javaType $column.javaField;
 

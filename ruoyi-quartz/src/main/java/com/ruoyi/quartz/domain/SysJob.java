@@ -12,18 +12,23 @@ import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.quartz.util.CronUtils;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 
 /**
  * 定时任务调度表 sys_job
  * 
  * @author ruoyi
  */
+@Table("sys_job")
 public class SysJob extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 任务ID */
     @Excel(name = "任务序号", cellType = ColumnType.NUMERIC)
+@Id(keyType = KeyType.Auto)
     private Long jobId;
 
     /** 任务名称 */

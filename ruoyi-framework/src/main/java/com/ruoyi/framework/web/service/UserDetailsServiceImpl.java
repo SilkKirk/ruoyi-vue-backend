@@ -15,24 +15,14 @@ import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysUserService;
 
-/**
- * 用户验证处理
- *
- * @author ruoyi
- */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService
 {
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
-    @Autowired
-    private ISysUserService userService;
-    
-    @Autowired
-    private SysPasswordService passwordService;
-
-    @Autowired
-    private SysPermissionService permissionService;
+    @Autowired private ISysUserService userService;
+    @Autowired private SysPasswordService passwordService;
+    @Autowired private SysPermissionService permissionService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
@@ -53,9 +43,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
             log.info("登录用户：{} 已被停用.", username);
             throw new ServiceException(MessageUtils.message("user.blocked"));
         }
-
         passwordService.validate(user);
-
         return createLoginUser(user);
     }
 

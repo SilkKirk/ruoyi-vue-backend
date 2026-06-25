@@ -9,17 +9,23 @@ import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 部门表 sys_dept
  * 
  * @author ruoyi
  */
+@Table("sys_dept")
 public class SysDept extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 部门ID */
+@Id(keyType = KeyType.Auto)
     private Long deptId;
 
     /** 父部门ID */
@@ -50,7 +56,12 @@ public class SysDept extends BaseEntity
     private String delFlag;
 
     /** 父部门名称 */
+    @Column(ignore = true)
     private String parentName;
+
+    /** 备注 */
+    @Column(ignore = true)
+    private String remark;
     
     /** 子部门 */
     private List<SysDept> children = new ArrayList<SysDept>();

@@ -14,18 +14,24 @@ import com.ruoyi.common.annotation.Excels;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.xss.Xss;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 用户对象 sys_user
  * 
  * @author ruoyi
  */
+@Table("sys_user")
 public class SysUser extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 用户ID */
     @Excel(name = "用户序号", type = Type.EXPORT, cellType = ColumnType.NUMERIC, prompt = "用户编号")
+@Id(keyType = KeyType.Auto)
     private Long userId;
 
     /** 部门ID */
@@ -94,6 +100,7 @@ public class SysUser extends BaseEntity
     private Long[] postIds;
 
     /** 角色ID */
+    @Column(ignore = true)
     private Long roleId;
 
     public SysUser()

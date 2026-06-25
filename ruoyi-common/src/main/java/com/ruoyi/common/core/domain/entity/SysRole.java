@@ -9,18 +9,24 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 角色表 sys_role
  * 
  * @author ruoyi
  */
+@Table("sys_role")
 public class SysRole extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 角色ID */
     @Excel(name = "角色序号", cellType = ColumnType.NUMERIC)
+@Id(keyType = KeyType.Auto)
     private Long roleId;
 
     /** 角色名称 */
@@ -53,6 +59,7 @@ public class SysRole extends BaseEntity
     private String delFlag;
 
     /** 用户是否存在此角色标识 默认不存在 */
+    @Column(ignore = true)
     private boolean flag = false;
 
     /** 菜单组 */

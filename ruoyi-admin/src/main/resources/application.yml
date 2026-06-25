@@ -69,13 +69,13 @@ spring:
     # redis 配置
     redis:
       # 地址
-      host: localhost
+      host: 127.0.0.1
       # 端口，默认为6379
       port: 6379
       # 数据库索引
       database: 0
       # 密码
-      password:
+      password: 123456
       # 连接超时时间
       timeout: 10s
       lettuce:
@@ -98,20 +98,15 @@ token:
   # 令牌有效期（默认30分钟）
   expireTime: 30
 
-# MyBatis配置
-mybatis:
-  # 搜索指定包别名
-  typeAliasesPackage: com.ruoyi.**.domain
-  # 配置mapper的扫描，找到所有的mapper.xml映射文件
-  mapperLocations: classpath*:mapper/**/*Mapper.xml
-  # 加载全局的配置文件
-  configLocation: classpath:mybatis/mybatis-config.xml
+# MyBatis-Flex配置
+mybatis-flex:
+  global-config:
+    key-config:
+      use-generated-keys: true
 
-# PageHelper分页插件
-pagehelper:
-  helperDialect: mysql
-  supportMethodsArguments: true
-  params: count=countSql
+# MyBatis配置（仅用于兼容 MyBatis-Flex 底层的 MyBatis 框架）
+mybatis:
+  typeAliasesPackage: com.ruoyi.**.domain
 
 # Springdoc配置
 springdoc:

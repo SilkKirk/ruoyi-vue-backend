@@ -8,18 +8,24 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 岗位表 sys_post
  * 
  * @author ruoyi
  */
+@Table("sys_post")
 public class SysPost extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 岗位序号 */
     @Excel(name = "岗位序号", cellType = ColumnType.NUMERIC)
+@Id(keyType = KeyType.Auto)
     private Long postId;
 
     /** 岗位编码 */
@@ -39,6 +45,7 @@ public class SysPost extends BaseEntity
     private String status;
 
     /** 用户是否存在此岗位标识 默认不存在 */
+    @Column(ignore = true)
     private boolean flag = false;
 
     public Long getPostId()

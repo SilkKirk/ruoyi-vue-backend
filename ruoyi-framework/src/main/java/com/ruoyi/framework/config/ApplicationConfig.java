@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import com.fasterxml.jackson.databind.Module;
+import com.ruoyi.common.config.serializer.AutoTrimModule;
 
 /**
  * 程序注解配置
@@ -26,5 +28,14 @@ public class ApplicationConfig
     public Jackson2ObjectMapperBuilderCustomizer jacksonObjectMapperCustomization()
     {
         return jacksonObjectMapperBuilder -> jacksonObjectMapperBuilder.timeZone(TimeZone.getDefault());
+    }
+
+    /**
+     * 自动 Trim 的 Jackson Module
+     */
+    @Bean
+    public Module autoTrimModule()
+    {
+        return new AutoTrimModule();
     }
 }

@@ -14,6 +14,7 @@ import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.text.Convert;
+import com.ruoyi.common.utils.DataScopeHelper;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.security.context.PermissionContextHolder;
@@ -27,11 +28,6 @@ import com.ruoyi.framework.security.context.PermissionContextHolder;
 @Component
 public class DataScopeAspect
 {
-    /**
-     * 数据权限过滤关键字
-     */
-    public static final String DATA_SCOPE = "dataScope";
-
     @Before("@annotation(controllerDataScope)")
     public void doBefore(JoinPoint point, DataScope controllerDataScope) throws Throwable
     {
@@ -140,7 +136,8 @@ public class DataScopeAspect
             if (StringUtils.isNotNull(params) && params instanceof BaseEntity)
             {
                 BaseEntity baseEntity = (BaseEntity) params;
-                baseEntity.getParams().put(DATA_SCOPE, " AND (" + sqlString.substring(4) + ")");
+                // 去掉开头 " OR "，存储纯条件串，方便 MyBatis-Flex QueryWrapper.and() 直接使用
+                baseEntity.getParams().put(DataScopeHelper.DATA_SCOPE, sqlString.substring(4));
             }
         }
     }
@@ -154,7 +151,7 @@ public class DataScopeAspect
         if (StringUtils.isNotNull(params) && params instanceof BaseEntity)
         {
             BaseEntity baseEntity = (BaseEntity) params;
-            baseEntity.getParams().put(DATA_SCOPE, "");
+            baseEntity.getParams().put(DataScopeHelper.DATA_SCOPE, "");
         }
     }
 }

@@ -5,14 +5,17 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
-import com.ruoyi.common.core.domain.BaseEntity;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * 定时任务调度日志表 sys_job_log
  * 
  * @author ruoyi
  */
-public class SysJobLog extends BaseEntity
+public class SysJobLog implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -44,6 +47,13 @@ public class SysJobLog extends BaseEntity
     @Excel(name = "异常信息")
     private String exceptionInfo;
 
+    /** 请求参数 */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Map<String, Object> params;
+
+    public Map<String, Object> getParams() { if (params == null) params = new HashMap<>(); return params; }
+    public void setParams(Map<String, Object> params) { this.params = params; }
+
     /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
@@ -51,6 +61,10 @@ public class SysJobLog extends BaseEntity
     /** 结束时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
 
     public Long getJobLogId()
     {
@@ -140,6 +154,16 @@ public class SysJobLog extends BaseEntity
     public void setEndTime(Date endTime)
     {
         this.endTime = endTime;
+    }
+
+    public Date getCreateTime()
+    {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime)
+    {
+        this.createTime = createTime;
     }
 
     @Override

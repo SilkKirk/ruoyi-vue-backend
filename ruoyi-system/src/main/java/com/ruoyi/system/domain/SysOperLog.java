@@ -1,22 +1,30 @@
 package com.ruoyi.system.domain;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
-import com.ruoyi.common.core.domain.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 
 /**
  * 操作日志记录表 oper_log
  * 
  * @author ruoyi
  */
-public class SysOperLog extends BaseEntity
+@Table("sys_oper_log")
+public class SysOperLog implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
     /** 日志主键 */
     @Excel(name = "操作序号", cellType = ColumnType.NUMERIC)
+@Id(keyType = KeyType.Auto)
     private Long operId;
 
     /** 操作模块 */
@@ -86,6 +94,24 @@ public class SysOperLog extends BaseEntity
     /** 消耗时间 */
     @Excel(name = "消耗时间", suffix = "毫秒")
     private Long costTime;
+
+    /** 请求参数 */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Map<String, Object> params;
+
+    public Map<String, Object> getParams()
+    {
+        if (params == null)
+        {
+            params = new HashMap<>();
+        }
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params)
+    {
+        this.params = params;
+    }
 
     public Long getOperId()
     {

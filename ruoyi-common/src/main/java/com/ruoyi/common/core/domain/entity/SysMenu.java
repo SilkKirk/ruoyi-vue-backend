@@ -8,23 +8,30 @@ import jakarta.validation.constraints.Size;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 菜单权限表 sys_menu
  * 
  * @author ruoyi
  */
+@Table("sys_menu")
 public class SysMenu extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 菜单ID */
+@Id(keyType = KeyType.Auto)
     private Long menuId;
 
     /** 菜单名称 */
     private String menuName;
 
     /** 父菜单名称 */
+    @Column(ignore = true)
     private String parentName;
 
     /** 父菜单ID */

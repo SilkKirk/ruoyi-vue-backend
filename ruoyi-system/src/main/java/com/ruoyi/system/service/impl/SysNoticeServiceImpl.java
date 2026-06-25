@@ -1,8 +1,11 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.mapper.SysNoticeMapper;
 import com.ruoyi.system.service.ISysNoticeService;
@@ -27,7 +30,7 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public SysNotice selectNoticeById(Long noticeId)
     {
-        return noticeMapper.selectNoticeById(noticeId);
+        return noticeMapper.selectOneById(noticeId);
     }
 
     /**
@@ -39,7 +42,14 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public List<SysNotice> selectNoticeList(SysNotice notice)
     {
-        return noticeMapper.selectNoticeList(notice);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
+        if (StringUtils.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
+        if (StringUtils.isNotEmpty(notice.getCreateBy())) qw.like(SysNotice::getCreateBy, notice.getCreateBy());
+        if (StringUtils.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
+        qw.orderBy(SysNotice::getCreateTime, false);
+        return noticeMapper.selectListByQuery(qw);
     }
 
     /**
@@ -51,7 +61,7 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public int insertNotice(SysNotice notice)
     {
-        return noticeMapper.insertNotice(notice);
+        return noticeMapper.insertSelective(notice);
     }
 
     /**
@@ -63,7 +73,7 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public int updateNotice(SysNotice notice)
     {
-        return noticeMapper.updateNotice(notice);
+        return noticeMapper.update(notice);
     }
 
     /**
@@ -75,7 +85,7 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public int deleteNoticeById(Long noticeId)
     {
-        return noticeMapper.deleteNoticeById(noticeId);
+        return noticeMapper.deleteById(noticeId);
     }
 
     /**
@@ -87,6 +97,6 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public int deleteNoticeByIds(Long[] noticeIds)
     {
-        return noticeMapper.deleteNoticeByIds(noticeIds);
+        return noticeMapper.deleteBatchByIds(Arrays.asList(noticeIds));
     }
 }

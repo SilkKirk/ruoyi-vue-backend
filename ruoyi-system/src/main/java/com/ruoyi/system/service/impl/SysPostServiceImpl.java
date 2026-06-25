@@ -1,12 +1,16 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysPost;
+import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.mapper.SysPostMapper;
 import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.service.ISysPostService;
@@ -34,7 +38,14 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public List<SysPost> selectPostList(SysPost post)
     {
-        return postMapper.selectPostList(post);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
+        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
+        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
+        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
+        qw.orderBy(SysPost::getPostSort, true);
+        return postMapper.selectListByQuery(qw);
     }
 
     /**
@@ -45,7 +56,7 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public List<SysPost> selectPostAll()
     {
-        return postMapper.selectPostAll();
+        return postMapper.selectListByQuery(QueryWrapper.create());
     }
 
     /**
@@ -57,7 +68,7 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public SysPost selectPostById(Long postId)
     {
-        return postMapper.selectPostById(postId);
+        return postMapper.selectOneById(postId);
     }
 
     /**
@@ -69,7 +80,9 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public List<Long> selectPostListByUserId(Long userId)
     {
-        return postMapper.selectPostListByUserId(userId);
+        return userPostMapper.selectListByQuery(
+            QueryWrapper.create().select(SysUserPost::getPostId).where(SysUserPost::getUserId).eq(userId)
+        ).stream().map(SysUserPost::getPostId).collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +95,7 @@ public class SysPostServiceImpl implements ISysPostService
     public boolean checkPostNameUnique(SysPost post)
     {
         Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
-        SysPost info = postMapper.checkPostNameUnique(post.getPostName());
+        SysPost info = postMapper.selectOneByQuery(QueryWrapper.create().where(SysPost::getPostName).eq(post.getPostName()));
         if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
         {
             return UserConstants.NOT_UNIQUE;
@@ -100,7 +113,7 @@ public class SysPostServiceImpl implements ISysPostService
     public boolean checkPostCodeUnique(SysPost post)
     {
         Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
-        SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());
+        SysPost info = postMapper.selectOneByQuery(QueryWrapper.create().where(SysPost::getPostCode).eq(post.getPostCode()));
         if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
         {
             return UserConstants.NOT_UNIQUE;
@@ -117,7 +130,7 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public int countUserPostById(Long postId)
     {
-        return userPostMapper.countUserPostById(postId);
+        return (int) userPostMapper.selectCountByQuery(QueryWrapper.create().where(SysUserPost::getPostId).eq(postId));
     }
 
     /**
@@ -129,7 +142,7 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public int deletePostById(Long postId)
     {
-        return postMapper.deletePostById(postId);
+        return postMapper.deleteById(postId);
     }
 
     /**
@@ -149,7 +162,7 @@ public class SysPostServiceImpl implements ISysPostService
                 throw new ServiceException(String.format("%1$s已分配,不能删除", post.getPostName()));
             }
         }
-        return postMapper.deletePostByIds(postIds);
+        return postMapper.deleteBatchByIds(Arrays.asList(postIds));
     }
 
     /**
@@ -161,7 +174,7 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public int insertPost(SysPost post)
     {
-        return postMapper.insertPost(post);
+        return postMapper.insertSelective(post);
     }
 
     /**
@@ -173,6 +186,6 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public int updatePost(SysPost post)
     {
-        return postMapper.updatePost(post);
+        return postMapper.update(post);
     }
 }

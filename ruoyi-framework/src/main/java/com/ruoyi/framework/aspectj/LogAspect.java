@@ -1,6 +1,7 @@
 package com.ruoyi.framework.aspectj;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -124,6 +125,8 @@ public class LogAspect
             getControllerMethodDescription(joinPoint, controllerLog, operLog, jsonResult);
             // 设置消耗时间
             operLog.setCostTime(System.currentTimeMillis() - TIME_THREADLOCAL.get());
+            // 设置操作时间
+            operLog.setOperTime(new Date());
             // 保存数据库
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         }

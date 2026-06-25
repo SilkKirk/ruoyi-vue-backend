@@ -1,8 +1,11 @@
 package com.ruoyi.quartz.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.quartz.domain.SysJobLog;
 import com.ruoyi.quartz.mapper.SysJobLogMapper;
 import com.ruoyi.quartz.service.ISysJobLogService;
@@ -27,7 +30,15 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public List<SysJobLog> selectJobLogList(SysJobLog jobLog)
     {
-        return jobLogMapper.selectJobLogList(jobLog);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(jobLog.getJobName())) qw.like(SysJobLog::getJobName, jobLog.getJobName());
+        if (StringUtils.isNotEmpty(jobLog.getJobGroup())) qw.eq(SysJobLog::getJobGroup, jobLog.getJobGroup());
+        if (StringUtils.isNotEmpty(jobLog.getStatus())) qw.eq(SysJobLog::getStatus, jobLog.getStatus());
+        if (StringUtils.isNotEmpty(jobLog.getInvokeTarget())) qw.like(SysJobLog::getInvokeTarget, jobLog.getInvokeTarget());
+        if (StringUtils.isNotNull(jobLog.getParams().get("beginTime"))) qw.ge(SysJobLog::getCreateTime, jobLog.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(jobLog.getParams().get("endTime"))) qw.le(SysJobLog::getCreateTime, jobLog.getParams().get("endTime"));
+        qw.orderBy(SysJobLog::getJobLogId, false);
+        return jobLogMapper.selectListByQuery(qw);
     }
 
     /**
@@ -39,7 +50,7 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public SysJobLog selectJobLogById(Long jobLogId)
     {
-        return jobLogMapper.selectJobLogById(jobLogId);
+        return jobLogMapper.selectOneById(jobLogId);
     }
 
     /**
@@ -50,7 +61,7 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public void addJobLog(SysJobLog jobLog)
     {
-        jobLogMapper.insertJobLog(jobLog);
+        jobLogMapper.insertSelective(jobLog);
     }
 
     /**
@@ -62,7 +73,7 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public int deleteJobLogByIds(Long[] logIds)
     {
-        return jobLogMapper.deleteJobLogByIds(logIds);
+        return jobLogMapper.deleteBatchByIds(Arrays.asList(logIds));
     }
 
     /**
@@ -73,7 +84,7 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public int deleteJobLogById(Long jobId)
     {
-        return jobLogMapper.deleteJobLogById(jobId);
+        return jobLogMapper.deleteById(jobId);
     }
 
     /**
@@ -82,6 +93,6 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public void cleanJobLog()
     {
-        jobLogMapper.cleanJobLog();
+        jobLogMapper.deleteByQuery(QueryWrapper.create().where("1=1"));
     }
 }

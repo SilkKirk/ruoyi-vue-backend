@@ -4,14 +4,17 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
-import com.ruoyi.common.core.domain.BaseEntity;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * 系统访问记录表 sys_logininfor
  * 
  * @author ruoyi
  */
-public class SysLogininfor extends BaseEntity
+public class SysLogininfor implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -46,6 +49,13 @@ public class SysLogininfor extends BaseEntity
     /** 提示消息 */
     @Excel(name = "提示消息")
     private String msg;
+
+    /** 请求参数 */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Map<String, Object> params;
+
+    public Map<String, Object> getParams() { if (params == null) params = new HashMap<>(); return params; }
+    public void setParams(Map<String, Object> params) { this.params = params; }
 
     /** 访问时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

@@ -7,17 +7,23 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.ruoyi.common.constant.GenConstants;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.utils.StringUtils;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
 
 /**
  * 业务表 gen_table
  * 
  * @author ruoyi
  */
+@Table("gen_table")
 public class GenTable extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 编号 */
+@Id(keyType = KeyType.Auto)
     private Long tableId;
 
     /** 表名称 */
@@ -87,21 +93,27 @@ public class GenTable extends BaseEntity
     private String options;
 
     /** 树编码字段 */
+    @Column(ignore = true)
     private String treeCode;
 
     /** 树父编码字段 */
+    @Column(ignore = true)
     private String treeParentCode;
 
     /** 树名称字段 */
+    @Column(ignore = true)
     private String treeName;
 
     /** 上级菜单ID字段 */
+    @Column(ignore = true)
     private Long parentMenuId;
 
     /** 上级菜单名称字段 */
+    @Column(ignore = true)
     private String parentMenuName;
 
     /** 是否生成详情页 */
+    @Column(ignore = true)
     private boolean isView;
 
     public Long getTableId()
