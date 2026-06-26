@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Objects;
-import org.apache.commons.io.FilenameUtils;
+import cn.hutool.core.io.FileUtil;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
@@ -143,7 +143,7 @@ public class FileUploadUtils
      */
     public static final String extractFilename(MultipartFile file)
     {
-        return StringUtils.format("{}/{}_{}.{}", DateUtils.datePath(), FilenameUtils.getBaseName(file.getOriginalFilename()), Seq.getId(Seq.uploadSeqType), getExtension(file));
+        return StringUtils.format("{}/{}_{}.{}", DateUtils.datePath(), FileUtil.mainName(file.getOriginalFilename()), Seq.getId(Seq.uploadSeqType), getExtension(file));
     }
 
     /**
@@ -250,7 +250,7 @@ public class FileUploadUtils
      */
     public static final String getExtension(MultipartFile file)
     {
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String extension = FileUtil.extName(file.getOriginalFilename());
         if (StringUtils.isEmpty(extension))
         {
             extension = MimeTypeUtils.getExtension(Objects.requireNonNull(file.getContentType()));

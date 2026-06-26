@@ -20,7 +20,6 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -60,8 +59,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysRole role)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysRole> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysRole> page = startPage(SysRole.class);
         page = roleService.selectRolePage(page, role);
         return getDataTable(page);
     }
@@ -192,8 +190,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/allocatedList")
     public TableDataInfo allocatedList(SysUser user)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysUser> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysUser> page = startPage(SysUser.class);
         page = userService.selectAllocatedPage(page, user);
         return getDataTable(page);
     }
@@ -205,8 +202,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/unallocatedList")
     public TableDataInfo unallocatedList(SysUser user)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysUser> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysUser> page = startPage(SysUser.class);
         page = userService.selectUnallocatedPage(page, user);
         return getDataTable(page);
     }

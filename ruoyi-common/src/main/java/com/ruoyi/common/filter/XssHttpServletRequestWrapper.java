@@ -6,7 +6,7 @@ import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
-import org.apache.commons.io.IOUtils;
+import cn.hutool.core.io.IoUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import com.ruoyi.common.utils.StringUtils;
@@ -55,7 +55,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper
         }
 
         // 为空，直接返回
-        String json = IOUtils.toString(super.getInputStream(), "utf-8");
+        String json = IoUtil.readUtf8(super.getInputStream());
         if (StringUtils.isEmpty(json))
         {
             return super.getInputStream();

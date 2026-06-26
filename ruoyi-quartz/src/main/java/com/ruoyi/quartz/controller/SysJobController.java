@@ -18,7 +18,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -49,8 +48,7 @@ public class SysJobController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysJob sysJob)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysJob> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysJob> page = startPage(SysJob.class);
         page = jobService.selectJobPage(page, sysJob);
         return getDataTable(page);
     }

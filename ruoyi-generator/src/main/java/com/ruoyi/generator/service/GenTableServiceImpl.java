@@ -17,8 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -368,9 +368,9 @@ public class GenTableServiceImpl implements IGenTableService
                 try
                 {
                     String path = getGenPath(table, template);
-                    FileUtils.writeStringToFile(new File(path), sw.toString(), CharsetKit.UTF_8);
+                    FileUtil.writeString(sw.toString(), new File(path), CharsetKit.UTF_8);
                 }
-                catch (IOException e)
+                catch (Exception e)
                 {
                     throw new ServiceException("渲染模板失败，表名：" + table.getTableName());
                 }
@@ -457,7 +457,7 @@ public class GenTableServiceImpl implements IGenTableService
         {
             writeToZip(zip, entry.getKey(), entry.getValue().toString());
         }
-        IOUtils.closeQuietly(zip);
+        IoUtil.close(zip);
         return outputStream.toByteArray();
     }
 
@@ -518,7 +518,7 @@ public class GenTableServiceImpl implements IGenTableService
         try
         {
             zip.putNextEntry(new ZipEntry(fileName));
-            IOUtils.write(content, zip, Constants.UTF8);
+            IoUtil.write(zip, Constants.UTF8, false, content);
             zip.flush();
             zip.closeEntry();
         }

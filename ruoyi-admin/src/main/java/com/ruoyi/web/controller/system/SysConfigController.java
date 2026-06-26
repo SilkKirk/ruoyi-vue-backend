@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -44,8 +43,7 @@ public class SysConfigController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysConfig config)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysConfig> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysConfig> page = startPage(SysConfig.class);
         page = configService.selectConfigPage(page, config);
         return getDataTable(page);
     }

@@ -1,7 +1,7 @@
 package com.ruoyi.framework.config;
 
 import com.ruoyi.common.utils.Threads;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -49,7 +49,7 @@ public class ThreadPoolConfig
     protected ScheduledExecutorService scheduledExecutorService()
     {
         return new ScheduledThreadPoolExecutor(corePoolSize,
-                new BasicThreadFactory.Builder().namingPattern("schedule-pool-%d").daemon(true).build(),
+                new ThreadFactoryBuilder().setNamePrefix("schedule-pool-").setDaemon(true).build(),
                 new ThreadPoolExecutor.CallerRunsPolicy())
         {
             @Override

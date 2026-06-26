@@ -18,7 +18,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.core.text.Convert;
@@ -49,8 +48,7 @@ public class SysNoticeController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysNotice notice)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysNotice> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysNotice> page = startPage(SysNotice.class);
         page = noticeService.selectNoticePage(page, notice);
         return getDataTable(page);
     }

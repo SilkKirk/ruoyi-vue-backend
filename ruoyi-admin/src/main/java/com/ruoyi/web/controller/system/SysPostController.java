@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -44,8 +43,7 @@ public class SysPostController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysPost post)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysPost> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysPost> page = startPage(SysPost.class);
         page = postService.selectPostPage(page, post);
         return getDataTable(page);
     }

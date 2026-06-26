@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -41,8 +40,7 @@ public class SysJobLogController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysJobLog sysJobLog)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysJobLog> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysJobLog> page = startPage(SysJobLog.class);
         page = jobLogService.selectJobLogPage(page, sysJobLog);
         return getDataTable(page);
     }

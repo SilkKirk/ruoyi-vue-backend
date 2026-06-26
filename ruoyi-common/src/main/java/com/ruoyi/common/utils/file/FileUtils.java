@@ -11,9 +11,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.DateUtils;
@@ -60,8 +60,8 @@ public class FileUtils
         }
         finally
         {
-            IOUtils.close(os);
-            IOUtils.close(fis);
+            IoUtil.close(os);
+            IoUtil.close(fis);
         }
     }
 
@@ -99,7 +99,7 @@ public class FileUtils
         }
         finally
         {
-            IOUtils.close(fos);
+            IoUtil.close(fos);
         }
         return FileUploadUtils.getPathFileName(uploadDir, pathName);
     }
@@ -159,7 +159,7 @@ public class FileUtils
         }
 
         // 检查允许下载的文件规则
-        if (ArrayUtils.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource)))
+        if (ArrayUtil.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource)))
         {
             return true;
         }
@@ -297,7 +297,7 @@ public class FileUtils
         {
             return null;
         }
-        String baseName = FilenameUtils.getBaseName(fileName);
+        String baseName = FileUtil.mainName(fileName);
         return baseName;
     }
 }

@@ -24,9 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RegExUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
+import cn.hutool.core.util.ArrayUtil;
+
+import cn.hutool.core.util.ReflectUtil;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
 import org.apache.poi.hssf.usermodel.HSSFPictureData;
@@ -1044,7 +1044,7 @@ public class ExcelUtil<T>
             {
                 ParameterizedType pt = (ParameterizedType) field.getGenericType();
                 Class<?> subClass = (Class<?>) pt.getActualTypeArguments()[0];
-                List<Field> subFields = FieldUtils.getFieldsListWithAnnotation(subClass, Excel.class);
+                List<Field> subFields = Arrays.stream(subClass.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Excel.class)).collect(java.util.stream.Collectors.toList());
                 for (Field subField : subFields)
                 {
                     Excel subExcel = subField.getAnnotation(Excel.class);
@@ -1137,7 +1137,7 @@ public class ExcelUtil<T>
             // 对于任何以表达式触发字符 =-+@开头的单元格，直接使用tab字符作为前缀，防止CSV注入。
             if (StringUtils.startsWithAny(cellValue, FORMULA_STR))
             {
-                cellValue = RegExUtils.replaceFirst(cellValue, FORMULA_REGEX_STR, "\t$0");
+                cellValue = cellValue.replaceFirst(FORMULA_REGEX_STR, "\t$0");
             }
             if (value instanceof Collection && StringUtils.equals("[]", cellValue))
             {
@@ -1707,7 +1707,7 @@ public class ExcelUtil<T>
         {
             for (Field field : tempFields)
             {
-                if (ArrayUtils.contains(this.includeFields, field.getName()) || field.isAnnotationPresent(Excels.class))
+                if (ArrayUtil.contains(this.includeFields, field.getName()) || field.isAnnotationPresent(Excels.class))
                 {
                     addField(fields, field);
                 }
@@ -1717,7 +1717,7 @@ public class ExcelUtil<T>
         {
             for (Field field : tempFields)
             {
-                if (!ArrayUtils.contains(this.excludeFields, field.getName()))
+                if (!ArrayUtil.contains(this.excludeFields, field.getName()))
                 {
                     addField(fields, field);
                 }
@@ -1752,7 +1752,7 @@ public class ExcelUtil<T>
                 subMethods.put(fieldName, getSubMethod(fieldName, clazz));
                 ParameterizedType pt = (ParameterizedType) field.getGenericType();
                 Class<?> subClass = (Class<?>) pt.getActualTypeArguments()[0];
-                subFieldsMap.put(fieldName, FieldUtils.getFieldsListWithAnnotation(subClass, Excel.class));
+                subFieldsMap.put(fieldName, Arrays.stream(subClass.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Excel.class)).collect(java.util.stream.Collectors.toList()));
             }
         }
 
@@ -1765,7 +1765,7 @@ public class ExcelUtil<T>
             {
                 if (StringUtils.isNotEmpty(includeFields))
                 {
-                    if (ArrayUtils.contains(this.includeFields, field.getName() + "." + attr.targetAttr())
+                    if (ArrayUtil.contains(this.includeFields, field.getName() + "." + attr.targetAttr())
                             && (attr != null && (attr.type() == Type.ALL || attr.type() == type)))
                     {
                         fields.add(new Object[] { field, attr });
@@ -1773,7 +1773,7 @@ public class ExcelUtil<T>
                 }
                 else
                 {
-                    if (!ArrayUtils.contains(this.excludeFields, field.getName() + "." + attr.targetAttr())
+                    if (!ArrayUtil.contains(this.excludeFields, field.getName() + "." + attr.targetAttr())
                             && (attr != null && (attr.type() == Type.ALL || attr.type() == type)))
                     {
                         fields.add(new Object[] { field, attr });

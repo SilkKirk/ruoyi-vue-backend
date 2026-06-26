@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
@@ -38,8 +37,7 @@ public class SysOperlogController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysOperLog operLog)
     {
-        PageDomain pd = TableSupport.buildPageRequest();
-        Page<SysOperLog> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        Page<SysOperLog> page = startPage(SysOperLog.class);
         page = operLogService.selectOperLogPage(page, operLog);
         return getDataTable(page);
     }

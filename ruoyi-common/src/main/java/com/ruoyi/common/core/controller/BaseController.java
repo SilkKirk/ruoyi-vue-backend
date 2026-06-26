@@ -11,7 +11,9 @@ import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -40,6 +42,16 @@ public class BaseController
                 setValue(DateUtils.parseDate(text));
             }
         });
+    }
+
+    /**
+     * 获取 MyBatis-Flex 分页对象（从请求参数构建）
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected <T> Page<T> startPage(Class<T> clazz)
+    {
+        PageDomain pd = TableSupport.buildPageRequest();
+        return Page.of(pd.getPageNum(), pd.getPageSize());
     }
 
     /**
