@@ -110,7 +110,7 @@ public class SysUserController extends BaseController
         if (StringUtils.isNotNull(userId))
         {
             userService.checkUserDataScope(userId);
-            SysUser sysUser = userService.selectUserById(userId);
+            SysUser sysUser = userService.getById(userId);
             ajax.put(AjaxResult.DATA_TAG, sysUser);
             ajax.put("postIds", postService.selectPostListByUserId(userId));
             List<SysRole> userRoles = sysUser.getRoles();
@@ -146,7 +146,7 @@ public class SysUserController extends BaseController
         }
         user.setCreateBy(getUsername());
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
-        return toAjax(userService.insertUser(user));
+        return toAjax(userService.save(user));
     }
 
     /**
@@ -174,7 +174,7 @@ public class SysUserController extends BaseController
             return error("修改用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
         user.setUpdateBy(getUsername());
-        return toAjax(userService.updateUser(user));
+        return toAjax(userService.updateById(user));
     }
 
     /**
@@ -189,7 +189,7 @@ public class SysUserController extends BaseController
         {
             return error("当前用户不能删除");
         }
-        return toAjax(userService.deleteUserByIds(userIds));
+        return toAjax(userService.removeByIds(java.util.Arrays.asList(userIds)));
     }
 
     /**
@@ -229,7 +229,7 @@ public class SysUserController extends BaseController
     public AjaxResult authRole(@PathVariable("userId") Long userId)
     {
         AjaxResult ajax = AjaxResult.success();
-        SysUser user = userService.selectUserById(userId);
+        SysUser user = userService.getById(userId);
         List<SysRole> roles = roleService.selectRolesByUserId(userId);
         ajax.put("user", user);
         ajax.put("roles", SecurityUtils.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));

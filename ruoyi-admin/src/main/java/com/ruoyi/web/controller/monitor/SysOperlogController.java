@@ -57,7 +57,7 @@ public class SysOperlogController extends BaseController
     @DeleteMapping("/{operIds}")
     public AjaxResult remove(@PathVariable Long[] operIds)
     {
-        return toAjax(operLogService.deleteOperLogByIds(operIds));
+        return toAjax(operLogService.removeByIds(java.util.Arrays.asList(operIds)));
     }
 
     @Log(title = "操作日志", businessType = BusinessType.CLEAN)

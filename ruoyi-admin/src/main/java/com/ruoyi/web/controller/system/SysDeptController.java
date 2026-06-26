@@ -68,7 +68,7 @@ public class SysDeptController extends BaseController
     public AjaxResult getInfo(@PathVariable Long deptId)
     {
         deptService.checkDeptDataScope(deptId);
-        return success(deptService.selectDeptById(deptId));
+        return success(deptService.getById(deptId));
     }
 
     /**
@@ -84,7 +84,7 @@ public class SysDeptController extends BaseController
             return error("新增部门'" + dept.getDeptName() + "'失败，部门名称已存在");
         }
         dept.setCreateBy(getUsername());
-        return toAjax(deptService.insertDept(dept));
+        return toAjax(deptService.save(dept));
     }
 
     /**
@@ -110,7 +110,7 @@ public class SysDeptController extends BaseController
             return error("该部门包含未停用的子部门！");
         }
         dept.setUpdateBy(getUsername());
-        return toAjax(deptService.updateDept(dept));
+        return toAjax(deptService.updateById(dept));
     }
 
     /**
@@ -144,6 +144,6 @@ public class SysDeptController extends BaseController
             return warn("部门存在用户,不允许删除");
         }
         deptService.checkDeptDataScope(deptId);
-        return toAjax(deptService.deleteDeptById(deptId));
+        return toAjax(deptService.removeById(deptId));
     }
 }

@@ -68,7 +68,7 @@ public class SysDictDataController extends BaseController
     @GetMapping(value = "/{dictCode}")
     public AjaxResult getInfo(@PathVariable Long dictCode)
     {
-        return success(dictDataService.selectDictDataById(dictCode));
+        return success(dictDataService.getById(dictCode));
     }
 
     /**
@@ -94,7 +94,7 @@ public class SysDictDataController extends BaseController
     public AjaxResult add(@Validated @RequestBody SysDictData dict)
     {
         dict.setCreateBy(getUsername());
-        return toAjax(dictDataService.insertDictData(dict));
+        return toAjax(dictDataService.save(dict));
     }
 
     /**
@@ -106,7 +106,7 @@ public class SysDictDataController extends BaseController
     public AjaxResult edit(@Validated @RequestBody SysDictData dict)
     {
         dict.setUpdateBy(getUsername());
-        return toAjax(dictDataService.updateDictData(dict));
+        return toAjax(dictDataService.updateById(dict));
     }
 
     /**
@@ -117,7 +117,7 @@ public class SysDictDataController extends BaseController
     @DeleteMapping("/{dictCodes}")
     public AjaxResult remove(@PathVariable Long[] dictCodes)
     {
-        dictDataService.deleteDictDataByIds(dictCodes);
+        dictDataService.removeByIds(java.util.Arrays.asList(dictCodes));
         return success();
     }
 }

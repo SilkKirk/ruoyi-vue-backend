@@ -61,7 +61,7 @@ public class SysLogininforController extends BaseController
     @DeleteMapping("/{infoIds}")
     public AjaxResult remove(@PathVariable Long[] infoIds)
     {
-        return toAjax(logininforService.deleteLogininforByIds(infoIds));
+        return toAjax(logininforService.removeByIds(java.util.Arrays.asList(infoIds)));
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:remove')")

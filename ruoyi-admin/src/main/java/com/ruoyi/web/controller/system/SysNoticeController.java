@@ -59,7 +59,7 @@ public class SysNoticeController extends BaseController
     @GetMapping(value = "/{noticeId}")
     public AjaxResult getInfo(@PathVariable Long noticeId)
     {
-        return success(noticeService.selectNoticeById(noticeId));
+        return success(noticeService.getById(noticeId));
     }
 
     /**
@@ -71,7 +71,7 @@ public class SysNoticeController extends BaseController
     public AjaxResult add(@Validated @RequestBody SysNotice notice)
     {
         notice.setCreateBy(getUsername());
-        return toAjax(noticeService.insertNotice(notice));
+        return toAjax(noticeService.save(notice));
     }
 
     /**
@@ -83,7 +83,7 @@ public class SysNoticeController extends BaseController
     public AjaxResult edit(@Validated @RequestBody SysNotice notice)
     {
         notice.setUpdateBy(getUsername());
-        return toAjax(noticeService.updateNotice(notice));
+        return toAjax(noticeService.updateById(notice));
     }
 
     /**
@@ -152,6 +152,6 @@ public class SysNoticeController extends BaseController
     public AjaxResult remove(@PathVariable Long[] noticeIds)
     {
         noticeReadService.deleteByNoticeIds(noticeIds);
-        return toAjax(noticeService.deleteNoticeByIds(noticeIds));
+        return toAjax(noticeService.removeByIds(java.util.Arrays.asList(noticeIds)));
     }
 }

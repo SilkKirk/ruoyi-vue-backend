@@ -62,7 +62,7 @@ public class SysDictTypeController extends BaseController
     @GetMapping(value = "/{dictId}")
     public AjaxResult getInfo(@PathVariable Long dictId)
     {
-        return success(dictTypeService.selectDictTypeById(dictId));
+        return success(dictTypeService.getById(dictId));
     }
 
     /**
@@ -78,7 +78,7 @@ public class SysDictTypeController extends BaseController
             return error("新增字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setCreateBy(getUsername());
-        return toAjax(dictTypeService.insertDictType(dict));
+        return toAjax(dictTypeService.save(dict));
     }
 
     /**
@@ -94,7 +94,7 @@ public class SysDictTypeController extends BaseController
             return error("修改字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setUpdateBy(getUsername());
-        return toAjax(dictTypeService.updateDictType(dict));
+        return toAjax(dictTypeService.updateById(dict));
     }
 
     /**
@@ -105,7 +105,7 @@ public class SysDictTypeController extends BaseController
     @DeleteMapping("/{dictIds}")
     public AjaxResult remove(@PathVariable Long[] dictIds)
     {
-        dictTypeService.deleteDictTypeByIds(dictIds);
+        dictTypeService.removeByIds(java.util.Arrays.asList(dictIds));
         return success();
     }
 

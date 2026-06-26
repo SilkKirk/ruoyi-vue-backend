@@ -65,7 +65,7 @@ public class SysConfigController extends BaseController
     @GetMapping(value = "/{configId}")
     public AjaxResult getInfo(@PathVariable Long configId)
     {
-        return success(configService.selectConfigById(configId));
+        return success(configService.getById(configId));
     }
 
     /**
@@ -90,7 +90,7 @@ public class SysConfigController extends BaseController
             return error("新增参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
         config.setCreateBy(getUsername());
-        return toAjax(configService.insertConfig(config));
+        return toAjax(configService.save(config));
     }
 
     /**
@@ -106,7 +106,7 @@ public class SysConfigController extends BaseController
             return error("修改参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
         config.setUpdateBy(getUsername());
-        return toAjax(configService.updateConfig(config));
+        return toAjax(configService.updateById(config));
     }
 
     /**
@@ -117,7 +117,7 @@ public class SysConfigController extends BaseController
     @DeleteMapping("/{configIds}")
     public AjaxResult remove(@PathVariable Long[] configIds)
     {
-        configService.deleteConfigByIds(configIds);
+        configService.removeByIds(java.util.Arrays.asList(configIds));
         return success();
     }
 

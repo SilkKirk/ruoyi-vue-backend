@@ -82,7 +82,7 @@ public class SysRoleController extends BaseController
     public AjaxResult getInfo(@PathVariable Long roleId)
     {
         roleService.checkRoleDataScope(roleId);
-        return success(roleService.selectRoleById(roleId));
+        return success(roleService.getById(roleId));
     }
 
     /**
@@ -102,7 +102,7 @@ public class SysRoleController extends BaseController
             return error("新增角色'" + role.getRoleName() + "'失败，角色权限已存在");
         }
         role.setCreateBy(getUsername());
-        return toAjax(roleService.insertRole(role));
+        return toAjax(roleService.save(role));
 
     }
 
@@ -126,7 +126,7 @@ public class SysRoleController extends BaseController
         }
         role.setUpdateBy(getUsername());
         
-        if (roleService.updateRole(role) > 0)
+        if (roleService.updateById(role))
         {
             // 刷新所有持有该角色的在线用户权限
             tokenService.refreshPermissionByRoleId(role.getRoleId(), permissionService);
@@ -170,7 +170,7 @@ public class SysRoleController extends BaseController
     @DeleteMapping("/{roleIds}")
     public AjaxResult remove(@PathVariable Long[] roleIds)
     {
-        return toAjax(roleService.deleteRoleByIds(roleIds));
+        return toAjax(roleService.removeByIds(java.util.Arrays.asList(roleIds)));
     }
 
     /**
