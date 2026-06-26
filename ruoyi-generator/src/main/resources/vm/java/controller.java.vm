@@ -77,7 +77,7 @@ public class ${ClassName}Controller extends BaseController
     @GetMapping(value = "/{${pkColumn.javaField}}")
     public AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField})
     {
-        return success(${className}Service.selectById(${pkColumn.javaField}));
+        return success(${className}Service.getById(${pkColumn.javaField}));
     }
 
     /**
@@ -88,7 +88,7 @@ public class ${ClassName}Controller extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody ${ClassName} ${className})
     {
-        return toAjax(${className}Service.insert(${className}));
+        return toAjax(${className}Service.save(${className}));
     }
 
     /**
@@ -99,7 +99,7 @@ public class ${ClassName}Controller extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody ${ClassName} ${className})
     {
-        return toAjax(${className}Service.update(${className}));
+        return toAjax(${className}Service.updateById(${className}));
     }
 
     /**
@@ -110,6 +110,6 @@ public class ${ClassName}Controller extends BaseController
 	@DeleteMapping("/{${pkColumn.javaField}s}")
     public AjaxResult remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s)
     {
-        return toAjax(${className}Service.deleteByIds(${pkColumn.javaField}s));
+        return toAjax(${className}Service.removeByIds(Arrays.asList(${pkColumn.javaField}s)));
     }
 }

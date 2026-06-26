@@ -8,7 +8,6 @@ import com.ruoyi.common.utils.DateUtils;
 #break
 #end
 #end
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 #if($table.sub)
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import ${packageName}.domain.${subClassName};
 #end
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import ${packageName}.mapper.${ClassName}Mapper;
 import ${packageName}.domain.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
@@ -29,23 +29,8 @@ import ${packageName}.service.I${ClassName}Service;
  * @date ${datetime}
  */
 @Service
-public class ${ClassName}ServiceImpl implements I${ClassName}Service 
+public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}> implements I${ClassName}Service
 {
-    @Autowired
-    private ${ClassName}Mapper ${className}Mapper;
-
-    /**
-     * 查询${functionName}
-     * 
-     * @param ${pkColumn.javaField} ${functionName}主键
-     * @return ${functionName}
-     */
-    @Override
-    public ${ClassName} selectById(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-        return ${className}Mapper.selectOneById(${pkColumn.javaField});
-    }
-
     /**
      * 查询${functionName}列表（不分页）
      * 
@@ -55,7 +40,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     @Override
     public List<${ClassName}> selectList(${ClassName} ${className})
     {
-        return ${className}Mapper.selectListByQuery(buildQuery(${className}));
+        return mapper.selectListByQuery(buildQuery(${className}));
     }
 
     /**
@@ -68,7 +53,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     @Override
     public Page<${ClassName}> selectPage(Page<${ClassName}> page, ${ClassName} ${className})
     {
-        return ${className}Mapper.paginate(page, buildQuery(${className}));
+        return mapper.paginate(page, buildQuery(${className}));
     }
 
     /**
@@ -102,30 +87,26 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
         return qw;
     }
 
+#if($table.sub)
     /**
      * 新增${functionName}
      * 
      * @param ${className} ${functionName}
      * @return 结果
      */
-#if($table.sub)
     @Transactional
-#end
     @Override
-    public int insert(${ClassName} ${className})
+    public boolean save(${ClassName} ${className})
     {
 #foreach ($column in $columns)
 #if($column.javaField == 'createTime')
         ${className}.setCreateTime(DateUtils.getNowDate());
 #end
 #end
-#if($table.sub)
-        int rows = ${className}Mapper.insertSelective(${className});
+        ${className}Mapper mapper = (${ClassName}Mapper) this.mapper;
+        mapper.insertSelective(${className});
         insertSub(${className});
-        return rows;
-#else
-        return ${className}Mapper.insertSelective(${className});
-#end
+        return true;
     }
 
     /**
@@ -134,60 +115,19 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
      * @param ${className} ${functionName}
      * @return 结果
      */
-#if($table.sub)
     @Transactional
-#end
     @Override
-    public int update(${ClassName} ${className})
+    public boolean updateById(${ClassName} ${className})
     {
 #foreach ($column in $columns)
 #if($column.javaField == 'updateTime')
         ${className}.setUpdateTime(DateUtils.getNowDate());
 #end
 #end
-#if($table.sub)
-        ${className}Mapper.deleteByQuery(QueryWrapper.create().where(${subClassName}::get${subTableFkClassName}).eq(${className}.get${pkColumn.capJavaField}()));
+        mapper.deleteByQuery(QueryWrapper.create().where(${subClassName}::get${subTableFkClassName}).eq(${className}.get${pkColumn.capJavaField}()));
         insertSub(${className});
-#end
-        return ${className}Mapper.update(${className});
+        return super.updateById(${className});
     }
-
-    /**
-     * 批量删除${functionName}
-     * 
-     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键
-     * @return 结果
-     */
-#if($table.sub)
-    @Transactional
-#end
-    @Override
-    public int deleteByIds(${pkColumn.javaType}[] ${pkColumn.javaField}s)
-    {
-#if($table.sub)
-        ${className}Mapper.deleteByQuery(QueryWrapper.create().where(${subClassName}::get${subTableFkClassName}).in(Arrays.asList(${pkColumn.javaField}s)));
-#end
-        return ${className}Mapper.deleteBatchByIds(Arrays.asList(${pkColumn.javaField}s));
-    }
-
-    /**
-     * 删除${functionName}信息
-     * 
-     * @param ${pkColumn.javaField} ${functionName}主键
-     * @return 结果
-     */
-#if($table.sub)
-    @Transactional
-#end
-    @Override
-    public int deleteById(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-#if($table.sub)
-        ${className}Mapper.deleteByQuery(QueryWrapper.create().where(${subClassName}::get${subTableFkClassName}).eq(${pkColumn.javaField}));
-#end
-        return ${className}Mapper.deleteById(${pkColumn.javaField});
-    }
-#if($table.sub)
 
     /**
      * 新增${subTable.functionName}信息
@@ -208,7 +148,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
             }
             if (list.size() > 0)
             {
-                ${className}Mapper.insertBatch(list, list.size());
+                mapper.insertBatch(list, list.size());
             }
         }
     }
