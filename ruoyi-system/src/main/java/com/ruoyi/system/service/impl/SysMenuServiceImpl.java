@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.service.ISysMenuService;
 
 @Service
-public class SysMenuServiceImpl implements ISysMenuService
+public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements ISysMenuService
 {
     private static final Logger log = LoggerFactory.getLogger(SysMenuServiceImpl.class);
     public static final Long MENU_ROOT_ID = 0L;

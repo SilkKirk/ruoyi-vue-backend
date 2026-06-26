@@ -1,5 +1,6 @@
 package com.ruoyi.generator.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import java.util.Map;
 import com.mybatisflex.core.paginate.Page;
@@ -10,7 +11,7 @@ import com.ruoyi.generator.domain.GenTable;
  * 
  * @author ruoyi
  */
-public interface IGenTableService
+public interface IGenTableService extends IService<GenTable>
 {
     /**
      * 查询业务列表

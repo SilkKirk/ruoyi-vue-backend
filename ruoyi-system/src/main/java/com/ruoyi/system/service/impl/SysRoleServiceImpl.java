@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysRoleService;
 
 @Service
-public class SysRoleServiceImpl implements ISysRoleService
+public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements ISysRoleService
 {
     @Autowired private SysRoleMapper roleMapper;
     @Autowired private SysRoleMenuMapper roleMenuMapper;

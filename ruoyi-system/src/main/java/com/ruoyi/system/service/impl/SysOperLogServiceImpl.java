@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import com.ruoyi.system.service.ISysOperLogService;
  * @author ruoyi
  */
 @Service
-public class SysOperLogServiceImpl implements ISysOperLogService
+public class SysOperLogServiceImpl extends ServiceImpl<SysOperLogMapper, SysOperLog> implements ISysOperLogService
 {
     @Autowired
     private SysOperLogMapper operLogMapper;

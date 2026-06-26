@@ -1,5 +1,6 @@
 package com.ruoyi.generator.service;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,7 @@ import com.ruoyi.generator.util.VelocityUtils;
  * @author ruoyi
  */
 @Service
-public class GenTableServiceImpl implements IGenTableService
+public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> implements IGenTableService
 {
     private static final Logger log = LoggerFactory.getLogger(GenTableServiceImpl.class);
 

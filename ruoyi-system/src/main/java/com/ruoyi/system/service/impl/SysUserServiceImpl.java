@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.validation.Validator;
@@ -28,7 +29,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.system.service.*;
 
 @Service
-public class SysUserServiceImpl implements ISysUserService
+public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService
 {
     private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
 

@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ import com.ruoyi.system.service.ISysPostService;
  * @author ruoyi
  */
 @Service
-public class SysPostServiceImpl implements ISysPostService
+public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPost> implements ISysPostService
 {
     @Autowired
     private SysPostMapper postMapper;

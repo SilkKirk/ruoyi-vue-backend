@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -9,7 +10,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
  * 
  * @author ruoyi
  */
-public interface ISysDeptService
+public interface ISysDeptService extends IService<SysDept>
 {
     /**
      * 查询部门管理数据

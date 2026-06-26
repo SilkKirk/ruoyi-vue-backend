@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.system.domain.SysOperLog;
@@ -9,7 +10,7 @@ import com.ruoyi.system.domain.SysOperLog;
  * 
  * @author ruoyi
  */
-public interface ISysOperLogService
+public interface ISysOperLogService extends IService<SysOperLog>
 {
     /**
      * 新增操作日志

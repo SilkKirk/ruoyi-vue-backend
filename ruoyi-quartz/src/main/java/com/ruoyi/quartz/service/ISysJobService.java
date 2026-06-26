@@ -1,5 +1,6 @@
 package com.ruoyi.quartz.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
 import org.quartz.SchedulerException;
@@ -11,7 +12,7 @@ import com.ruoyi.quartz.domain.SysJob;
  * 
  * @author ruoyi
  */
-public interface ISysJobService
+public interface ISysJobService extends IService<SysJob>
 {
     /**
      * 获取quartz调度器的计划任务

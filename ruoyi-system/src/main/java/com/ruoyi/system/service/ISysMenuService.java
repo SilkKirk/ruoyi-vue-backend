@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import java.util.Set;
 import com.ruoyi.common.core.domain.TreeSelect;
@@ -11,7 +12,7 @@ import com.ruoyi.system.domain.vo.RouterVo;
  * 
  * @author ruoyi
  */
-public interface ISysMenuService
+public interface ISysMenuService extends IService<SysMenu>
 {
     /**
      * 根据用户查询系统菜单列表
