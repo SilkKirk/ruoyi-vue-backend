@@ -3,7 +3,6 @@ package com.ruoyi.web.controller.system;
 import java.util.Arrays;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +21,6 @@ import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.exception.ServiceException;
@@ -54,13 +52,7 @@ public class SysConfigController extends BaseController
     public TableDataInfo list(SysConfig config)
     {
         Page<SysConfig> page = startPage(SysConfig.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
-        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
-        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
-        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
-        page = configService.page(page, qw);
+        page = configService.selectConfigPage(page, config);
         return getDataTable(page);
     }
 
@@ -69,13 +61,7 @@ public class SysConfigController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysConfig config)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
-        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
-        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
-        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
-        List<SysConfig> list = configService.list(qw);
+        List<SysConfig> list = configService.selectConfigList(config);
         ExcelUtil<SysConfig> util = new ExcelUtil<SysConfig>(SysConfig.class);
         util.exportExcel(response, list, "参数数据");
     }

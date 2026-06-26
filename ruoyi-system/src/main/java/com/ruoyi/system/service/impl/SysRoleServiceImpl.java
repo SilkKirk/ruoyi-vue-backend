@@ -36,6 +36,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         return roleMapper.selectListByQuery(qw);
     }
 
+    @Override
+    public Page<SysRole> selectRolePage(Page<SysRole> page, SysRole role) {
+        QueryWrapper qw = buildRoleQuery(role);
+        return roleMapper.paginate(page, qw);
+    }
+
     private QueryWrapper buildRoleQuery(SysRole role) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
@@ -53,7 +59,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             QueryWrapper.create()
                 .select("r.*").from("sys_role").as("r")
                 .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
-                .where("ur.user_id = " + userId)
+                .where("ur.user_id = ?", userId)
         );
         List<SysRole> roles = selectRoleAll();
         for (SysRole role : roles)
@@ -68,7 +74,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             QueryWrapper.create()
                 .select("r.*").from("sys_role").as("r")
                 .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
-                .where("ur.user_id = " + userId + " and r.del_flag = '0'")
+                .where("ur.user_id = ? and r.del_flag = '0'", userId)
         );
         Set<String> permsSet = new HashSet<>();
         for (SysRole perm : perms)
@@ -87,16 +93,18 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     @Override
     public boolean checkRoleNameUnique(SysRole role) {
-        Long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
-        SysRole info = roleMapper.selectOneByQuery(QueryWrapper.create().where(SysRole::getRoleName).eq(role.getRoleName()));
-        return info == null || info.getRoleId().longValue() == roleId.longValue();
+        return roleMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysRole::getRoleName).eq(role.getRoleName())
+                .and(SysRole::getRoleId).ne(role.getRoleId() == null ? -1L : role.getRoleId())
+        ) == 0;
     }
 
     @Override
     public boolean checkRoleKeyUnique(SysRole role) {
-        Long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
-        SysRole info = roleMapper.selectOneByQuery(QueryWrapper.create().where(SysRole::getRoleKey).eq(role.getRoleKey()));
-        return info == null || info.getRoleId().longValue() == roleId.longValue();
+        return roleMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysRole::getRoleKey).eq(role.getRoleKey())
+                .and(SysRole::getRoleId).ne(role.getRoleId() == null ? -1L : role.getRoleId())
+        ) == 0;
     }
 
     @Override

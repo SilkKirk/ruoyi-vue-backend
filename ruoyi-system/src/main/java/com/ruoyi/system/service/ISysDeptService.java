@@ -97,13 +97,5 @@ public interface ISysDeptService extends IService<SysDept>
      * @param orderNums 排序数组
      */
     public void updateDeptSort(String[] deptIds, String[] orderNums);
-
-    /**
-     * 删除部门管理信息
-     * 
-     * @param deptId 部门ID
-     * @return 结果
-     */
-    public int deleteDeptById(Long deptId);
 }
 

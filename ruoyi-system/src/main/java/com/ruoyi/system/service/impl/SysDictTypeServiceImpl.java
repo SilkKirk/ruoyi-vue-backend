@@ -35,6 +35,29 @@ public class SysDictTypeServiceImpl extends ServiceImpl<SysDictTypeMapper, SysDi
     @Autowired
     private SysDictDataMapper dictDataMapper;
 
+    @Override
+    public List<SysDictType> selectDictTypeList(SysDictType dictType) {
+        QueryWrapper qw = buildDictTypeQuery(dictType);
+        return dictTypeMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysDictType> selectDictTypePage(Page<SysDictType> page, SysDictType dictType) {
+        QueryWrapper qw = buildDictTypeQuery(dictType);
+        return dictTypeMapper.paginate(page, qw);
+    }
+
+    private QueryWrapper buildDictTypeQuery(SysDictType dictType) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
+        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
+        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
+        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
+        qw.orderBy(SysDictType::getCreateTime, false);
+        return qw;
+    }
+
     /**
      * 项目启动时，初始化字典到缓存
      */
@@ -167,13 +190,10 @@ public class SysDictTypeServiceImpl extends ServiceImpl<SysDictTypeMapper, SysDi
     @Override
     public boolean checkDictTypeUnique(SysDictType dict)
     {
-        Long dictId = StringUtils.isNull(dict.getDictId()) ? -1L : dict.getDictId();
-        SysDictType dictType = dictTypeMapper.selectOneByQuery(QueryWrapper.create().where(SysDictType::getDictType).eq(dict.getDictType()));
-        if (StringUtils.isNotNull(dictType) && dictType.getDictId().longValue() != dictId.longValue())
-        {
-            return UserConstants.NOT_UNIQUE;
-        }
-        return UserConstants.UNIQUE;
+        return dictTypeMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysDictType::getDictType).eq(dict.getDictType())
+                .and(SysDictType::getDictId).ne(dict.getDictId() == null ? -1L : dict.getDictId())
+        ) == 0;
     }
 }
 

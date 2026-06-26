@@ -44,14 +44,7 @@ public class SysLogininforController extends BaseController
     public TableDataInfo list(SysLogininfor logininfor)
     {
         Page<SysLogininfor> page = startPage(SysLogininfor.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(logininfor.getIpaddr())) qw.like(SysLogininfor::getIpaddr, logininfor.getIpaddr());
-        if (StringUtils.isNotEmpty(logininfor.getStatus())) qw.eq(SysLogininfor::getStatus, logininfor.getStatus());
-        if (StringUtils.isNotEmpty(logininfor.getUserName())) qw.like(SysLogininfor::getUserName, logininfor.getUserName());
-        if (StringUtils.isNotNull(logininfor.getParams().get("beginTime"))) qw.ge(SysLogininfor::getLoginTime, logininfor.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(logininfor.getParams().get("endTime"))) qw.le(SysLogininfor::getLoginTime, logininfor.getParams().get("endTime"));
-        qw.orderBy(SysLogininfor::getInfoId, false);
-        page = logininforService.page(page, qw);
+        page = logininforService.selectLogininforPage(page, logininfor);
         return getDataTable(page);
     }
 
@@ -60,14 +53,7 @@ public class SysLogininforController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysLogininfor logininfor)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(logininfor.getIpaddr())) qw.like(SysLogininfor::getIpaddr, logininfor.getIpaddr());
-        if (StringUtils.isNotEmpty(logininfor.getStatus())) qw.eq(SysLogininfor::getStatus, logininfor.getStatus());
-        if (StringUtils.isNotEmpty(logininfor.getUserName())) qw.like(SysLogininfor::getUserName, logininfor.getUserName());
-        if (StringUtils.isNotNull(logininfor.getParams().get("beginTime"))) qw.ge(SysLogininfor::getLoginTime, logininfor.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(logininfor.getParams().get("endTime"))) qw.le(SysLogininfor::getLoginTime, logininfor.getParams().get("endTime"));
-        qw.orderBy(SysLogininfor::getInfoId, false);
-        List<SysLogininfor> list = logininforService.list(qw);
+        List<SysLogininfor> list = logininforService.selectLogininforList(logininfor);
         ExcelUtil<SysLogininfor> util = new ExcelUtil<SysLogininfor>(SysLogininfor.class);
         util.exportExcel(response, list, "登录日志");
     }

@@ -13,6 +13,16 @@ import com.ruoyi.system.domain.SysLogininfor;
 public interface ISysLogininforService extends IService<SysLogininfor>
 {
     /**
+     * 查询登录日志列表
+     */
+    public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor);
+
+    /**
+     * 分页查询登录日志
+     */
+    public Page<SysLogininfor> selectLogininforPage(Page<SysLogininfor> page, SysLogininfor logininfor);
+
+    /**
      * 新增系统登录日志
      * 
      * @param logininfor 访问日志对象

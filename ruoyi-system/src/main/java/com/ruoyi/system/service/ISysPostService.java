@@ -13,6 +13,16 @@ import com.ruoyi.system.domain.SysPost;
 public interface ISysPostService extends IService<SysPost>
 {
     /**
+     * 查询岗位列表
+     */
+    public List<SysPost> selectPostList(SysPost post);
+
+    /**
+     * 分页查询岗位
+     */
+    public Page<SysPost> selectPostPage(Page<SysPost> page, SysPost post);
+
+    /**
      * 根据用户ID获取岗位选择框列表
      * 
      * @param userId 用户ID

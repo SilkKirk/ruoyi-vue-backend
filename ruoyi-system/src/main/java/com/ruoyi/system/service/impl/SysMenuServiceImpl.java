@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.ruoyi.common.utils.TreeUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 .from("sys_menu").as("m")
                 .leftJoin("sys_role_menu").as("rm").on("m.menu_id = rm.menu_id")
                 .leftJoin("sys_user_role").as("ur").on("rm.role_id = ur.role_id")
-                .where("ur.user_id = " + userId + " and m.status = '0'")
+                .where("ur.user_id = ? and m.status = '0'", userId)
                 .orderBy("m.parent_id", true).orderBy("m.order_num", true)
         );
     }
@@ -68,7 +69,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     .select("distinct m.perms").from("sys_menu").as("m")
                     .leftJoin("sys_role_menu").as("rm").on("m.menu_id = rm.menu_id")
                     .leftJoin("sys_user_role").as("ur").on("rm.role_id = ur.role_id")
-                    .where("ur.user_id = " + userId + " and m.status = '0' and m.perms is not null and m.perms != ''")
+                    .where("ur.user_id = ? and m.status = '0' and m.perms is not null and m.perms != ''", userId)
             ).stream().map(SysMenu::getPerms).collect(Collectors.toList());
         }
         Set<String> permsSet = new HashSet<>();
@@ -82,7 +83,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             QueryWrapper.create()
                 .select("distinct m.perms").from("sys_menu").as("m")
                 .leftJoin("sys_role_menu").as("rm").on("m.menu_id = rm.menu_id")
-                .where("rm.role_id = " + roleId + " and m.perms is not null and m.perms != ''")
+                .where("rm.role_id = ? and m.perms is not null and m.perms != ''", roleId)
         ).stream().map(SysMenu::getPerms).collect(Collectors.toList());
         Set<String> permsSet = new HashSet<>();
         for (String perm : perms) if (StringUtils.isNotEmpty(perm)) permsSet.addAll(Arrays.asList(perm.trim().split(",")));
@@ -105,7 +106,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     .select("distinct m.*").from("sys_menu").as("m")
                     .leftJoin("sys_role_menu").as("rm").on("m.menu_id = rm.menu_id")
                     .leftJoin("sys_user_role").as("ur").on("rm.role_id = ur.role_id")
-                    .where("ur.user_id = " + userId + " and m.menu_type in ('M','C') and m.status = '0'")
+                    .where("ur.user_id = ? and m.menu_type in ('M','C') and m.status = '0'", userId)
                     .orderBy("m.parent_id", true).orderBy("m.order_num", true)
             );
         }
@@ -118,10 +119,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         QueryWrapper qw = QueryWrapper.create()
             .select("m.menu_id").from("sys_menu").as("m")
             .leftJoin("sys_role_menu").as("rm").on("m.menu_id = rm.menu_id")
-            .where("rm.role_id = " + roleId)
+            .where("rm.role_id = ?", roleId)
             .orderBy("m.parent_id", true).orderBy("m.order_num", true);
         if (role != null && role.isMenuCheckStrictly()) {
-            qw.and("m.menu_id not in (select m.parent_id from sys_menu m inner join sys_role_menu rm on m.menu_id = rm.menu_id and rm.role_id = " + roleId + ")");
+            qw.and("m.menu_id not in (select m.parent_id from sys_menu m inner join sys_role_menu rm on m.menu_id = rm.menu_id and rm.role_id = ?)", roleId);
         }
         return menuMapper.selectListByQuery(qw).stream().map(SysMenu::getMenuId).toList();
     }
@@ -160,12 +161,12 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override public List<SysMenu> buildMenuTree(List<SysMenu> menus) {
-        List<SysMenu> returnList = new ArrayList<>();
-        List<Long> tempList = menus.stream().map(SysMenu::getMenuId).collect(Collectors.toList());
-        for (SysMenu menu : menus) if (!tempList.contains(menu.getParentId())) { recursionFn(menus, menu); returnList.add(menu); }
-        return returnList.isEmpty() ? menus : returnList;
+        return TreeUtils.buildTree(menus, MENU_ROOT_ID, SysMenu::getMenuId, SysMenu::getParentId, SysMenu::setChildren);
     }
-    @Override public List<TreeSelect> buildMenuTreeSelect(List<SysMenu> menus) { return buildMenuTree(menus).stream().map(TreeSelect::new).collect(Collectors.toList()); }
+
+    @Override public List<TreeSelect> buildMenuTreeSelect(List<SysMenu> menus) {
+        return buildMenuTree(menus).stream().map(TreeSelect::new).collect(Collectors.toList());
+    }
 
     @Override
     public boolean hasChildByMenuId(Long menuId) {
@@ -199,7 +200,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         String path = menu.getPath();
         String routeName = StringUtils.isEmpty(menu.getRouteName()) ? path : menu.getRouteName();
         List<SysMenu> list = menuMapper.selectListByQuery(
-            QueryWrapper.create().where("path = '" + path + "' or route_name = '" + routeName + "'")
+            QueryWrapper.create().where("path = ? or route_name = ?", path, routeName)
         );
         for (SysMenu m : list) {
             if (m.getMenuId().longValue() != menuId.longValue()) {
@@ -238,16 +239,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     public boolean isParentView(SysMenu menu) { return menu.getParentId().intValue() != MENU_ROOT_ID && UserConstants.TYPE_DIR.equals(menu.getMenuType()); }
     public boolean isInnerLink(SysMenu menu) { return menu.getIsFrame().equals(UserConstants.NO_FRAME) && StringUtils.ishttp(menu.getPath()); }
     public List<SysMenu> getChildPerms(List<SysMenu> list, long parentId) {
-        List<SysMenu> returnList = new ArrayList<>();
-        for (SysMenu t : list) if (t.getParentId() == parentId) { recursionFn(list, t); returnList.add(t); }
-        return returnList;
+        return TreeUtils.buildTree(list, parentId, SysMenu::getMenuId, SysMenu::getParentId, SysMenu::setChildren);
     }
-    private void recursionFn(List<SysMenu> list, SysMenu t) { List<SysMenu> childList = getChildList(list, t); t.setChildren(childList); for (SysMenu tChild : childList) if (hasChild(list, tChild)) recursionFn(list, tChild); }
-    private List<SysMenu> getChildList(List<SysMenu> list, SysMenu t) {
-        List<SysMenu> tlist = new ArrayList<>();
-        for (SysMenu n : list) if (n.getParentId().longValue() == t.getMenuId().longValue()) tlist.add(n);
-        return tlist;
-    }
-    private boolean hasChild(List<SysMenu> list, SysMenu t) { return !getChildList(list, t).isEmpty(); }
     public String innerLinkReplaceEach(String path) { return StringUtils.replaceEach(path, new String[]{Constants.HTTP, Constants.HTTPS, Constants.WWW, ".", ":"}, new String[]{"", "", "", "/", "/"}); }
 }

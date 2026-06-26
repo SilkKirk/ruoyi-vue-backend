@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.mybatisflex.core.service.IService;
+import com.mybatisflex.core.paginate.Page;
 import java.util.List;
 import com.ruoyi.system.domain.SysConfig;
 
@@ -11,6 +12,16 @@ import com.ruoyi.system.domain.SysConfig;
  */
 public interface ISysConfigService extends IService<SysConfig>
 {
+    /**
+     * 查询参数配置列表
+     */
+    public List<SysConfig> selectConfigList(SysConfig config);
+
+    /**
+     * 分页查询参数配置
+     */
+    public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config);
+
     /**
      * 根据键名查询参数配置信息
      * 

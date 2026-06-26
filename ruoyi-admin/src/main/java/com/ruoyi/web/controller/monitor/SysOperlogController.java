@@ -40,16 +40,7 @@ public class SysOperlogController extends BaseController
     public TableDataInfo list(SysOperLog operLog)
     {
         Page<SysOperLog> page = startPage(SysOperLog.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(operLog.getOperIp())) qw.like(SysOperLog::getOperIp, operLog.getOperIp());
-        if (StringUtils.isNotEmpty(operLog.getTitle())) qw.like(SysOperLog::getTitle, operLog.getTitle());
-        if (StringUtils.isNotNull(operLog.getBusinessType())) qw.eq(SysOperLog::getBusinessType, operLog.getBusinessType());
-        if (StringUtils.isNotNull(operLog.getStatus())) qw.eq(SysOperLog::getStatus, operLog.getStatus());
-        if (StringUtils.isNotEmpty(operLog.getOperName())) qw.like(SysOperLog::getOperName, operLog.getOperName());
-        if (StringUtils.isNotNull(operLog.getParams().get("beginTime"))) qw.ge(SysOperLog::getOperTime, operLog.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(operLog.getParams().get("endTime"))) qw.le(SysOperLog::getOperTime, operLog.getParams().get("endTime"));
-        qw.orderBy(SysOperLog::getOperId, false);
-        page = operLogService.page(page, qw);
+        page = operLogService.selectOperLogPage(page, operLog);
         return getDataTable(page);
     }
 
@@ -58,16 +49,7 @@ public class SysOperlogController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysOperLog operLog)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(operLog.getOperIp())) qw.like(SysOperLog::getOperIp, operLog.getOperIp());
-        if (StringUtils.isNotEmpty(operLog.getTitle())) qw.like(SysOperLog::getTitle, operLog.getTitle());
-        if (StringUtils.isNotNull(operLog.getBusinessType())) qw.eq(SysOperLog::getBusinessType, operLog.getBusinessType());
-        if (StringUtils.isNotNull(operLog.getStatus())) qw.eq(SysOperLog::getStatus, operLog.getStatus());
-        if (StringUtils.isNotEmpty(operLog.getOperName())) qw.like(SysOperLog::getOperName, operLog.getOperName());
-        if (StringUtils.isNotNull(operLog.getParams().get("beginTime"))) qw.ge(SysOperLog::getOperTime, operLog.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(operLog.getParams().get("endTime"))) qw.le(SysOperLog::getOperTime, operLog.getParams().get("endTime"));
-        qw.orderBy(SysOperLog::getOperId, false);
-        List<SysOperLog> list = operLogService.list(qw);
+        List<SysOperLog> list = operLogService.selectOperLogList(operLog);
         ExcelUtil<SysOperLog> util = new ExcelUtil<SysOperLog>(SysOperLog.class);
         util.exportExcel(response, list, "操作日志");
     }

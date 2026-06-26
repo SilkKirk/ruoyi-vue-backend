@@ -65,7 +65,7 @@ public class SysJobLogController extends BaseController
     @GetMapping(value = "/{jobLogId}")
     public AjaxResult getInfo(@PathVariable Long jobLogId)
     {
-        return success(jobLogService.selectJobLogById(jobLogId));
+        return success(jobLogService.getById(jobLogId));
     }
 
 
@@ -77,7 +77,7 @@ public class SysJobLogController extends BaseController
     @DeleteMapping("/{jobLogIds}")
     public AjaxResult remove(@PathVariable Long[] jobLogIds)
     {
-        return toAjax(jobLogService.deleteJobLogByIds(jobLogIds));
+        return toAjax(jobLogService.removeByIds(java.util.Arrays.asList(jobLogIds)));
     }
 
     /**

@@ -33,6 +33,29 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPost> impl
     @Autowired
     private SysUserPostMapper userPostMapper;
 
+    @Override
+    public List<SysPost> selectPostList(SysPost post) {
+        QueryWrapper qw = buildPostQuery(post);
+        return postMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysPost> selectPostPage(Page<SysPost> page, SysPost post) {
+        QueryWrapper qw = buildPostQuery(post);
+        return postMapper.paginate(page, qw);
+    }
+
+    private QueryWrapper buildPostQuery(SysPost post) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
+        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
+        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
+        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
+        qw.orderBy(SysPost::getPostSort, true);
+        return qw;
+    }
+
     /**
      * 查询岗位信息集合
      * 
@@ -57,38 +80,26 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPost> impl
 
     /**
      * 校验岗位名称是否唯一
-     * 
-     * @param post 岗位信息
-     * @return 结果
      */
     @Override
     public boolean checkPostNameUnique(SysPost post)
     {
-        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
-        SysPost info = postMapper.selectOneByQuery(QueryWrapper.create().where(SysPost::getPostName).eq(post.getPostName()));
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
-        {
-            return UserConstants.NOT_UNIQUE;
-        }
-        return UserConstants.UNIQUE;
+        return postMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysPost::getPostName).eq(post.getPostName())
+                .and(SysPost::getPostId).ne(post.getPostId() == null ? -1L : post.getPostId())
+        ) == 0;
     }
 
     /**
      * 校验岗位编码是否唯一
-     * 
-     * @param post 岗位信息
-     * @return 结果
      */
     @Override
     public boolean checkPostCodeUnique(SysPost post)
     {
-        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
-        SysPost info = postMapper.selectOneByQuery(QueryWrapper.create().where(SysPost::getPostCode).eq(post.getPostCode()));
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
-        {
-            return UserConstants.NOT_UNIQUE;
-        }
-        return UserConstants.UNIQUE;
+        return postMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysPost::getPostCode).eq(post.getPostCode())
+                .and(SysPost::getPostId).ne(post.getPostId() == null ? -1L : post.getPostId())
+        ) == 0;
     }
 
     /**

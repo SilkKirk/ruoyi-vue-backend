@@ -52,11 +52,7 @@ public class SysDictDataController extends BaseController
     public TableDataInfo list(SysDictData dictData)
     {
         Page<SysDictData> page = startPage(SysDictData.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
-        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
-        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
-        page = dictDataService.page(page, qw);
+        page = dictDataService.selectDictDataPage(page, dictData);
         return getDataTable(page);
     }
 
@@ -65,11 +61,7 @@ public class SysDictDataController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysDictData dictData)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
-        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
-        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
-        List<SysDictData> list = dictDataService.list(qw);
+        List<SysDictData> list = dictDataService.selectDictDataList(dictData);
         ExcelUtil<SysDictData> util = new ExcelUtil<SysDictData>(SysDictData.class);
         util.exportExcel(response, list, "字典数据");
     }

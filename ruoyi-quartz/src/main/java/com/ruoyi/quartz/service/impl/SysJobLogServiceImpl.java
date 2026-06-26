@@ -55,58 +55,9 @@ public class SysJobLogServiceImpl extends ServiceImpl<SysJobLogMapper, SysJobLog
         return jobLogMapper.paginate(page, qw);
     }
 
-    /**
-     * 通过调度任务日志ID查询调度信息
-     * 
-     * @param jobLogId 调度任务日志ID
-     * @return 调度任务日志对象信息
-     */
-    @Override
-    public SysJobLog selectJobLogById(Long jobLogId)
-    {
-        return jobLogMapper.selectOneById(jobLogId);
-    }
-
-    /**
-     * 新增任务日志
-     * 
-     * @param jobLog 调度日志信息
-     */
-    @Override
-    public void addJobLog(SysJobLog jobLog)
-    {
-        jobLogMapper.insertSelective(jobLog);
-    }
-
-    /**
-     * 批量删除调度日志信息
-     * 
-     * @param logIds 需要删除的数据ID
-     * @return 结果
-     */
-    @Override
-    public int deleteJobLogByIds(Long[] logIds)
-    {
-        return jobLogMapper.deleteBatchByIds(Arrays.asList(logIds));
-    }
-
-    /**
-     * 删除任务日志
-     * 
-     * @param jobId 调度日志ID
-     */
-    @Override
-    public int deleteJobLogById(Long jobId)
-    {
-        return jobLogMapper.deleteById(jobId);
-    }
-
-    /**
-     * 清空任务日志
-     */
     @Override
     public void cleanJobLog()
     {
-        jobLogMapper.deleteByQuery(QueryWrapper.create().where("1=1"));
+        jobLogMapper.deleteByQuery(QueryWrapper.create());
     }
 }

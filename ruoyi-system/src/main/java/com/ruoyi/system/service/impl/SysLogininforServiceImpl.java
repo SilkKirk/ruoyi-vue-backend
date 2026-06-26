@@ -24,6 +24,29 @@ public class SysLogininforServiceImpl extends ServiceImpl<SysLogininforMapper, S
     @Autowired
     private SysLogininforMapper logininforMapper;
 
+    @Override
+    public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor) {
+        QueryWrapper qw = buildLogininforQuery(logininfor);
+        return logininforMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysLogininfor> selectLogininforPage(Page<SysLogininfor> page, SysLogininfor logininfor) {
+        QueryWrapper qw = buildLogininforQuery(logininfor);
+        return logininforMapper.paginate(page, qw);
+    }
+
+    private QueryWrapper buildLogininforQuery(SysLogininfor logininfor) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(logininfor.getIpaddr())) qw.like(SysLogininfor::getIpaddr, logininfor.getIpaddr());
+        if (StringUtils.isNotEmpty(logininfor.getStatus())) qw.eq(SysLogininfor::getStatus, logininfor.getStatus());
+        if (StringUtils.isNotEmpty(logininfor.getUserName())) qw.like(SysLogininfor::getUserName, logininfor.getUserName());
+        if (StringUtils.isNotNull(logininfor.getParams().get("beginTime"))) qw.ge(SysLogininfor::getLoginTime, logininfor.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(logininfor.getParams().get("endTime"))) qw.le(SysLogininfor::getLoginTime, logininfor.getParams().get("endTime"));
+        qw.orderBy(SysLogininfor::getInfoId, false);
+        return qw;
+    }
+
     /**
      * 新增系统登录日志
      * 
@@ -41,7 +64,7 @@ public class SysLogininforServiceImpl extends ServiceImpl<SysLogininforMapper, S
     @Override
     public void cleanLogininfor()
     {
-        logininforMapper.deleteByQuery(QueryWrapper.create().where("1=1"));
+        logininforMapper.deleteByQuery(QueryWrapper.create());
     }
 }
 

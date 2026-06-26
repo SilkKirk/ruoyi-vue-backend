@@ -23,14 +23,28 @@ public class SysNoticeServiceImpl extends ServiceImpl<SysNoticeMapper, SysNotice
     @Autowired
     private SysNoticeMapper noticeMapper;
 
-    /**
-     * 查询公告列表
-     * 
-     * @param notice 公告信息
-     * @return 公告集合
-     */
-    
+    @Override
+    public List<SysNotice> selectNoticeList(SysNotice notice) {
+        QueryWrapper qw = buildNoticeQuery(notice);
+        return noticeMapper.selectListByQuery(qw);
+    }
 
+    @Override
+    public Page<SysNotice> selectNoticePage(Page<SysNotice> page, SysNotice notice) {
+        QueryWrapper qw = buildNoticeQuery(notice);
+        return noticeMapper.paginate(page, qw);
+    }
+
+    private QueryWrapper buildNoticeQuery(SysNotice notice) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
+        if (StringUtils.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
+        if (StringUtils.isNotEmpty(notice.getCreateBy())) qw.like(SysNotice::getCreateBy, notice.getCreateBy());
+        if (StringUtils.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
+        qw.orderBy(SysNotice::getCreateTime, false);
+        return qw;
+    }
 }
 
 

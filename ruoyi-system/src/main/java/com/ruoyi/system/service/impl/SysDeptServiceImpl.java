@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.ruoyi.common.utils.TreeUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -136,33 +137,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
         }
     }
 
-    @Override public int deleteDeptById(Long deptId) { return deptMapper.deleteById(deptId); }
-
     @Override public List<SysDept> buildDeptTree(List<SysDept> depts) {
-        List<SysDept> returnList = new ArrayList<>();
-        List<Long> tempList = depts.stream().map(SysDept::getDeptId).collect(Collectors.toList());
-        for (SysDept dept : depts) {
-            if (!tempList.contains(dept.getParentId())) { recursionFn(depts, dept); returnList.add(dept); }
-        }
-        return returnList.isEmpty() ? depts : returnList;
+        return TreeUtils.buildTree(depts, 0L, SysDept::getDeptId, SysDept::getParentId, SysDept::setChildren);
     }
 
     @Override public List<TreeSelect> buildDeptTreeSelect(List<SysDept> depts) {
         return buildDeptTree(depts).stream().map(TreeSelect::new).collect(Collectors.toList());
     }
-
-    private void recursionFn(List<SysDept> list, SysDept t) {
-        List<SysDept> childList = getChildList(list, t);
-        t.setChildren(childList);
-        for (SysDept tChild : childList) if (hasChild(list, tChild)) recursionFn(list, tChild);
-    }
-
-    private List<SysDept> getChildList(List<SysDept> list, SysDept t) {
-        List<SysDept> tlist = new ArrayList<>();
-        for (SysDept n : list)
-            if (StringUtils.isNotNull(n.getParentId()) && n.getParentId().longValue() == t.getDeptId().longValue()) tlist.add(n);
-        return tlist;
-    }
-
-    private boolean hasChild(List<SysDept> list, SysDept t) { return !getChildList(list, t).isEmpty(); }
 }

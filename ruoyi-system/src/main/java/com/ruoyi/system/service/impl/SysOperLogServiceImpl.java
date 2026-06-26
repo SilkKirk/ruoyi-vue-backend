@@ -23,6 +23,31 @@ public class SysOperLogServiceImpl extends ServiceImpl<SysOperLogMapper, SysOper
     @Autowired
     private SysOperLogMapper operLogMapper;
 
+    @Override
+    public List<SysOperLog> selectOperLogList(SysOperLog operLog) {
+        QueryWrapper qw = buildOperLogQuery(operLog);
+        return operLogMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysOperLog> selectOperLogPage(Page<SysOperLog> page, SysOperLog operLog) {
+        QueryWrapper qw = buildOperLogQuery(operLog);
+        return operLogMapper.paginate(page, qw);
+    }
+
+    private QueryWrapper buildOperLogQuery(SysOperLog operLog) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(operLog.getOperIp())) qw.like(SysOperLog::getOperIp, operLog.getOperIp());
+        if (StringUtils.isNotEmpty(operLog.getTitle())) qw.like(SysOperLog::getTitle, operLog.getTitle());
+        if (StringUtils.isNotNull(operLog.getBusinessType())) qw.eq(SysOperLog::getBusinessType, operLog.getBusinessType());
+        if (StringUtils.isNotNull(operLog.getStatus())) qw.eq(SysOperLog::getStatus, operLog.getStatus());
+        if (StringUtils.isNotEmpty(operLog.getOperName())) qw.like(SysOperLog::getOperName, operLog.getOperName());
+        if (StringUtils.isNotNull(operLog.getParams().get("beginTime"))) qw.ge(SysOperLog::getOperTime, operLog.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(operLog.getParams().get("endTime"))) qw.le(SysOperLog::getOperTime, operLog.getParams().get("endTime"));
+        qw.orderBy(SysOperLog::getOperId, false);
+        return qw;
+    }
+
     /**
      * 新增操作日志
      * 
@@ -40,7 +65,7 @@ public class SysOperLogServiceImpl extends ServiceImpl<SysOperLogMapper, SysOper
     @Override
     public void cleanOperLog()
     {
-        operLogMapper.deleteByQuery(QueryWrapper.create().where("1=1"));
+        operLogMapper.deleteByQuery(QueryWrapper.create());
     }
 }
 

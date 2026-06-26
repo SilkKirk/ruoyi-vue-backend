@@ -19,7 +19,7 @@ public interface I${ClassName}Service extends IService<${ClassName}>
      * @param ${className} ${functionName}
      * @return ${functionName}集合
      */
-    List<${ClassName}> selectList(${ClassName} ${className});
+    List<${ClassName}> select${BusinessName}List(${ClassName} ${className});
 
     /**
      * 分页查询${functionName}列表
@@ -28,5 +28,5 @@ public interface I${ClassName}Service extends IService<${ClassName}>
      * @param ${className} ${functionName}
      * @return 分页结果
      */
-    Page<${ClassName}> selectPage(Page<${ClassName}> page, ${ClassName} ${className});
+    Page<${ClassName}> select${BusinessName}Page(Page<${ClassName}> page, ${ClassName} ${className});
 }

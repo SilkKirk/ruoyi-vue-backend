@@ -53,14 +53,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public List<SysUser> selectAllocatedList(SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
-        qw.where("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        qw.and("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = ?)", user.getRoleId());
         return userMapper.selectListByQuery(qw);
     }
 
     @Override
     public List<SysUser> selectUnallocatedList(SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
-        qw.where("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        qw.and("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = ?)", user.getRoleId());
         return userMapper.selectListByQuery(qw);
     }
 
@@ -73,14 +73,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public Page<SysUser> selectAllocatedPage(Page<SysUser> page, SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
-        qw.where("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        qw.and("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = ?)", user.getRoleId());
         return userMapper.paginate(page, qw);
     }
 
     @Override
     public Page<SysUser> selectUnallocatedPage(Page<SysUser> page, SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
-        qw.where("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        qw.and("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = ?)", user.getRoleId());
         return userMapper.paginate(page, qw);
     }
 
@@ -95,7 +95,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (StringUtils.isNotEmpty(user.getStatus())) qw.eq("u.status", user.getStatus());
         if (StringUtils.isNotEmpty(user.getPhonenumber())) qw.like("u.phonenumber", user.getPhonenumber());
         if (StringUtils.isNotNull(user.getDeptId()) && user.getDeptId() != 0)
-            qw.and("(u.dept_id = " + user.getDeptId() + " or u.dept_id in (select t.dept_id from sys_dept t where find_in_set(" + user.getDeptId() + ", ancestors)))");
+            qw.and("(u.dept_id = ? or u.dept_id in (select t.dept_id from sys_dept t where find_in_set(?, ancestors)))", user.getDeptId(), user.getDeptId());
         if (StringUtils.isNotNull(user.getParams().get("beginTime"))) qw.ge("u.create_time", user.getParams().get("beginTime"));
         if (StringUtils.isNotNull(user.getParams().get("endTime"))) qw.le("u.create_time", user.getParams().get("endTime"));
         // 应用数据权限过滤条件（由 @DataScope 注解触发注入）
@@ -128,7 +128,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 QueryWrapper.create()
                     .select("r.*").from("sys_role").as("r")
                     .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
-                    .where("ur.user_id = " + userId)
+                    .where("ur.user_id = ?", userId)
             ));
         }
         return user;
@@ -141,7 +141,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .select("r.*").from("sys_role").as("r")
                 .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
                 .leftJoin("sys_user").as("u").on("u.user_id = ur.user_id")
-                .where("u.user_name = '" + userName + "'")
+                .where("u.user_name = ?", userName)
         );
         return CollectionUtils.isEmpty(list) ? StringUtils.EMPTY : list.stream().map(SysRole::getRoleName).collect(Collectors.joining(","));
     }
@@ -153,30 +153,33 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .select("p.*").from("sys_post").as("p")
                 .leftJoin("sys_user_post").as("up").on("p.post_id = up.post_id")
                 .leftJoin("sys_user").as("u").on("u.user_id = up.user_id")
-                .where("u.user_name = '" + userName + "'")
+                .where("u.user_name = ?", userName)
         );
         return CollectionUtils.isEmpty(list) ? StringUtils.EMPTY : list.stream().map(SysPost::getPostName).collect(Collectors.joining(","));
     }
 
     @Override
     public boolean checkUserNameUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
-        SysUser info = userMapper.selectOneByQuery(QueryWrapper.create().where(SysUser::getUserName).eq(user.getUserName()).and(SysUser::getDelFlag).eq("0"));
-        return info == null || info.getUserId().longValue() == userId.longValue();
+        return userMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysUser::getUserName).eq(user.getUserName()).and(SysUser::getDelFlag).eq("0")
+                .and(SysUser::getUserId).ne(user.getUserId() == null ? -1L : user.getUserId())
+        ) == 0;
     }
 
     @Override
     public boolean checkPhoneUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
-        SysUser info = userMapper.selectOneByQuery(QueryWrapper.create().where(SysUser::getPhonenumber).eq(user.getPhonenumber()).and(SysUser::getDelFlag).eq("0"));
-        return info == null || info.getUserId().longValue() == userId.longValue();
+        return userMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysUser::getPhonenumber).eq(user.getPhonenumber()).and(SysUser::getDelFlag).eq("0")
+                .and(SysUser::getUserId).ne(user.getUserId() == null ? -1L : user.getUserId())
+        ) == 0;
     }
 
     @Override
     public boolean checkEmailUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
-        SysUser info = userMapper.selectOneByQuery(QueryWrapper.create().where(SysUser::getEmail).eq(user.getEmail()).and(SysUser::getDelFlag).eq("0"));
-        return info == null || info.getUserId().longValue() == userId.longValue();
+        return userMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysUser::getEmail).eq(user.getEmail()).and(SysUser::getDelFlag).eq("0")
+                .and(SysUser::getUserId).ne(user.getUserId() == null ? -1L : user.getUserId())
+        ) == 0;
     }
 
     @Override

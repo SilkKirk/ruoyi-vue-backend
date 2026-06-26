@@ -23,6 +23,15 @@ public interface ISysRoleService extends IService<SysRole>
     public List<SysRole> selectRoleList(SysRole role);
 
     /**
+     * 分页查询角色数据
+     * 
+     * @param page 分页对象
+     * @param role 角色信息
+     * @return 分页数据
+     */
+    public Page<SysRole> selectRolePage(Page<SysRole> page, SysRole role);
+
+    /**
      * 根据用户ID查询角色列表
      * 
      * @param userId 用户ID

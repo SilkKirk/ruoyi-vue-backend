@@ -47,12 +47,12 @@ public class ${ClassName}Controller extends BaseController
     public TableDataInfo list(${ClassName} ${className})
     {
         Page<${ClassName}> page = startPage(${ClassName}.class);
-        return getDataTable(${className}Service.selectPage(page, ${className}));
+        return getDataTable(${className}Service.select${BusinessName}Page(page, ${className}));
     }
 #elseif($table.tree)
     public AjaxResult list(${ClassName} ${className})
     {
-        List<${ClassName}> list = ${className}Service.selectList(${className});
+        List<${ClassName}> list = ${className}Service.select${BusinessName}List(${className});
         return success(list);
     }
 #end
@@ -65,7 +65,7 @@ public class ${ClassName}Controller extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, ${ClassName} ${className})
     {
-        List<${ClassName}> list = ${className}Service.selectList(${className});
+        List<${ClassName}> list = ${className}Service.select${BusinessName}List(${className});
         ExcelUtil<${ClassName}> util = new ExcelUtil<${ClassName}>(${ClassName}.class);
         util.exportExcel(response, list, "${functionName}数据");
     }

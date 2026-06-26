@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
@@ -23,6 +24,28 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
 {
     @Autowired private SysConfigMapper configMapper;
     @Autowired private RedisCache redisCache;
+
+    @Override
+    public List<SysConfig> selectConfigList(SysConfig config) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        return configMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        return configMapper.paginate(page, qw);
+    }
 
     @PostConstruct
     public void init() { loadingConfigCache(); }
@@ -75,16 +98,27 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     @Override
     public void resetConfigCache() { clearConfigCache(); loadingConfigCache(); }
 
+    @Override @Transactional
+    public boolean save(SysConfig config) {
+        boolean result = super.save(config);
+        if (result) resetConfigCache();
+        return result;
+    }
+
+    @Override @Transactional
+    public boolean updateById(SysConfig config) {
+        boolean result = super.updateById(config);
+        if (result) resetConfigCache();
+        return result;
+    }
+
     @Override
     public boolean checkConfigKeyUnique(SysConfig config)
     {
-        Long configId = StringUtils.isNull(config.getConfigId()) ? -1L : config.getConfigId();
-        SysConfig info = configMapper.selectOneByQuery(
+        return configMapper.selectCountByQuery(
             QueryWrapper.create().where(SysConfig::getConfigKey).eq(config.getConfigKey())
-        );
-        if (StringUtils.isNotNull(info) && info.getConfigId().longValue() != configId.longValue())
-            return UserConstants.NOT_UNIQUE;
-        return UserConstants.UNIQUE;
+                .and(SysConfig::getConfigId).ne(config.getConfigId() == null ? -1L : config.getConfigId())
+        ) == 0;
     }
 
     private String getCacheKey(String configKey) { return CacheConstants.SYS_CONFIG_KEY + configKey; }

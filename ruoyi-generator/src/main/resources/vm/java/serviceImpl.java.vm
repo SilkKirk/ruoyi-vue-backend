@@ -38,7 +38,7 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
      * @return ${functionName}
      */
     @Override
-    public List<${ClassName}> selectList(${ClassName} ${className})
+    public List<${ClassName}> select${BusinessName}List(${ClassName} ${className})
     {
         return mapper.selectListByQuery(buildQuery(${className}));
     }
@@ -51,7 +51,7 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
      * @return 分页结果
      */
     @Override
-    public Page<${ClassName}> selectPage(Page<${ClassName}> page, ${ClassName} ${className})
+    public Page<${ClassName}> select${BusinessName}Page(Page<${ClassName}> page, ${ClassName} ${className})
     {
         return mapper.paginate(page, buildQuery(${className}));
     }

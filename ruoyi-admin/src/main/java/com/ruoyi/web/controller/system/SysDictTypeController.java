@@ -3,7 +3,6 @@ package com.ruoyi.web.controller.system;
 import java.util.Arrays;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
-import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,14 +44,7 @@ public class SysDictTypeController extends BaseController
     public TableDataInfo list(SysDictType dictType)
     {
         Page<SysDictType> page = startPage(SysDictType.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
-        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
-        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
-        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
-        qw.orderBy(SysDictType::getCreateTime, false);
-        page = dictTypeService.page(page, qw);
+        page = dictTypeService.selectDictTypePage(page, dictType);
         return getDataTable(page);
     }
 
@@ -61,14 +53,7 @@ public class SysDictTypeController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysDictType dictType)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
-        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
-        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
-        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
-        qw.orderBy(SysDictType::getCreateTime, false);
-        List<SysDictType> list = dictTypeService.list(qw);
+        List<SysDictType> list = dictTypeService.selectDictTypeList(dictType);
         ExcelUtil<SysDictType> util = new ExcelUtil<SysDictType>(SysDictType.class);
         util.exportExcel(response, list, "字典类型");
     }

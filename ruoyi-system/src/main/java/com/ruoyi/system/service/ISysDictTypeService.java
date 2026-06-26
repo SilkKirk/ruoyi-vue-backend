@@ -14,6 +14,16 @@ import com.ruoyi.common.core.domain.entity.SysDictType;
 public interface ISysDictTypeService extends IService<SysDictType>
 {
     /**
+     * 查询字典类型列表
+     */
+    public List<SysDictType> selectDictTypeList(SysDictType dictType);
+
+    /**
+     * 分页查询字典类型
+     */
+    public Page<SysDictType> selectDictTypePage(Page<SysDictType> page, SysDictType dictType);
+
+    /**
      * 根据字典类型查询字典数据
      * 
      * @param dictType 字典类型

@@ -46,14 +46,7 @@ public class SysPostController extends BaseController
     public TableDataInfo list(SysPost post)
     {
         Page<SysPost> page = startPage(SysPost.class);
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
-        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
-        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
-        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
-        qw.orderBy(SysPost::getPostSort, true);
-        page = postService.page(page, qw);
+        page = postService.selectPostPage(page, post);
         return getDataTable(page);
     }
     
@@ -62,14 +55,7 @@ public class SysPostController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysPost post)
     {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
-        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
-        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
-        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
-        qw.orderBy(SysPost::getPostSort, true);
-        List<SysPost> list = postService.list(qw);
+        List<SysPost> list = postService.selectPostList(post);
         ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);
         util.exportExcel(response, list, "岗位数据");
     }

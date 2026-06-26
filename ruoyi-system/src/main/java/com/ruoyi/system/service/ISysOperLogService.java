@@ -13,6 +13,16 @@ import com.ruoyi.system.domain.SysOperLog;
 public interface ISysOperLogService extends IService<SysOperLog>
 {
     /**
+     * 查询操作日志列表
+     */
+    public List<SysOperLog> selectOperLogList(SysOperLog operLog);
+
+    /**
+     * 分页查询操作日志
+     */
+    public Page<SysOperLog> selectOperLogPage(Page<SysOperLog> page, SysOperLog operLog);
+
+    /**
      * 新增操作日志
      * 
      * @param operLog 操作日志对象

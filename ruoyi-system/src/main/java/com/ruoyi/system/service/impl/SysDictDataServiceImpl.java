@@ -17,7 +17,23 @@ public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDi
 {
     @Autowired private SysDictDataMapper dictDataMapper;
 
-    
+    @Override
+    public List<SysDictData> selectDictDataList(SysDictData dictData) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
+        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
+        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
+        return dictDataMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysDictData> selectDictDataPage(Page<SysDictData> page, SysDictData dictData) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
+        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
+        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
+        return dictDataMapper.paginate(page, qw);
+    }
 
     @Override
     public String selectDictLabel(String dictType, String dictValue)
