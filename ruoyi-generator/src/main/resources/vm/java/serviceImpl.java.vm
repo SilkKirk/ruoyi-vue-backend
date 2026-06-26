@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ${packageName}.domain.${subClassName};
 #end
 import com.mybatisflex.core.query.QueryWrapper;
-import com.ruoyi.common.utils.PageUtils;
+import com.mybatisflex.core.paginate.Page;
 import ${packageName}.mapper.${ClassName}Mapper;
 import ${packageName}.domain.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
@@ -47,13 +47,34 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 查询${functionName}列表
+     * 查询${functionName}列表（不分页）
      * 
      * @param ${className} ${functionName}
      * @return ${functionName}
      */
     @Override
     public List<${ClassName}> selectList(${ClassName} ${className})
+    {
+        return ${className}Mapper.selectListByQuery(buildQuery(${className}));
+    }
+
+    /**
+     * 分页查询${functionName}列表
+     * 
+     * @param page 分页对象
+     * @param ${className} ${functionName}
+     * @return 分页结果
+     */
+    @Override
+    public Page<${ClassName}> selectPage(Page<${ClassName}> page, ${ClassName} ${className})
+    {
+        return ${className}Mapper.paginate(page, buildQuery(${className}));
+    }
+
+    /**
+     * 构建查询条件
+     */
+    private QueryWrapper buildQuery(${ClassName} ${className})
     {
         QueryWrapper qw = QueryWrapper.create();
 #foreach($column in $columns)
@@ -78,7 +99,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
 #end
 #end
 #end
-        return PageUtils.paginate(${className}Mapper, qw);
+        return qw;
     }
 
     /**
