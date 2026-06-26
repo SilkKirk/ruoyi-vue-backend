@@ -1,6 +1,7 @@
 package com.ruoyi.quartz.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.quartz.domain.SysJobLog;
 
 /**
@@ -17,6 +18,8 @@ public interface ISysJobLogService
      * @return 调度任务日志集合
      */
     public List<SysJobLog> selectJobLogList(SysJobLog jobLog);
+
+    public Page<SysJobLog> selectJobLogPage(Page<SysJobLog> page, SysJobLog jobLog);
 
     /**
      * 通过调度任务日志ID查询调度信息

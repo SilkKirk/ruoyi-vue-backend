@@ -1,5 +1,7 @@
 package com.ruoyi.framework.web.domain.server;
 
+
+import lombok.Data;
 import com.ruoyi.common.utils.Arith;
 
 /**
@@ -7,6 +9,7 @@ import com.ruoyi.common.utils.Arith;
  * 
  * @author ruoyi
  */
+@Data
 public class Cpu
 {
     /**
@@ -99,3 +102,4 @@ public class Cpu
         this.free = free;
     }
 }
+

@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysUserOnline;
@@ -92,5 +93,12 @@ public class SysUserOnlineServiceImpl implements ISysUserOnlineService
             sysUserOnline.setDeptName(user.getUser().getDept().getDeptName());
         }
         return sysUserOnline;
+    }
+
+    @Override
+    public Page<SysUserOnline> selectUserOnlinePage(Page<SysUserOnline> page, SysUserOnline userOnline)
+    {
+        // Not used - online users are built in-memory in the controller
+        return page;
     }
 }

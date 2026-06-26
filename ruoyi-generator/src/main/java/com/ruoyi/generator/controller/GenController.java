@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,9 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStateme
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -59,9 +62,10 @@ public class GenController extends BaseController
     @GetMapping("/list")
     public TableDataInfo genList(GenTable genTable)
     {
-        startPage();
-        List<GenTable> list = genTableService.selectGenTableList(genTable);
-        return getDataTable(list);
+        PageDomain pd = TableSupport.buildPageRequest();
+        Page<GenTable> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        page = genTableService.selectGenTablePage(page, genTable);
+        return getDataTable(page);
     }
 
     /**
@@ -88,9 +92,10 @@ public class GenController extends BaseController
     @GetMapping("/db/list")
     public TableDataInfo dataList(GenTable genTable)
     {
-        startPage();
-        List<GenTable> list = genTableService.selectDbTableList(genTable);
-        return getDataTable(list);
+        PageDomain pd = TableSupport.buildPageRequest();
+        Page<GenTable> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        page = genTableService.selectDbTablePage(page, genTable);
+        return getDataTable(page);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.ruoyi.generator.service;
 
 import java.util.List;
 import java.util.Map;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.generator.domain.GenTable;
 
 /**
@@ -26,6 +27,10 @@ public interface IGenTableService
      * @return 数据库表集合
      */
     public List<GenTable> selectDbTableList(GenTable genTable);
+
+    public Page<GenTable> selectGenTablePage(Page<GenTable> page, GenTable genTable);
+
+    public Page<GenTable> selectDbTablePage(Page<GenTable> page, GenTable genTable);
 
     /**
      * 查询据库列表

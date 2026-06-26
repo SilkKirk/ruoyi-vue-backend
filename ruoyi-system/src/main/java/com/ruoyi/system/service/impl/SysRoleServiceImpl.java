@@ -4,13 +4,13 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.system.domain.SysRoleDept;
 import com.ruoyi.system.domain.SysRoleMenu;
 import com.ruoyi.system.domain.SysUserRole;
@@ -30,6 +30,11 @@ public class SysRoleServiceImpl implements ISysRoleService
 
     @Override
     public List<SysRole> selectRoleList(SysRole role) {
+        QueryWrapper qw = buildRoleQuery(role);
+        return roleMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildRoleQuery(SysRole role) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
         if (StringUtils.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
@@ -37,7 +42,13 @@ public class SysRoleServiceImpl implements ISysRoleService
         if (StringUtils.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
         if (StringUtils.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
         qw.orderBy(SysRole::getRoleSort, true);
-        return PageUtils.paginate(roleMapper, qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysRole> selectRolePage(Page<SysRole> page, SysRole role) {
+        QueryWrapper qw = buildRoleQuery(role);
+        return roleMapper.paginate(page, qw);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.system;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +20,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.service.SysPermissionService;
@@ -57,9 +60,10 @@ public class SysRoleController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysRole role)
     {
-        startPage();
-        List<SysRole> list = roleService.selectRoleList(role);
-        return getDataTable(list);
+        PageDomain pd = TableSupport.buildPageRequest();
+        Page<SysRole> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        page = roleService.selectRolePage(page, role);
+        return getDataTable(page);
     }
 
     @Log(title = "角色管理", businessType = BusinessType.EXPORT)
@@ -188,9 +192,10 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/allocatedList")
     public TableDataInfo allocatedList(SysUser user)
     {
-        startPage();
-        List<SysUser> list = userService.selectAllocatedList(user);
-        return getDataTable(list);
+        PageDomain pd = TableSupport.buildPageRequest();
+        Page<SysUser> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        page = userService.selectAllocatedPage(page, user);
+        return getDataTable(page);
     }
 
     /**
@@ -200,9 +205,10 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/unallocatedList")
     public TableDataInfo unallocatedList(SysUser user)
     {
-        startPage();
-        List<SysUser> list = userService.selectUnallocatedList(user);
-        return getDataTable(list);
+        PageDomain pd = TableSupport.buildPageRequest();
+        Page<SysUser> page = Page.of(pd.getPageNum(), pd.getPageSize());
+        page = userService.selectUnallocatedPage(page, user);
+        return getDataTable(page);
     }
 
     /**

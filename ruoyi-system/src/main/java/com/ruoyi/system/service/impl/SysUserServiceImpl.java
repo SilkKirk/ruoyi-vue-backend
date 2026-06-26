@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.utils.DataScopeHelper;
-import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
@@ -45,21 +45,41 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public List<SysUser> selectUserList(SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
-        return PageUtils.paginate(userMapper, qw);
+        return userMapper.selectListByQuery(qw);
     }
 
     @Override
     public List<SysUser> selectAllocatedList(SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
         qw.where("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
-        return PageUtils.paginate(userMapper, qw);
+        return userMapper.selectListByQuery(qw);
     }
 
     @Override
     public List<SysUser> selectUnallocatedList(SysUser user) {
         QueryWrapper qw = buildUserQuery(user);
         qw.where("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
-        return PageUtils.paginate(userMapper, qw);
+        return userMapper.selectListByQuery(qw);
+    }
+
+    @Override
+    public Page<SysUser> selectUserPage(Page<SysUser> page, SysUser user) {
+        QueryWrapper qw = buildUserQuery(user);
+        return userMapper.paginate(page, qw);
+    }
+
+    @Override
+    public Page<SysUser> selectAllocatedPage(Page<SysUser> page, SysUser user) {
+        QueryWrapper qw = buildUserQuery(user);
+        qw.where("exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        return userMapper.paginate(page, qw);
+    }
+
+    @Override
+    public Page<SysUser> selectUnallocatedPage(Page<SysUser> page, SysUser user) {
+        QueryWrapper qw = buildUserQuery(user);
+        qw.where("not exists (select 1 from sys_user_role ur where ur.user_id = u.user_id and ur.role_id = " + user.getRoleId() + ")");
+        return userMapper.paginate(page, qw);
     }
 
     private QueryWrapper buildUserQuery(SysUser user) {
@@ -96,6 +116,14 @@ public class SysUserServiceImpl implements ISysUserService
         SysUser user = userMapper.selectOneById(userId);
         if (user != null && user.getDeptId() != null) {
             user.setDept(deptMapper.selectOneById(user.getDeptId()));
+        }
+        if (user != null) {
+            user.setRoles(roleMapper.selectListByQuery(
+                QueryWrapper.create()
+                    .select("r.*").from("sys_role").as("r")
+                    .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
+                    .where("ur.user_id = " + userId)
+            ));
         }
         return user;
     }

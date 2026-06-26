@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.system.domain.SysPost;
 
 /**
@@ -17,6 +18,8 @@ public interface ISysPostService
      * @return 岗位列表
      */
     public List<SysPost> selectPostList(SysPost post);
+
+    public Page<SysPost> selectPostPage(Page<SysPost> page, SysPost post);
 
     /**
      * 查询所有岗位

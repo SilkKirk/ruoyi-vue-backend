@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.system.domain.SysOperLog;
 
 /**
@@ -24,6 +25,8 @@ public interface ISysOperLogService
      * @return 操作日志集合
      */
     public List<SysOperLog> selectOperLogList(SysOperLog operLog);
+
+    public Page<SysOperLog> selectOperLogPage(Page<SysOperLog> page, SysOperLog operLog);
 
     /**
      * 批量删除系统操作日志

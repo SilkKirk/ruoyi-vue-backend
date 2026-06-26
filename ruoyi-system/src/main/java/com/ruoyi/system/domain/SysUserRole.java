@@ -1,9 +1,8 @@
 package com.ruoyi.system.domain;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Id;
+import lombok.Data;
 
 /**
  * 用户和角色关联 sys_user_role
@@ -11,6 +10,7 @@ import com.mybatisflex.annotation.Id;
  * @author ruoyi
  */
 @Table("sys_user_role")
+@Data
 public class SysUserRole
 {
     /** 用户ID */
@@ -20,32 +20,4 @@ public class SysUserRole
     /** 角色ID */
 @Id
     private Long roleId;
-
-    public Long getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(Long userId)
-    {
-        this.userId = userId;
-    }
-
-    public Long getRoleId()
-    {
-        return roleId;
-    }
-
-    public void setRoleId(Long roleId)
-    {
-        this.roleId = roleId;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("userId", getUserId())
-            .append("roleId", getRoleId())
-            .toString();
-    }
 }

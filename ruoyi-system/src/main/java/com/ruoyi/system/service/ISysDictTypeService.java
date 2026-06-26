@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.entity.SysDictType;
 
@@ -18,6 +19,8 @@ public interface ISysDictTypeService
      * @return 字典类型集合信息
      */
     public List<SysDictType> selectDictTypeList(SysDictType dictType);
+
+    public Page<SysDictType> selectDictTypePage(Page<SysDictType> page, SysDictType dictType);
 
     /**
      * 根据所有字典类型

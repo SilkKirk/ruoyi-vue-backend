@@ -34,6 +34,7 @@ import com.ruoyi.common.constant.GenConstants;
 import com.ruoyi.common.core.text.CharsetKit;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
@@ -88,13 +89,43 @@ public class GenTableServiceImpl implements IGenTableService
     @Override
     public List<GenTable> selectGenTableList(GenTable genTable)
     {
+        QueryWrapper qw = buildGenTableQuery(genTable);
+        return genTableMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildGenTableQuery(GenTable genTable) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(genTable.getTableName())) qw.like(GenTable::getTableName, genTable.getTableName());
         if (StringUtils.isNotEmpty(genTable.getTableComment())) qw.like(GenTable::getTableComment, genTable.getTableComment());
         if (StringUtils.isNotNull(genTable.getParams().get("beginTime"))) qw.ge(GenTable::getCreateTime, genTable.getParams().get("beginTime"));
         if (StringUtils.isNotNull(genTable.getParams().get("endTime"))) qw.le(GenTable::getCreateTime, genTable.getParams().get("endTime"));
         qw.orderBy(GenTable::getCreateTime, false);
-        return genTableMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<GenTable> selectGenTablePage(Page<GenTable> page, GenTable genTable)
+    {
+        QueryWrapper qw = buildGenTableQuery(genTable);
+        return genTableMapper.paginate(page, qw);
+    }
+
+    @Override
+    public Page<GenTable> selectDbTablePage(Page<GenTable> page, GenTable genTable)
+    {
+        List<GenTable> all = selectDbTableList(genTable);
+        int total = all.size();
+        long pageNumber = page.getPageNumber();
+        long pageSize = page.getPageSize();
+        int fromIndex = (int) ((pageNumber - 1) * pageSize);
+        int toIndex = Math.min(fromIndex + (int) pageSize, total);
+        if (fromIndex >= total) {
+            page.setRecords(new ArrayList<>());
+        } else {
+            page.setRecords(all.subList(fromIndex, toIndex));
+        }
+        page.setTotalRow(total);
+        return page;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.Date;
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.entity.SysUser;
 
 /**
@@ -34,6 +35,12 @@ public interface ISysUserService
      * @return 用户信息集合信息
      */
     public List<SysUser> selectUnallocatedList(SysUser user);
+
+    public Page<SysUser> selectUserPage(Page<SysUser> page, SysUser user);
+
+    public Page<SysUser> selectAllocatedPage(Page<SysUser> page, SysUser user);
+
+    public Page<SysUser> selectUnallocatedPage(Page<SysUser> page, SysUser user);
 
     /**
      * 通过用户名查询用户

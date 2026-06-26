@@ -1,20 +1,22 @@
 package com.ruoyi.quartz.domain;
 
 import java.util.Date;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * 定时任务调度日志表 sys_job_log
  * 
  * @author ruoyi
  */
+@Data
 public class SysJobLog implements Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -49,6 +51,7 @@ public class SysJobLog implements Serializable
 
     /** 请求参数 */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Getter(AccessLevel.NONE)
     private Map<String, Object> params;
 
     public Map<String, Object> getParams() { if (params == null) params = new HashMap<>(); return params; }
@@ -65,118 +68,4 @@ public class SysJobLog implements Serializable
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    public Long getJobLogId()
-    {
-        return jobLogId;
-    }
-
-    public void setJobLogId(Long jobLogId)
-    {
-        this.jobLogId = jobLogId;
-    }
-
-    public String getJobName()
-    {
-        return jobName;
-    }
-
-    public void setJobName(String jobName)
-    {
-        this.jobName = jobName;
-    }
-
-    public String getJobGroup()
-    {
-        return jobGroup;
-    }
-
-    public void setJobGroup(String jobGroup)
-    {
-        this.jobGroup = jobGroup;
-    }
-
-    public String getInvokeTarget()
-    {
-        return invokeTarget;
-    }
-
-    public void setInvokeTarget(String invokeTarget)
-    {
-        this.invokeTarget = invokeTarget;
-    }
-
-    public String getJobMessage()
-    {
-        return jobMessage;
-    }
-
-    public void setJobMessage(String jobMessage)
-    {
-        this.jobMessage = jobMessage;
-    }
-
-    public String getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(String status)
-    {
-        this.status = status;
-    }
-
-    public String getExceptionInfo()
-    {
-        return exceptionInfo;
-    }
-
-    public void setExceptionInfo(String exceptionInfo)
-    {
-        this.exceptionInfo = exceptionInfo;
-    }
-
-    public Date getStartTime()
-    {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime)
-    {
-        this.startTime = startTime;
-    }
-    
-    public Date getEndTime()
-    {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime)
-    {
-        this.endTime = endTime;
-    }
-
-    public Date getCreateTime()
-    {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime)
-    {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("jobLogId", getJobLogId())
-            .append("jobName", getJobName())
-            .append("jobGroup", getJobGroup())
-            .append("jobMessage", getJobMessage())
-            .append("status", getStatus())
-            .append("exceptionInfo", getExceptionInfo())
-            .append("startTime", getStartTime())
-            .append("stopTime", getEndTime())
-            .toString();
-    }
 }

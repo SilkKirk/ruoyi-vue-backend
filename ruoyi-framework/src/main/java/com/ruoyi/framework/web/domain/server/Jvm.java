@@ -1,5 +1,7 @@
 package com.ruoyi.framework.web.domain.server;
 
+
+import lombok.Data;
 import java.lang.management.ManagementFactory;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DateUtils;
@@ -9,6 +11,7 @@ import com.ruoyi.common.utils.DateUtils;
  * 
  * @author ruoyi
  */
+@Data
 public class Jvm
 {
     /**
@@ -128,3 +131,4 @@ public class Jvm
         return ManagementFactory.getRuntimeMXBean().getInputArguments().toString();
     }
 }
+

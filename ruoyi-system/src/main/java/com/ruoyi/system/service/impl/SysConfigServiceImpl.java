@@ -5,13 +5,13 @@ import java.util.List;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
@@ -59,13 +59,25 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public List<SysConfig> selectConfigList(SysConfig config)
     {
+        QueryWrapper qw = buildConfigQuery(config);
+        return configMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildConfigQuery(SysConfig config) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
         if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
         if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
         if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
         if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
-        return PageUtils.paginate(configMapper, qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config)
+    {
+        QueryWrapper qw = buildConfigQuery(config);
+        return configMapper.paginate(page, qw);
     }
 
     @Override

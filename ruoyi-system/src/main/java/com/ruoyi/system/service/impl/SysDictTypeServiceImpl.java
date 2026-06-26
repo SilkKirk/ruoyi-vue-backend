@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysDictData;
@@ -51,6 +52,11 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
     @Override
     public List<SysDictType> selectDictTypeList(SysDictType dictType)
     {
+        QueryWrapper qw = buildDictTypeQuery(dictType);
+        return dictTypeMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildDictTypeQuery(SysDictType dictType) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
         if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
@@ -58,7 +64,14 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
         if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
         if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
         qw.orderBy(SysDictType::getCreateTime, false);
-        return dictTypeMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysDictType> selectDictTypePage(Page<SysDictType> page, SysDictType dictType)
+    {
+        QueryWrapper qw = buildDictTypeQuery(dictType);
+        return dictTypeMapper.paginate(page, qw);
     }
 
     /**

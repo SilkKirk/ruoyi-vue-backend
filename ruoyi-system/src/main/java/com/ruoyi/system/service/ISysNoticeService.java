@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.system.domain.SysNotice;
 
 /**
@@ -25,6 +26,8 @@ public interface ISysNoticeService
      * @return 公告集合
      */
     public List<SysNotice> selectNoticeList(SysNotice notice);
+
+    public Page<SysNotice> selectNoticePage(Page<SysNotice> page, SysNotice notice);
 
     /**
      * 新增公告

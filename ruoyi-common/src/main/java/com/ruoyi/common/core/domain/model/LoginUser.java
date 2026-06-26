@@ -1,5 +1,7 @@
 package com.ruoyi.common.core.domain.model;
 
+
+import lombok.Data;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +14,7 @@ import java.util.Set;
  * 
  * @author ruoyi
  */
+@Data
 public class LoginUser implements UserDetails
 {
     private static final long serialVersionUID = 1L;
@@ -264,3 +267,4 @@ public class LoginUser implements UserDetails
         return null;
     }
 }
+

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysOperLog;
@@ -41,6 +42,11 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public List<SysOperLog> selectOperLogList(SysOperLog operLog)
     {
+        QueryWrapper qw = buildOperLogQuery(operLog);
+        return operLogMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildOperLogQuery(SysOperLog operLog) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(operLog.getOperIp())) qw.like(SysOperLog::getOperIp, operLog.getOperIp());
         if (StringUtils.isNotEmpty(operLog.getTitle())) qw.like(SysOperLog::getTitle, operLog.getTitle());
@@ -50,7 +56,14 @@ public class SysOperLogServiceImpl implements ISysOperLogService
         if (StringUtils.isNotNull(operLog.getParams().get("beginTime"))) qw.ge(SysOperLog::getOperTime, operLog.getParams().get("beginTime"));
         if (StringUtils.isNotNull(operLog.getParams().get("endTime"))) qw.le(SysOperLog::getOperTime, operLog.getParams().get("endTime"));
         qw.orderBy(SysOperLog::getOperId, false);
-        return operLogMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysOperLog> selectOperLogPage(Page<SysOperLog> page, SysOperLog operLog)
+    {
+        QueryWrapper qw = buildOperLogQuery(operLog);
+        return operLogMapper.paginate(page, qw);
     }
 
     /**

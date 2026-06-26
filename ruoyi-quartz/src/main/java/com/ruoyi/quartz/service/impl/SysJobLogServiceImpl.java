@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.quartz.domain.SysJobLog;
@@ -30,6 +31,11 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public List<SysJobLog> selectJobLogList(SysJobLog jobLog)
     {
+        QueryWrapper qw = buildJobLogQuery(jobLog);
+        return jobLogMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildJobLogQuery(SysJobLog jobLog) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(jobLog.getJobName())) qw.like(SysJobLog::getJobName, jobLog.getJobName());
         if (StringUtils.isNotEmpty(jobLog.getJobGroup())) qw.eq(SysJobLog::getJobGroup, jobLog.getJobGroup());
@@ -38,7 +44,14 @@ public class SysJobLogServiceImpl implements ISysJobLogService
         if (StringUtils.isNotNull(jobLog.getParams().get("beginTime"))) qw.ge(SysJobLog::getCreateTime, jobLog.getParams().get("beginTime"));
         if (StringUtils.isNotNull(jobLog.getParams().get("endTime"))) qw.le(SysJobLog::getCreateTime, jobLog.getParams().get("endTime"));
         qw.orderBy(SysJobLog::getJobLogId, false);
-        return jobLogMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysJobLog> selectJobLogPage(Page<SysJobLog> page, SysJobLog jobLog)
+    {
+        QueryWrapper qw = buildJobLogQuery(jobLog);
+        return jobLogMapper.paginate(page, qw);
     }
 
     /**

@@ -9,6 +9,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.exception.job.TaskException;
@@ -56,6 +57,11 @@ public class SysJobServiceImpl implements ISysJobService
     @Override
     public List<SysJob> selectJobList(SysJob job)
     {
+        QueryWrapper qw = buildJobQuery(job);
+        return jobMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildJobQuery(SysJob job) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(job.getJobName())) qw.like(SysJob::getJobName, job.getJobName());
         if (StringUtils.isNotEmpty(job.getJobGroup())) qw.eq(SysJob::getJobGroup, job.getJobGroup());
@@ -64,7 +70,14 @@ public class SysJobServiceImpl implements ISysJobService
         if (StringUtils.isNotNull(job.getParams().get("beginTime"))) qw.ge(SysJob::getCreateTime, job.getParams().get("beginTime"));
         if (StringUtils.isNotNull(job.getParams().get("endTime"))) qw.le(SysJob::getCreateTime, job.getParams().get("endTime"));
         qw.orderBy(SysJob::getCreateTime, false);
-        return jobMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysJob> selectJobPage(Page<SysJob> page, SysJob job)
+    {
+        QueryWrapper qw = buildJobQuery(job);
+        return jobMapper.paginate(page, qw);
     }
 
     /**

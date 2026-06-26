@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysNotice;
@@ -42,6 +43,11 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public List<SysNotice> selectNoticeList(SysNotice notice)
     {
+        QueryWrapper qw = buildNoticeQuery(notice);
+        return noticeMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildNoticeQuery(SysNotice notice) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
         if (StringUtils.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
@@ -49,7 +55,14 @@ public class SysNoticeServiceImpl implements ISysNoticeService
         if (StringUtils.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
         if (StringUtils.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
         qw.orderBy(SysNotice::getCreateTime, false);
-        return noticeMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysNotice> selectNoticePage(Page<SysNotice> page, SysNotice notice)
+    {
+        QueryWrapper qw = buildNoticeQuery(notice);
+        return noticeMapper.paginate(page, qw);
     }
 
     /**

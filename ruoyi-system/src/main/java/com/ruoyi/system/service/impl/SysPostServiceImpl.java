@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.exception.ServiceException;
@@ -38,6 +39,11 @@ public class SysPostServiceImpl implements ISysPostService
     @Override
     public List<SysPost> selectPostList(SysPost post)
     {
+        QueryWrapper qw = buildPostQuery(post);
+        return postMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildPostQuery(SysPost post) {
         QueryWrapper qw = QueryWrapper.create();
         if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
         if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
@@ -45,7 +51,14 @@ public class SysPostServiceImpl implements ISysPostService
         if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
         if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
         qw.orderBy(SysPost::getPostSort, true);
-        return postMapper.selectListByQuery(qw);
+        return qw;
+    }
+
+    @Override
+    public Page<SysPost> selectPostPage(Page<SysPost> page, SysPost post)
+    {
+        QueryWrapper qw = buildPostQuery(post);
+        return postMapper.paginate(page, qw);
     }
 
     /**

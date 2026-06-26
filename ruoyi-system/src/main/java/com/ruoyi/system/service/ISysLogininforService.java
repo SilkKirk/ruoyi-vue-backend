@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.system.domain.SysLogininfor;
 
 /**
@@ -24,6 +25,8 @@ public interface ISysLogininforService
      * @return 登录记录集合
      */
     public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor);
+
+    public Page<SysLogininfor> selectLogininforPage(Page<SysLogininfor> page, SysLogininfor logininfor);
 
     /**
      * 批量删除系统登录日志

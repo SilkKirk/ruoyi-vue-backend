@@ -1,5 +1,7 @@
 package com.ruoyi.common.core.domain;
 
+
+import lombok.Data;
 import java.util.HashMap;
 import java.util.Objects;
 import com.ruoyi.common.constant.HttpStatus;
@@ -10,6 +12,7 @@ import com.ruoyi.common.utils.StringUtils;
  * 
  * @author ruoyi
  */
+@Data
 public class AjaxResult extends HashMap<String, Object>
 {
     private static final long serialVersionUID = 1L;
@@ -214,3 +217,4 @@ public class AjaxResult extends HashMap<String, Object>
         return this;
     }
 }
+
