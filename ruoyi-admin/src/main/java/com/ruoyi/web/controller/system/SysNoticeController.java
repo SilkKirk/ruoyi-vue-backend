@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.system;
 
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +23,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.service.ISysNoticeReadService;
 import com.ruoyi.system.service.ISysNoticeService;
@@ -49,7 +51,14 @@ public class SysNoticeController extends BaseController
     public TableDataInfo list(SysNotice notice)
     {
         Page<SysNotice> page = startPage(SysNotice.class);
-        page = noticeService.selectNoticePage(page, notice);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
+        if (StringUtils.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
+        if (StringUtils.isNotEmpty(notice.getCreateBy())) qw.like(SysNotice::getCreateBy, notice.getCreateBy());
+        if (StringUtils.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
+        qw.orderBy(SysNotice::getCreateTime, false);
+        page = noticeService.page(page, qw);
         return getDataTable(page);
     }
 
@@ -155,3 +164,6 @@ public class SysNoticeController extends BaseController
         return toAjax(noticeService.removeByIds(java.util.Arrays.asList(noticeIds)));
     }
 }
+
+
+

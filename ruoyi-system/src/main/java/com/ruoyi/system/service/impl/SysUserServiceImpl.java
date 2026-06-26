@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.validation.Validator;
@@ -113,6 +114,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return user;
     }
 
+    @Override public SysUser getById(Serializable userId) {
+        return selectUserById((Long) userId);
+    }
+
     @Override public SysUser selectUserById(Long userId) {
         SysUser user = userMapper.selectOneById(userId);
         if (user != null && user.getDeptId() != null) {
@@ -188,22 +193,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override @Transactional
-    public int insertUser(SysUser user) {
+    public boolean save(SysUser user) {
         int rows = userMapper.insertSelective(user);
         insertUserPost(user); insertUserRole(user);
-        return rows;
+        return rows > 0;
     }
 
     @Override public boolean registerUser(SysUser user) { return userMapper.insertSelective(user) > 0; }
 
     @Override @Transactional
-    public int updateUser(SysUser user) {
+    public boolean updateById(SysUser user) {
         Long userId = user.getUserId();
-        userRoleMapper.deleteByQuery(QueryWrapper.create().where(SysUserRole::getUserId).eq(userId));
-        insertUserRole(user);
-        userPostMapper.deleteByQuery(QueryWrapper.create().where(SysUserPost::getUserId).eq(userId));
-        insertUserPost(user);
-        return userMapper.update(user);
+        // 只有表单包含岗位/角色数据时才更新关联
+        if (user.getRoleIds() != null) {
+            userRoleMapper.deleteByQuery(QueryWrapper.create().where(SysUserRole::getUserId).eq(userId));
+            insertUserRole(user);
+        }
+        if (user.getPostIds() != null) {
+            userPostMapper.deleteByQuery(QueryWrapper.create().where(SysUserPost::getUserId).eq(userId));
+            insertUserPost(user);
+        }
+        return userMapper.update(user) > 0;
     }
 
     @Override @Transactional
@@ -263,18 +273,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override @Transactional
-    public int deleteUserById(Long userId) {
+    public boolean removeById(Serializable userId) {
         userRoleMapper.deleteByQuery(QueryWrapper.create().where(SysUserRole::getUserId).eq(userId));
         userPostMapper.deleteByQuery(QueryWrapper.create().where(SysUserPost::getUserId).eq(userId));
-        return userMapper.deleteById(userId);
+        return userMapper.deleteById(userId) > 0;
     }
 
     @Override @Transactional
-    public int deleteUserByIds(Long[] userIds) {
-        for (Long userId : userIds) { checkUserAllowed(new SysUser(userId)); checkUserDataScope(userId); }
-        userRoleMapper.deleteByQuery(QueryWrapper.create().where(SysUserRole::getUserId).in(Arrays.asList(userIds)));
-        userPostMapper.deleteByQuery(QueryWrapper.create().where(SysUserPost::getUserId).in(Arrays.asList(userIds)));
-        return userMapper.deleteBatchByIds(Arrays.asList(userIds));
+    public boolean removeByIds(Collection<? extends Serializable> userIds) {
+        for (Serializable id : userIds) { checkUserAllowed(new SysUser((Long) id)); checkUserDataScope((Long) id); }
+        userRoleMapper.deleteByQuery(QueryWrapper.create().where(SysUserRole::getUserId).in(userIds));
+        userPostMapper.deleteByQuery(QueryWrapper.create().where(SysUserPost::getUserId).in(userIds));
+        return userMapper.deleteBatchByIds(userIds) > 0;
     }
 
     @Override

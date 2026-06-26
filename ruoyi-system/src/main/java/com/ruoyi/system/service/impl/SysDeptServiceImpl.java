@@ -39,8 +39,6 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
     }
 
     @Override public List<TreeSelect> selectDeptTreeList(SysDept dept) { return buildDeptTreeSelect(selectDeptList(dept)); }
-    @Override public SysDept selectDeptById(Long deptId) { return deptMapper.selectOneById(deptId); }
-
     @Override
     public int selectNormalChildrenDeptById(Long deptId) {
         return (int) deptMapper.selectCountByQuery(
@@ -84,16 +82,16 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
     }
 
     @Override
-    public int insertDept(SysDept dept) {
+    public boolean save(SysDept dept) {
         SysDept info = deptMapper.selectOneById(dept.getParentId());
         if (!UserConstants.DEPT_NORMAL.equals(info.getStatus()))
             throw new ServiceException("部门停用，不允许新增");
         dept.setAncestors(info.getAncestors() + "," + dept.getParentId());
-        return deptMapper.insertSelective(dept);
+        return deptMapper.insertSelective(dept) > 0;
     }
 
     @Override
-    public int updateDept(SysDept dept) {
+    public boolean updateById(SysDept dept) {
         SysDept newParent = deptMapper.selectOneById(dept.getParentId());
         SysDept oldDept = deptMapper.selectOneById(dept.getDeptId());
         if (newParent != null && oldDept != null) {
@@ -105,7 +103,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
         if (UserConstants.DEPT_NORMAL.equals(dept.getStatus()) && StringUtils.isNotEmpty(dept.getAncestors())
                 && !StringUtils.equals("0", dept.getAncestors()))
             updateParentDeptStatusNormal(dept);
-        return result;
+        return result > 0;
     }
 
     private void updateParentDeptStatusNormal(SysDept dept) {

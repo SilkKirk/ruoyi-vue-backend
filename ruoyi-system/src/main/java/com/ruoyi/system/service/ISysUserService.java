@@ -114,28 +114,12 @@ public interface ISysUserService extends IService<SysUser>
     public void checkUserDataScope(Long userId);
 
     /**
-     * 新增用户信息
-     * 
-     * @param user 用户信息
-     * @return 结果
-     */
-    public int insertUser(SysUser user);
-
-    /**
      * 注册用户信息
      * 
      * @param user 用户信息
      * @return 结果
      */
     public boolean registerUser(SysUser user);
-
-    /**
-     * 修改用户信息
-     * 
-     * @param user 用户信息
-     * @return 结果
-     */
-    public int updateUser(SysUser user);
 
     /**
      * 用户授权角色
@@ -196,22 +180,6 @@ public interface ISysUserService extends IService<SysUser>
      * @return 结果
      */
     public int resetUserPwd(Long userId, String password);
-
-    /**
-     * 通过用户ID删除用户
-     * 
-     * @param userId 用户ID
-     * @return 结果
-     */
-    public int deleteUserById(Long userId);
-
-    /**
-     * 批量删除用户信息
-     * 
-     * @param userIds 需要删除的用户ID
-     * @return 结果
-     */
-    public int deleteUserByIds(Long[] userIds);
 
     /**
      * 导入用户数据

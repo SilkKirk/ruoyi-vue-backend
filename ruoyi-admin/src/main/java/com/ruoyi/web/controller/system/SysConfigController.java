@@ -1,7 +1,9 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.Arrays;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,11 +17,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.constant.CacheConstants;
+import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.service.ISysConfigService;
@@ -36,6 +43,9 @@ public class SysConfigController extends BaseController
     @Autowired
     private ISysConfigService configService;
 
+    @Autowired
+    private RedisCache redisCache;
+
     /**
      * 获取参数配置列表
      */
@@ -44,7 +54,13 @@ public class SysConfigController extends BaseController
     public TableDataInfo list(SysConfig config)
     {
         Page<SysConfig> page = startPage(SysConfig.class);
-        page = configService.selectConfigPage(page, config);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        page = configService.page(page, qw);
         return getDataTable(page);
     }
 
@@ -53,7 +69,13 @@ public class SysConfigController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysConfig config)
     {
-        List<SysConfig> list = configService.selectConfigList(config);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        List<SysConfig> list = configService.list(qw);
         ExcelUtil<SysConfig> util = new ExcelUtil<SysConfig>(SysConfig.class);
         util.exportExcel(response, list, "参数数据");
     }
@@ -90,7 +112,12 @@ public class SysConfigController extends BaseController
             return error("新增参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
         config.setCreateBy(getUsername());
-        return toAjax(configService.save(config));
+        if (configService.save(config))
+        {
+            redisCache.setCacheObject(CacheConstants.SYS_CONFIG_KEY + config.getConfigKey(), config.getConfigValue());
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -105,8 +132,16 @@ public class SysConfigController extends BaseController
         {
             return error("修改参数'" + config.getConfigName() + "'失败，参数键名已存在");
         }
+        SysConfig oldConfig = configService.getById(config.getConfigId());
         config.setUpdateBy(getUsername());
-        return toAjax(configService.updateById(config));
+        if (configService.updateById(config))
+        {
+            if (oldConfig != null && !StringUtils.equals(oldConfig.getConfigKey(), config.getConfigKey()))
+                redisCache.deleteObject(CacheConstants.SYS_CONFIG_KEY + oldConfig.getConfigKey());
+            redisCache.setCacheObject(CacheConstants.SYS_CONFIG_KEY + config.getConfigKey(), config.getConfigValue());
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -117,7 +152,14 @@ public class SysConfigController extends BaseController
     @DeleteMapping("/{configIds}")
     public AjaxResult remove(@PathVariable Long[] configIds)
     {
-        configService.removeByIds(java.util.Arrays.asList(configIds));
+        for (Long configId : configIds)
+        {
+            SysConfig config = configService.getById(configId);
+            if (StringUtils.equals(UserConstants.YES, config.getConfigType()))
+                throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
+            redisCache.deleteObject(CacheConstants.SYS_CONFIG_KEY + config.getConfigKey());
+        }
+        configService.removeByIds(Arrays.asList(configIds));
         return success();
     }
 
@@ -133,3 +175,5 @@ public class SysConfigController extends BaseController
         return success();
     }
 }
+
+

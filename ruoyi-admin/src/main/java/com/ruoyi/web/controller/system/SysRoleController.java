@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.system;
 
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.service.SysPermissionService;
 import com.ruoyi.framework.web.service.TokenService;
@@ -60,7 +62,14 @@ public class SysRoleController extends BaseController
     public TableDataInfo list(SysRole role)
     {
         Page<SysRole> page = startPage(SysRole.class);
-        page = roleService.selectRolePage(page, role);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
+        if (StringUtils.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
+        if (StringUtils.isNotEmpty(role.getStatus())) qw.eq(SysRole::getStatus, role.getStatus());
+        if (StringUtils.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
+        qw.orderBy(SysRole::getRoleSort, true);
+        page = roleService.page(page, qw);
         return getDataTable(page);
     }
 
@@ -69,7 +78,14 @@ public class SysRoleController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysRole role)
     {
-        List<SysRole> list = roleService.selectRoleList(role);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
+        if (StringUtils.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
+        if (StringUtils.isNotEmpty(role.getStatus())) qw.eq(SysRole::getStatus, role.getStatus());
+        if (StringUtils.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
+        qw.orderBy(SysRole::getRoleSort, true);
+        List<SysRole> list = roleService.list(qw);
         ExcelUtil<SysRole> util = new ExcelUtil<SysRole>(SysRole.class);
         util.exportExcel(response, list, "角色数据");
     }
@@ -254,3 +270,6 @@ public class SysRoleController extends BaseController
         return ajax;
     }
 }
+
+
+

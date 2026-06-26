@@ -1,7 +1,9 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.Arrays;
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +23,8 @@ import com.ruoyi.common.core.domain.entity.SysDictType;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.service.ISysDictTypeService;
 
@@ -41,7 +45,14 @@ public class SysDictTypeController extends BaseController
     public TableDataInfo list(SysDictType dictType)
     {
         Page<SysDictType> page = startPage(SysDictType.class);
-        page = dictTypeService.selectDictTypePage(page, dictType);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
+        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
+        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
+        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
+        qw.orderBy(SysDictType::getCreateTime, false);
+        page = dictTypeService.page(page, qw);
         return getDataTable(page);
     }
 
@@ -50,7 +61,14 @@ public class SysDictTypeController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysDictType dictType)
     {
-        List<SysDictType> list = dictTypeService.selectDictTypeList(dictType);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
+        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
+        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
+        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
+        qw.orderBy(SysDictType::getCreateTime, false);
+        List<SysDictType> list = dictTypeService.list(qw);
         ExcelUtil<SysDictType> util = new ExcelUtil<SysDictType>(SysDictType.class);
         util.exportExcel(response, list, "字典类型");
     }
@@ -78,7 +96,12 @@ public class SysDictTypeController extends BaseController
             return error("新增字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setCreateBy(getUsername());
-        return toAjax(dictTypeService.save(dict));
+        if (dictTypeService.save(dict))
+        {
+            DictUtils.setDictCache(dict.getDictType(), null);
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -94,7 +117,12 @@ public class SysDictTypeController extends BaseController
             return error("修改字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setUpdateBy(getUsername());
-        return toAjax(dictTypeService.updateById(dict));
+        if (dictTypeService.updateById(dict))
+        {
+            DictUtils.removeDictCache(dict.getDictType());
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -105,7 +133,14 @@ public class SysDictTypeController extends BaseController
     @DeleteMapping("/{dictIds}")
     public AjaxResult remove(@PathVariable Long[] dictIds)
     {
-        dictTypeService.removeByIds(java.util.Arrays.asList(dictIds));
+        for (Long dictId : dictIds)
+        {
+            SysDictType dictType = dictTypeService.getById(dictId);
+            if (dictTypeService.hasDictDataByType(dictType.getDictType()))
+                return warn(dictType.getDictName() + "已分配,不能删除");
+            DictUtils.removeDictCache(dictType.getDictType());
+        }
+        dictTypeService.removeByIds(Arrays.asList(dictIds));
         return success();
     }
 
@@ -127,7 +162,10 @@ public class SysDictTypeController extends BaseController
     @GetMapping("/optionselect")
     public AjaxResult optionselect()
     {
-        List<SysDictType> dictTypes = dictTypeService.selectDictTypeAll();
+        List<SysDictType> dictTypes = dictTypeService.list();
         return success(dictTypes);
     }
 }
+
+
+

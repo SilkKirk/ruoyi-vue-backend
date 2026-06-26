@@ -28,12 +28,6 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     public void init() { loadingConfigCache(); }
 
     @Override
-    public SysConfig selectConfigById(Long configId)
-    {
-        return configMapper.selectOneById(configId);
-    }
-
-    @Override
     public String selectConfigByKey(String configKey)
     {
         String configValue = Convert.toStr(redisCache.getCacheObject(getCacheKey(configKey)));
@@ -57,61 +51,11 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         return Convert.toBool(captchaEnabled);
     }
 
-    @Override
-    public List<SysConfig> selectConfigList(SysConfig config)
-    {
-        QueryWrapper qw = buildConfigQuery(config);
-        return configMapper.selectListByQuery(qw);
-    }
+    
 
-    private QueryWrapper buildConfigQuery(SysConfig config) {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
-        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
-        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
-        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
-        return qw;
-    }
+    
 
-    @Override
-    public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config)
-    {
-        QueryWrapper qw = buildConfigQuery(config);
-        return configMapper.paginate(page, qw);
-    }
-
-    @Override
-    public int insertConfig(SysConfig config)
-    {
-        int row = configMapper.insertSelective(config);
-        if (row > 0) redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
-        return row;
-    }
-
-    @Override
-    public int updateConfig(SysConfig config)
-    {
-        SysConfig temp = configMapper.selectOneById(config.getConfigId());
-        if (!StringUtils.equals(temp.getConfigKey(), config.getConfigKey()))
-            redisCache.deleteObject(getCacheKey(temp.getConfigKey()));
-        int row = configMapper.update(config);
-        if (row > 0) redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
-        return row;
-    }
-
-    @Override
-    public void deleteConfigByIds(Long[] configIds)
-    {
-        for (Long configId : configIds)
-        {
-            SysConfig config = selectConfigById(configId);
-            if (StringUtils.equals(UserConstants.YES, config.getConfigType()))
-                throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
-            configMapper.deleteById(configId);
-            redisCache.deleteObject(getCacheKey(config.getConfigKey()));
-        }
-    }
+    
 
     @Override
     public void loadingConfigCache()
@@ -145,3 +89,4 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
 
     private String getCacheKey(String configKey) { return CacheConstants.SYS_CONFIG_KEY + configKey; }
 }
+

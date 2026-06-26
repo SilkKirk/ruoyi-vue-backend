@@ -17,27 +17,7 @@ public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDi
 {
     @Autowired private SysDictDataMapper dictDataMapper;
 
-    @Override
-    public List<SysDictData> selectDictDataList(SysDictData dictData)
-    {
-        QueryWrapper qw = buildDictDataQuery(dictData);
-        return dictDataMapper.selectListByQuery(qw);
-    }
-
-    private QueryWrapper buildDictDataQuery(SysDictData dictData) {
-        QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
-        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
-        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
-        return qw;
-    }
-
-    @Override
-    public Page<SysDictData> selectDictDataPage(Page<SysDictData> page, SysDictData dictData)
-    {
-        QueryWrapper qw = buildDictDataQuery(dictData);
-        return dictDataMapper.paginate(page, qw);
-    }
+    
 
     @Override
     public String selectDictLabel(String dictType, String dictValue)
@@ -48,52 +28,6 @@ public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDi
         return data != null ? data.getDictLabel() : "";
     }
 
-    @Override
-    public SysDictData selectDictDataById(Long dictCode)
-    {
-        return dictDataMapper.selectOneById(dictCode);
-    }
-
-    @Override
-    public void deleteDictDataByIds(Long[] dictCodes)
-    {
-        for (Long dictCode : dictCodes)
-        {
-            SysDictData data = selectDictDataById(dictCode);
-            dictDataMapper.deleteById(dictCode);
-            List<SysDictData> dictDatas = selectDictDataByType(data.getDictType());
-            DictUtils.setDictCache(data.getDictType(), dictDatas);
-        }
-    }
-
-    @Override
-    public int insertDictData(SysDictData data)
-    {
-        int row = dictDataMapper.insertSelective(data);
-        if (row > 0)
-        {
-            List<SysDictData> dictDatas = selectDictDataByType(data.getDictType());
-            DictUtils.setDictCache(data.getDictType(), dictDatas);
-        }
-        return row;
-    }
-
-    @Override
-    public int updateDictData(SysDictData data)
-    {
-        int row = dictDataMapper.update(data);
-        if (row > 0)
-        {
-            List<SysDictData> dictDatas = selectDictDataByType(data.getDictType());
-            DictUtils.setDictCache(data.getDictType(), dictDatas);
-        }
-        return row;
-    }
-
-    private List<SysDictData> selectDictDataByType(String dictType)
-    {
-        return dictDataMapper.selectListByQuery(
-            QueryWrapper.create().where(SysDictData::getDictType).eq(dictType).orderBy(SysDictData::getDictSort, true)
-        );
-    }
 }
+
+

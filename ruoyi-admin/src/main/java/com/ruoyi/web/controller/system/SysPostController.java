@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.system;
 
 import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.service.ISysPostService;
@@ -44,7 +46,14 @@ public class SysPostController extends BaseController
     public TableDataInfo list(SysPost post)
     {
         Page<SysPost> page = startPage(SysPost.class);
-        page = postService.selectPostPage(page, post);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
+        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
+        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
+        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
+        qw.orderBy(SysPost::getPostSort, true);
+        page = postService.page(page, qw);
         return getDataTable(page);
     }
     
@@ -53,7 +62,14 @@ public class SysPostController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysPost post)
     {
-        List<SysPost> list = postService.selectPostList(post);
+        QueryWrapper qw = QueryWrapper.create();
+        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
+        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
+        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
+        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
+        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
+        qw.orderBy(SysPost::getPostSort, true);
+        List<SysPost> list = postService.list(qw);
         ExcelUtil<SysPost> util = new ExcelUtil<SysPost>(SysPost.class);
         util.exportExcel(response, list, "岗位数据");
     }
@@ -125,7 +141,10 @@ public class SysPostController extends BaseController
     @GetMapping("/optionselect")
     public AjaxResult optionselect()
     {
-        List<SysPost> posts = postService.selectPostAll();
+        List<SysPost> posts = postService.list();
         return success(posts);
     }
 }
+
+
+

@@ -166,7 +166,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return returnList.isEmpty() ? menus : returnList;
     }
     @Override public List<TreeSelect> buildMenuTreeSelect(List<SysMenu> menus) { return buildMenuTree(menus).stream().map(TreeSelect::new).collect(Collectors.toList()); }
-    @Override public SysMenu selectMenuById(Long menuId) { return menuMapper.selectOneById(menuId); }
 
     @Override
     public boolean hasChildByMenuId(Long menuId) {
@@ -177,9 +176,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return roleMenuMapper.selectCountByQuery(QueryWrapper.create().where(SysRoleMenu::getMenuId).eq(menuId)) > 0;
     }
 
-    @Override public int insertMenu(SysMenu menu) { return menuMapper.insertSelective(menu); }
-    @Override public int updateMenu(SysMenu menu) { return menuMapper.update(menu); }
-
     @Override @Transactional
     public void updateMenuSort(String[] menuIds, String[] orderNums) {
         for (int i = 0; i < menuIds.length; i++) {
@@ -187,8 +183,6 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             menuMapper.update(menu);
         }
     }
-
-    @Override public int deleteMenuById(Long menuId) { return menuMapper.deleteById(menuId); }
 
     @Override
     public boolean checkMenuNameUnique(SysMenu menu) {

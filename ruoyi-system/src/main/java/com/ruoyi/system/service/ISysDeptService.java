@@ -53,14 +53,6 @@ public interface ISysDeptService extends IService<SysDept>
     public List<Long> selectDeptListByRoleId(Long roleId);
 
     /**
-     * 根据部门ID查询信息
-     * 
-     * @param deptId 部门ID
-     * @return 部门信息
-     */
-    public SysDept selectDeptById(Long deptId);
-
-    /**
      * 根据ID查询所有子部门（正常状态）
      * 
      * @param deptId 部门ID
@@ -98,24 +90,7 @@ public interface ISysDeptService extends IService<SysDept>
      * @param deptId 部门id
      */
     public void checkDeptDataScope(Long deptId);
-
-    /**
-     * 新增保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    public int insertDept(SysDept dept);
-
-    /**
-     * 修改保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    public int updateDept(SysDept dept);
-
-    /**
+/**
      * 保存部门排序
      *
      * @param deptIds 部门ID数组
@@ -131,3 +106,4 @@ public interface ISysDeptService extends IService<SysDept>
      */
     public int deleteDeptById(Long deptId);
 }
+

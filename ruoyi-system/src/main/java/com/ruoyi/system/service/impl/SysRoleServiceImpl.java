@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import java.io.Serializable;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,12 +48,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     @Override
-    public Page<SysRole> selectRolePage(Page<SysRole> page, SysRole role) {
-        QueryWrapper qw = buildRoleQuery(role);
-        return roleMapper.paginate(page, qw);
-    }
-
-    @Override
     public List<SysRole> selectRolesByUserId(Long userId) {
         List<SysRole> userRoles = roleMapper.selectListByQuery(
             QueryWrapper.create()
@@ -82,7 +77,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     @Override public List<SysRole> selectRoleAll() { return selectRoleList(new SysRole()); }
-    @Override public SysRole selectRoleById(Long roleId) { return roleMapper.selectOneById(roleId); }
 
     @Override
     public List<Long> selectRoleListByUserId(Long userId) {
@@ -127,10 +121,18 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     @Override @Transactional
-    public int insertRole(SysRole role) { roleMapper.insertSelective(role); return insertRoleMenu(role); }
+    public boolean save(SysRole role) { roleMapper.insertSelective(role); return insertRoleMenu(role) > 0; }
 
     @Override @Transactional
-    public int updateRole(SysRole role) { roleMapper.update(role); roleMenuMapper.deleteByQuery(QueryWrapper.create().where(SysRoleMenu::getRoleId).eq(role.getRoleId())); return insertRoleMenu(role); }
+    public boolean updateById(SysRole role) {
+        roleMapper.update(role);
+        // 只有表单包含菜单数据时才更新菜单关联
+        if (role.getMenuIds() != null) {
+            roleMenuMapper.deleteByQuery(QueryWrapper.create().where(SysRoleMenu::getRoleId).eq(role.getRoleId()));
+            return insertRoleMenu(role) > 0;
+        }
+        return true;
+    }
 
     @Override public int updateRoleStatus(SysRole role) { return roleMapper.update(role); }
 
@@ -158,22 +160,23 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     @Override @Transactional
-    public int deleteRoleById(Long roleId) {
+    public boolean removeById(Serializable roleId) {
         roleMenuMapper.deleteByQuery(QueryWrapper.create().where(SysRoleMenu::getRoleId).eq(roleId));
         roleDeptMapper.deleteByQuery(QueryWrapper.create().where(SysRoleDept::getRoleId).eq(roleId));
-        return roleMapper.deleteById(roleId);
+        return roleMapper.deleteById((Long) roleId) > 0;
     }
 
     @Override @Transactional
-    public int deleteRoleByIds(Long[] roleIds) {
-        for (Long roleId : roleIds) {
+    public boolean removeByIds(Collection<? extends Serializable> roleIds) {
+        for (Serializable id : roleIds) {
+            Long roleId = (Long) id;
             checkRoleAllowed(new SysRole(roleId)); checkRoleDataScope(roleId);
-            SysRole role = selectRoleById(roleId);
+            SysRole role = getById(roleId);
             if (countUserRoleByRoleId(roleId) > 0) throw new ServiceException(String.format("%1$s已分配,不能删除", role.getRoleName()));
         }
-        roleMenuMapper.deleteByQuery(QueryWrapper.create().where(SysRoleMenu::getRoleId).in(Arrays.asList(roleIds)));
-        roleDeptMapper.deleteByQuery(QueryWrapper.create().where(SysRoleDept::getRoleId).in(Arrays.asList(roleIds)));
-        return roleMapper.deleteBatchByIds(Arrays.asList(roleIds));
+        roleMenuMapper.deleteByQuery(QueryWrapper.create().where(SysRoleMenu::getRoleId).in(roleIds));
+        roleDeptMapper.deleteByQuery(QueryWrapper.create().where(SysRoleDept::getRoleId).in(roleIds));
+        return roleMapper.deleteBatchByIds(roleIds) > 0;
     }
 
     @Override
@@ -193,3 +196,5 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         return userRoleMapper.insertBatch(list, list.size());
     }
 }
+
+
