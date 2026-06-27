@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
-import org.apache.poi.util.IOUtils;
+import cn.hutool.core.io.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.common.config.RuoYiConfig;
@@ -27,7 +27,7 @@ public class ImageUtils
         InputStream is = getFile(imagePath);
         try
         {
-            return IOUtils.toByteArray(is);
+            return IoUtil.readBytes(is);
         }
         catch (Exception e)
         {
@@ -36,7 +36,7 @@ public class ImageUtils
         }
         finally
         {
-            IOUtils.closeQuietly(is);
+            IoUtil.close(is);
         }
     }
 
@@ -83,7 +83,7 @@ public class ImageUtils
                 String downloadPath = localPath + StrUtil.subAfter(url, Constants.RESOURCE_PREFIX, false);
                 in = new FileInputStream(downloadPath);
             }
-            return IOUtils.toByteArray(in);
+            return IoUtil.readBytes(in);
         }
         catch (Exception e)
         {
@@ -92,7 +92,7 @@ public class ImageUtils
         }
         finally
         {
-            IOUtils.closeQuietly(in);
+            IoUtil.close(in);
         }
     }
 }

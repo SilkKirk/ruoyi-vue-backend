@@ -104,9 +104,6 @@ mybatis-flex:
     key-config:
       use-generated-keys: true
 
-# MyBatis配置（仅用于兼容 MyBatis-Flex 底层的 MyBatis 框架）
-mybatis:
-  typeAliasesPackage: com.ruoyi.**.domain
 
 # Springdoc配置
 springdoc:
