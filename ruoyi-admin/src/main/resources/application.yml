@@ -104,6 +104,15 @@ mybatis-flex:
     key-config:
       use-generated-keys: true
 
+# Flowable 工作流引擎配置
+flowable:
+  # 关闭定时任务JOB
+  async-executor-activate: true
+  # 启动时自动更新数据库表结构
+  database-schema-update: true
+  # 不自动部署classpath下的流程文件
+  check-process-definitions: false
+
 
 # Springdoc配置
 springdoc:
@@ -131,6 +140,6 @@ xss:
   # 过滤开关
   enabled: true
   # 排除链接（多个用逗号分隔）
-  excludes: /system/notice
+  excludes: /system/notice,/workflow/model
   # 匹配链接
-  urlPatterns: /system/*,/monitor/*,/tool/*
+  urlPatterns: /system/*,/monitor/*,/tool/*,/workflow/*
