@@ -27,10 +27,10 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.service.ISysDictDataService;
 import com.ruoyi.system.service.ISysDictTypeService;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 数据字典信息
@@ -83,7 +83,7 @@ public class SysDictDataController extends BaseController
     public AjaxResult dictType(@PathVariable String dictType)
     {
         List<SysDictData> data = dictTypeService.selectDictDataByType(dictType);
-        if (StringUtils.isNull(data))
+        if (ObjectUtil.isNull(data))
         {
             data = new ArrayList<SysDictData>();
         }
@@ -143,5 +143,4 @@ public class SysDictDataController extends BaseController
         return success();
     }
 }
-
 

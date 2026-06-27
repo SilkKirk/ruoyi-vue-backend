@@ -21,8 +21,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysDeptService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 部门信息
@@ -56,7 +56,7 @@ public class SysDeptController extends BaseController
     public AjaxResult excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
     {
         List<SysDept> depts = deptService.selectDeptList(new SysDept());
-        depts.removeIf(d -> d.getDeptId().intValue() == deptId || ArrayUtil.contains(StringUtils.split(d.getAncestors(), ","), deptId + ""));
+        depts.removeIf(d -> d.getDeptId().intValue() == deptId || ArrayUtil.contains(StrUtil.splitToArray(d.getAncestors(), ","), deptId + ""));
         return success(depts);
     }
 
@@ -105,7 +105,7 @@ public class SysDeptController extends BaseController
         {
             return error("修改部门'" + dept.getDeptName() + "'失败，上级部门不能是自己");
         }
-        else if (StringUtils.equals(UserConstants.DEPT_DISABLE, dept.getStatus()) && deptService.selectNormalChildrenDeptById(deptId) > 0)
+        else if (StrUtil.equals(UserConstants.DEPT_DISABLE, dept.getStatus()) && deptService.selectNormalChildrenDeptById(deptId) > 0)
         {
             return error("该部门包含未停用的子部门！");
         }

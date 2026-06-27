@@ -14,15 +14,15 @@ import com.ruoyi.common.core.domain.entity.SysMenu;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginBody;
 import com.ruoyi.common.core.domain.model.LoginUser;
-import com.ruoyi.common.core.text.Convert;
-import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.service.SysLoginService;
 import com.ruoyi.framework.web.service.SysPermissionService;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysMenuService;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 登录验证
@@ -125,13 +125,13 @@ public class SysLoginController
         Integer passwordValidateDays = Convert.toInt(configService.selectConfigByKey("sys.account.passwordValidateDays"));
         if (passwordValidateDays != null && passwordValidateDays > 0)
         {
-            if (StringUtils.isNull(pwdUpdateDate))
+            if (ObjectUtil.isNull(pwdUpdateDate))
             {
                 // 如果从未修改过初始密码，直接提醒过期
                 return true;
             }
-            Date nowDate = DateUtils.getNowDate();
-            return DateUtils.differentDaysByMillisecond(nowDate, pwdUpdateDate) > passwordValidateDays;
+            Date nowDate = DateUtil.date();
+            return Math.abs((int) DateUtil.betweenDay(nowDate, pwdUpdateDate, true)) > passwordValidateDays;
         }
         return false;
     }

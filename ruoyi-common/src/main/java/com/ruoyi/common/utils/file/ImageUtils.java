@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 图片处理工具类
@@ -80,7 +80,7 @@ public class ImageUtils
             {
                 // 本机地址
                 String localPath = RuoYiConfig.getProfile();
-                String downloadPath = localPath + StringUtils.substringAfter(url, Constants.RESOURCE_PREFIX);
+                String downloadPath = localPath + StrUtil.subAfter(url, Constants.RESOURCE_PREFIX, false);
                 in = new FileInputStream(downloadPath);
             }
             return IOUtils.toByteArray(in);

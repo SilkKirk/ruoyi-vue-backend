@@ -16,10 +16,12 @@ import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.entity.SysDictType;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.mapper.SysDictDataMapper;
 import com.ruoyi.system.mapper.SysDictTypeMapper;
 import com.ruoyi.system.service.ISysDictTypeService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 
 /**
  * 字典 业务层处理
@@ -49,11 +51,11 @@ public class SysDictTypeServiceImpl extends ServiceImpl<SysDictTypeMapper, SysDi
 
     private QueryWrapper buildDictTypeQuery(SysDictType dictType) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
-        if (StringUtils.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
-        if (StringUtils.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
-        if (StringUtils.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(dictType.getDictName())) qw.like(SysDictType::getDictName, dictType.getDictName());
+        if (StrUtil.isNotEmpty(dictType.getStatus())) qw.eq(SysDictType::getStatus, dictType.getStatus());
+        if (StrUtil.isNotEmpty(dictType.getDictType())) qw.like(SysDictType::getDictType, dictType.getDictType());
+        if (ObjectUtil.isNotNull(dictType.getParams().get("beginTime"))) qw.ge(SysDictType::getCreateTime, dictType.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(dictType.getParams().get("endTime"))) qw.le(SysDictType::getCreateTime, dictType.getParams().get("endTime"));
         qw.orderBy(SysDictType::getCreateTime, false);
         return qw;
     }
@@ -85,12 +87,12 @@ public class SysDictTypeServiceImpl extends ServiceImpl<SysDictTypeMapper, SysDi
     public List<SysDictData> selectDictDataByType(String dictType)
     {
         List<SysDictData> dictDatas = DictUtils.getDictCache(dictType);
-        if (StringUtils.isNotEmpty(dictDatas))
+        if (CollUtil.isNotEmpty(dictDatas))
         {
             return dictDatas;
         }
         dictDatas = dictDataMapper.selectListByQuery(QueryWrapper.create().where(SysDictData::getDictType).eq(dictType));
-        if (StringUtils.isNotEmpty(dictDatas))
+        if (CollUtil.isNotEmpty(dictDatas))
         {
             DictUtils.setDictCache(dictType, dictDatas);
             return dictDatas;
@@ -196,5 +198,4 @@ public class SysDictTypeServiceImpl extends ServiceImpl<SysDictTypeMapper, SysDi
         ) == 0;
     }
 }
-
 

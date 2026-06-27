@@ -14,12 +14,13 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.exception.job.TaskException;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.quartz.domain.SysJob;
 import com.ruoyi.quartz.mapper.SysJobMapper;
 import com.ruoyi.quartz.service.ISysJobService;
 import com.ruoyi.quartz.util.CronUtils;
 import com.ruoyi.quartz.util.ScheduleUtils;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 定时任务调度信息 服务层
@@ -64,12 +65,12 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJob> impleme
 
     private QueryWrapper buildJobQuery(SysJob job) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(job.getJobName())) qw.like(SysJob::getJobName, job.getJobName());
-        if (StringUtils.isNotEmpty(job.getJobGroup())) qw.eq(SysJob::getJobGroup, job.getJobGroup());
-        if (StringUtils.isNotEmpty(job.getStatus())) qw.eq(SysJob::getStatus, job.getStatus());
-        if (StringUtils.isNotEmpty(job.getInvokeTarget())) qw.like(SysJob::getInvokeTarget, job.getInvokeTarget());
-        if (StringUtils.isNotNull(job.getParams().get("beginTime"))) qw.ge(SysJob::getCreateTime, job.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(job.getParams().get("endTime"))) qw.le(SysJob::getCreateTime, job.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(job.getJobName())) qw.like(SysJob::getJobName, job.getJobName());
+        if (StrUtil.isNotEmpty(job.getJobGroup())) qw.eq(SysJob::getJobGroup, job.getJobGroup());
+        if (StrUtil.isNotEmpty(job.getStatus())) qw.eq(SysJob::getStatus, job.getStatus());
+        if (StrUtil.isNotEmpty(job.getInvokeTarget())) qw.like(SysJob::getInvokeTarget, job.getInvokeTarget());
+        if (ObjectUtil.isNotNull(job.getParams().get("beginTime"))) qw.ge(SysJob::getCreateTime, job.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(job.getParams().get("endTime"))) qw.le(SysJob::getCreateTime, job.getParams().get("endTime"));
         qw.orderBy(SysJob::getCreateTime, false);
         return qw;
     }

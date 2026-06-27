@@ -12,12 +12,13 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.redis.RedisCache;
-import com.ruoyi.common.core.text.Convert;
+import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
 import com.ruoyi.system.service.ISysConfigService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 @Service
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements ISysConfigService
@@ -28,22 +29,22 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     @Override
     public List<SysConfig> selectConfigList(SysConfig config) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
-        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
-        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
-        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StrUtil.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StrUtil.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (ObjectUtil.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
         return configMapper.selectListByQuery(qw);
     }
 
     @Override
     public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
-        if (StringUtils.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
-        if (StringUtils.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
-        if (StringUtils.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(config.getConfigName())) qw.like(SysConfig::getConfigName, config.getConfigName());
+        if (StrUtil.isNotEmpty(config.getConfigType())) qw.eq(SysConfig::getConfigType, config.getConfigType());
+        if (StrUtil.isNotEmpty(config.getConfigKey())) qw.like(SysConfig::getConfigKey, config.getConfigKey());
+        if (ObjectUtil.isNotNull(config.getParams().get("beginTime"))) qw.ge(SysConfig::getCreateTime, config.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(config.getParams().get("endTime"))) qw.le(SysConfig::getCreateTime, config.getParams().get("endTime"));
         return configMapper.paginate(page, qw);
     }
 
@@ -54,23 +55,23 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     public String selectConfigByKey(String configKey)
     {
         String configValue = Convert.toStr(redisCache.getCacheObject(getCacheKey(configKey)));
-        if (StringUtils.isNotEmpty(configValue)) return configValue;
+        if (StrUtil.isNotEmpty(configValue)) return configValue;
         SysConfig retConfig = configMapper.selectOneByQuery(
             QueryWrapper.create().where(SysConfig::getConfigKey).eq(configKey)
         );
-        if (StringUtils.isNotNull(retConfig))
+        if (ObjectUtil.isNotNull(retConfig))
         {
             redisCache.setCacheObject(getCacheKey(configKey), retConfig.getConfigValue());
             return retConfig.getConfigValue();
         }
-        return StringUtils.EMPTY;
+        return StrUtil.EMPTY;
     }
 
     @Override
     public boolean selectCaptchaEnabled()
     {
         String captchaEnabled = selectConfigByKey("sys.account.captchaEnabled");
-        if (StringUtils.isEmpty(captchaEnabled)) return true;
+        if (StrUtil.isEmpty(captchaEnabled)) return true;
         return Convert.toBool(captchaEnabled);
     }
 

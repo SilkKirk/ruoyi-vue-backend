@@ -10,8 +10,8 @@ import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysUserService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 首页
@@ -34,7 +34,7 @@ public class SysIndexController
     @RequestMapping("/")
     public String index()
     {
-        return StringUtils.format("欢迎使用{}后台管理框架，当前版本：v{}，请通过前端地址访问。", ruoyiConfig.getName(), ruoyiConfig.getVersion());
+        return StrUtil.format("欢迎使用{}后台管理框架，当前版本：v{}，请通过前端地址访问。", ruoyiConfig.getName(), ruoyiConfig.getVersion());
     }
 
     /**
@@ -44,7 +44,7 @@ public class SysIndexController
     public AjaxResult unlockScreen(@RequestBody Map<String, String> body)
     {
         String password = body.get("password");
-        if (StringUtils.isEmpty(password))
+        if (StrUtil.isEmpty(password))
         {
             return AjaxResult.error("密码不能为空");
         }

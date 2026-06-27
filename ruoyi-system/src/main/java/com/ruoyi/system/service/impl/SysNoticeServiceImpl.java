@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.mapper.SysNoticeMapper;
 import com.ruoyi.system.service.ISysNoticeService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 公告 服务层实现
@@ -37,14 +38,13 @@ public class SysNoticeServiceImpl extends ServiceImpl<SysNoticeMapper, SysNotice
 
     private QueryWrapper buildNoticeQuery(SysNotice notice) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
-        if (StringUtils.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
-        if (StringUtils.isNotEmpty(notice.getCreateBy())) qw.like(SysNotice::getCreateBy, notice.getCreateBy());
-        if (StringUtils.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(notice.getNoticeTitle())) qw.like(SysNotice::getNoticeTitle, notice.getNoticeTitle());
+        if (StrUtil.isNotEmpty(notice.getNoticeType())) qw.eq(SysNotice::getNoticeType, notice.getNoticeType());
+        if (StrUtil.isNotEmpty(notice.getCreateBy())) qw.like(SysNotice::getCreateBy, notice.getCreateBy());
+        if (ObjectUtil.isNotNull(notice.getParams().get("beginTime"))) qw.ge(SysNotice::getCreateTime, notice.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(notice.getParams().get("endTime"))) qw.le(SysNotice::getCreateTime, notice.getParams().get("endTime"));
         qw.orderBy(SysNotice::getCreateTime, false);
         return qw;
     }
 }
-
 

@@ -14,9 +14,9 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
-import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * web层通用数据处理
@@ -39,7 +39,7 @@ public class BaseController
             @Override
             public void setAsText(String text)
             {
-                setValue(DateUtils.parseDate(text));
+                setValue(DateUtil.parse(text.toString()));
             }
         });
     }
@@ -143,7 +143,7 @@ public class BaseController
      */
     public String redirect(String url)
     {
-        return StringUtils.format("redirect:{}", url);
+        return StrUtil.format("redirect:{}", url);
     }
 
     /**

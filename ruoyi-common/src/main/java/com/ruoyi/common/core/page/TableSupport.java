@@ -1,6 +1,6 @@
 package com.ruoyi.common.core.page;
 
-import com.ruoyi.common.core.text.Convert;
+import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.utils.ServletUtils;
 
 /**

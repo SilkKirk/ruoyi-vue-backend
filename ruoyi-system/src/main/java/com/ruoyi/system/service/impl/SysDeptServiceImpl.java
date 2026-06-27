@@ -17,11 +17,13 @@ import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.service.ISysDeptService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 
 @Service
 public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> implements ISysDeptService
@@ -32,8 +34,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
     @Override
     public List<SysDept> selectDeptList(SysDept dept) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dept.getDeptName())) qw.like(SysDept::getDeptName, dept.getDeptName());
-        if (StringUtils.isNotEmpty(dept.getStatus())) qw.eq(SysDept::getStatus, dept.getStatus());
+        if (StrUtil.isNotEmpty(dept.getDeptName())) qw.like(SysDept::getDeptName, dept.getDeptName());
+        if (StrUtil.isNotEmpty(dept.getStatus())) qw.eq(SysDept::getStatus, dept.getStatus());
         // 应用数据权限过滤条件（由 @DataScope 注解触发注入）
         DataScopeHelper.applyDataScope(qw, dept.getParams());
         return deptMapper.selectListByQuery(qw);
@@ -58,7 +60,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
 
     @Override
     public boolean checkDeptNameUnique(SysDept dept) {
-        Long deptId = StringUtils.isNull(dept.getDeptId()) ? -1L : dept.getDeptId();
+        Long deptId = ObjectUtil.isNull(dept.getDeptId()) ? -1L : dept.getDeptId();
         SysDept info = deptMapper.selectOneByQuery(
             QueryWrapper.create().where(SysDept::getDeptName).eq(dept.getDeptName()).and(SysDept::getParentId).eq(dept.getParentId())
         );
@@ -67,9 +69,9 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
 
     @Override
     public void checkDeptDataScope(Long deptId) {
-        if (!SecurityUtils.isAdmin() && StringUtils.isNotNull(deptId)) {
+        if (!SecurityUtils.isAdmin() && ObjectUtil.isNotNull(deptId)) {
             SysDept dept = new SysDept(); dept.setDeptId(deptId);
-            if (StringUtils.isEmpty(selectDeptList(dept)))
+            if (CollUtil.isEmpty(selectDeptList(dept)))
                 throw new ServiceException("没有权限访问部门数据！");
         }
     }
@@ -101,8 +103,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
             updateDeptChildren(dept.getDeptId(), newAncestors, oldDept.getAncestors());
         }
         int result = deptMapper.update(dept);
-        if (UserConstants.DEPT_NORMAL.equals(dept.getStatus()) && StringUtils.isNotEmpty(dept.getAncestors())
-                && !StringUtils.equals("0", dept.getAncestors()))
+        if (UserConstants.DEPT_NORMAL.equals(dept.getStatus()) && StrUtil.isNotEmpty(dept.getAncestors())
+                && !StrUtil.equals("0", dept.getAncestors()))
             updateParentDeptStatusNormal(dept);
         return result > 0;
     }

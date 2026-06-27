@@ -1,6 +1,6 @@
 package com.ruoyi.system.domain.vo;
 
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 
 /**
@@ -60,7 +60,7 @@ public class MetaVo
         this.title = title;
         this.icon = icon;
         this.noCache = noCache;
-        if (StringUtils.ishttp(link))
+        if (StrUtil.startWithAny(link, "http://", "https://"))
         {
             this.link = link;
         }

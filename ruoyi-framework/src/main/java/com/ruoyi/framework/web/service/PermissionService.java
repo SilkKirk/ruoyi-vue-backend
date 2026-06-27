@@ -7,8 +7,9 @@ import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.security.context.PermissionContextHolder;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * RuoYi首创 自定义权限实现，ss取自SpringSecurity首字母
@@ -26,12 +27,12 @@ public class PermissionService
      */
     public boolean hasPermi(String permission)
     {
-        if (StringUtils.isEmpty(permission))
+        if (StrUtil.isEmpty(permission))
         {
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
+        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
         {
             return false;
         }
@@ -58,12 +59,12 @@ public class PermissionService
      */
     public boolean hasAnyPermi(String permissions)
     {
-        if (StringUtils.isEmpty(permissions))
+        if (StrUtil.isEmpty(permissions))
         {
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
+        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
         {
             return false;
         }
@@ -87,19 +88,19 @@ public class PermissionService
      */
     public boolean hasRole(String role)
     {
-        if (StringUtils.isEmpty(role))
+        if (StrUtil.isEmpty(role))
         {
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
+        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
         {
             return false;
         }
         for (SysRole sysRole : loginUser.getUser().getRoles())
         {
             String roleKey = sysRole.getRoleKey();
-            if (Constants.SUPER_ADMIN.equals(roleKey) || roleKey.equals(StringUtils.trim(role)))
+            if (Constants.SUPER_ADMIN.equals(roleKey) || roleKey.equals(StrUtil.trim(role)))
             {
                 return true;
             }
@@ -126,12 +127,12 @@ public class PermissionService
      */
     public boolean hasAnyRoles(String roles)
     {
-        if (StringUtils.isEmpty(roles))
+        if (StrUtil.isEmpty(roles))
         {
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (StringUtils.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
+        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
         {
             return false;
         }
@@ -154,6 +155,6 @@ public class PermissionService
      */
     private boolean hasPermissions(Set<String> permissions, String permission)
     {
-        return permissions.contains(Constants.ALL_PERMISSION) || permissions.contains(StringUtils.trim(permission));
+        return permissions.contains(Constants.ALL_PERMISSION) || permissions.contains(StrUtil.trim(permission));
     }
 }

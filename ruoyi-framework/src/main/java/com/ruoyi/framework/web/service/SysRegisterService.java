@@ -10,14 +10,15 @@ import com.ruoyi.common.core.domain.model.RegisterBody;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
-import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.date.DateUtil;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 注册校验方法
@@ -52,11 +53,11 @@ public class SysRegisterService
             validateCaptcha(username, registerBody.getCode(), registerBody.getUuid());
         }
 
-        if (StringUtils.isEmpty(username))
+        if (StrUtil.isEmpty(username))
         {
             msg = "用户名不能为空";
         }
-        else if (StringUtils.isEmpty(password))
+        else if (StrUtil.isEmpty(password))
         {
             msg = "用户密码不能为空";
         }
@@ -77,7 +78,7 @@ public class SysRegisterService
         else
         {
             sysUser.setNickName(username);
-            sysUser.setPwdUpdateDate(DateUtils.getNowDate());
+            sysUser.setPwdUpdateDate(DateUtil.date());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
             boolean regFlag = userService.registerUser(sysUser);
             if (!regFlag)

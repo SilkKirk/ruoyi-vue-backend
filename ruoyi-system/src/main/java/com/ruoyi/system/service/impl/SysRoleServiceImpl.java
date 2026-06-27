@@ -12,7 +12,6 @@ import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysRoleDept;
 import com.ruoyi.system.domain.SysRoleMenu;
 import com.ruoyi.system.domain.SysUserRole;
@@ -21,6 +20,9 @@ import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysRoleService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements ISysRoleService
@@ -44,11 +46,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     private QueryWrapper buildRoleQuery(SysRole role) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
-        if (StringUtils.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
-        if (StringUtils.isNotEmpty(role.getStatus())) qw.eq(SysRole::getStatus, role.getStatus());
-        if (StringUtils.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
+        if (StrUtil.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
+        if (StrUtil.isNotEmpty(role.getStatus())) qw.eq(SysRole::getStatus, role.getStatus());
+        if (ObjectUtil.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
         qw.orderBy(SysRole::getRoleSort, true);
         return qw;
     }
@@ -117,7 +119,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         if (!SecurityUtils.isAdmin()) {
             for (Long roleId : roleIds) {
                 SysRole role = new SysRole(); role.setRoleId(roleId);
-                if (StringUtils.isEmpty(selectRoleList(role)))
+                if (CollUtil.isEmpty(selectRoleList(role)))
                     throw new ServiceException("没有权限访问角色数据！");
             }
         }
@@ -204,5 +206,4 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         return userRoleMapper.insertBatch(list, list.size());
     }
 }
-
 

@@ -1,7 +1,7 @@
 package com.ruoyi.system.domain;
 
-import com.ruoyi.common.utils.StringUtils;
 import lombok.Data;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 缓存信息
@@ -36,8 +36,8 @@ public class SysCache
 
     public SysCache(String cacheName, String cacheKey, String cacheValue)
     {
-        this.cacheName = StringUtils.replace(cacheName, ":", "");
-        this.cacheKey = StringUtils.replace(cacheKey, cacheName, "");
+        this.cacheName = StrUtil.replace(cacheName, ":", "");
+        this.cacheKey = StrUtil.replace(cacheKey, cacheName, "");
         this.cacheValue = cacheValue;
     }
 }

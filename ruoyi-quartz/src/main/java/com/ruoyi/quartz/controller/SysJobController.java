@@ -22,12 +22,12 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.exception.job.TaskException;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.quartz.domain.SysJob;
 import com.ruoyi.quartz.service.ISysJobService;
 import com.ruoyi.quartz.util.CronUtils;
 import com.ruoyi.quartz.util.ScheduleUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 调度任务信息操作处理
@@ -88,19 +88,19 @@ public class SysJobController extends BaseController
         {
             return error("新增任务'" + job.getJobName() + "'失败，Cron表达式不正确");
         }
-        else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
+        else if (StrUtil.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
             return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
         {
             return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap(s)'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
         {
             return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
         {
             return error("新增任务'" + job.getJobName() + "'失败，目标字符串存在违规");
         }
@@ -124,19 +124,19 @@ public class SysJobController extends BaseController
         {
             return error("修改任务'" + job.getJobName() + "'失败，Cron表达式不正确");
         }
-        else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
+        else if (StrUtil.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
             return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
         {
             return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap(s)'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
         {
             return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)'调用");
         }
-        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
+        else if (StrUtil.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
         {
             return error("修改任务'" + job.getJobName() + "'失败，目标字符串存在违规");
         }

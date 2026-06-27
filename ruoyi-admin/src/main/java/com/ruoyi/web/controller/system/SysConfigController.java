@@ -24,10 +24,10 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.service.ISysConfigService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 参数配置 信息操作处理
@@ -122,7 +122,7 @@ public class SysConfigController extends BaseController
         config.setUpdateBy(getUsername());
         if (configService.updateById(config))
         {
-            if (oldConfig != null && !StringUtils.equals(oldConfig.getConfigKey(), config.getConfigKey()))
+            if (oldConfig != null && !StrUtil.equals(oldConfig.getConfigKey(), config.getConfigKey()))
                 redisCache.deleteObject(CacheConstants.SYS_CONFIG_KEY + oldConfig.getConfigKey());
             redisCache.setCacheObject(CacheConstants.SYS_CONFIG_KEY + config.getConfigKey(), config.getConfigValue());
             return success();
@@ -141,7 +141,7 @@ public class SysConfigController extends BaseController
         for (Long configId : configIds)
         {
             SysConfig config = configService.getById(configId);
-            if (StringUtils.equals(UserConstants.YES, config.getConfigType()))
+            if (StrUtil.equals(UserConstants.YES, config.getConfigType()))
                 throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
             redisCache.deleteObject(CacheConstants.SYS_CONFIG_KEY + config.getConfigKey());
         }
@@ -161,5 +161,4 @@ public class SysConfigController extends BaseController
         return success();
     }
 }
-
 

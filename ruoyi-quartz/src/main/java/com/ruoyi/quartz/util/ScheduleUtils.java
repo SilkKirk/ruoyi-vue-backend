@@ -14,9 +14,10 @@ import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.exception.job.TaskException;
 import com.ruoyi.common.exception.job.TaskException.Code;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.quartz.domain.SysJob;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 定时任务工具类
@@ -84,7 +85,7 @@ public class ScheduleUtils
         }
 
         // 判断任务是否过期
-        if (StringUtils.isNotNull(CronUtils.getNextExecution(job.getCronExpression())))
+        if (ObjectUtil.isNotNull(CronUtils.getNextExecution(job.getCronExpression())))
         {
             // 执行调度任务
             scheduler.scheduleJob(jobDetail, trigger);
@@ -127,15 +128,15 @@ public class ScheduleUtils
      */
     public static boolean whiteList(String invokeTarget)
     {
-        String packageName = StringUtils.substringBefore(invokeTarget, "(");
-        int count = StringUtils.countMatches(packageName, ".");
+        String packageName = StrUtil.subBefore(invokeTarget, "(", false);
+        int count = StrUtil.count(packageName, ".");
         if (count > 1)
         {
-            return StringUtils.startsWithAny(invokeTarget, Constants.JOB_WHITELIST_STR);
+            return StrUtil.startWithAny(invokeTarget, Constants.JOB_WHITELIST_STR);
         }
-        Object obj = SpringUtils.getBean(StringUtils.split(invokeTarget, ".")[0]);
+        Object obj = SpringUtils.getBean(StrUtil.splitToArray(invokeTarget, ".")[0]);
         String beanPackageName = obj.getClass().getPackage().getName();
-        return StringUtils.startsWithAny(beanPackageName, Constants.JOB_WHITELIST_STR)
-                && !StringUtils.startsWithAny(beanPackageName, Constants.JOB_ERROR_STR);
+        return StrUtil.startWithAny(beanPackageName, Constants.JOB_WHITELIST_STR)
+                && !StrUtil.startWithAny(beanPackageName, Constants.JOB_ERROR_STR);
     }
 }

@@ -12,8 +12,8 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import com.ruoyi.common.annotation.DataSource;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.datasource.DynamicDataSourceContextHolder;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 多数据源处理
@@ -39,7 +39,7 @@ public class DataSourceAspect
     {
         DataSource dataSource = getDataSource(point);
 
-        if (StringUtils.isNotNull(dataSource))
+        if (ObjectUtil.isNotNull(dataSource))
         {
             DynamicDataSourceContextHolder.setDataSourceType(dataSource.value().name());
         }

@@ -12,20 +12,21 @@ ruoyi-vue-backend/
 │       ├── monitor/      # Server, cache, logs, online users
 │       ├── system/       # User, role, menu, dept, notice, config...
 │       └── tool/         # Swagger test controller
-├── ruoyi-common/         # Shared utils, enums, annotations, base classes, XSS filter
+├── ruoyi-common/         # Shared utils, enums, annotations, base classes, XSS filter, TreeUtils
 ├── ruoyi-framework/      # Security (JWT + Spring Security), AOP aspects, data source, configs, interceptors
 ├── ruoyi-system/         # Business services + MyBatis-Flex mappers + domain entities
 ├── ruoyi-quartz/         # Scheduled-task management module
 ├── ruoyi-generator/      # Code generator (Velocity templates)
 ├── ruoyi-ui/             # Vue 2 frontend (Vue CLI, Element UI)
 ├── sql/                  # Database init scripts (ry_20260417.sql, quartz.sql)
-└── pom.xml               # Parent POM (JDK 17, Spring Boot 3.5.11, MyBatis-Flex 1.10.9)
+└── pom.xml               # Parent POM (JDK 17, Spring Boot 3.5.14, MyBatis-Flex 1.10.9, Hutool 5.8.34)
 ```
 
 Key patterns:
 - Controllers extend `BaseController` and use `@PreAuthorize("@ss.hasPermi('system:user:list')")` for permissions.
-- Services follow the `ISysXxxService` / `SysXxxServiceImpl` naming convention.
-- **Mappers use MyBatis-Flex exclusively** — no XML mapper files. Each mapper extends `BaseMapper<Entity>` and queries are built with `QueryWrapper` in service implementations.
+- **Service interfaces extend `IService<Entity>`** (from `com.mybatisflex.core.service.IService`); implementations extend `ServiceImpl<Mapper, Entity>`.
+- **Controllers use IService standard methods** (`getById`, `save`, `updateById`, `removeByIds`) — no custom `insert`/`update`/`delete` wrappers in services.
+- Mappers extend `BaseMapper<Entity>` with no XML files; queries use `QueryWrapper`.
 - Entities are annotated with `@Table("table_name")` and `@Id` from `com.mybatisflex.annotation`.
 
 ## Build, Test, and Development Commands
@@ -33,14 +34,9 @@ Key patterns:
 ### Backend (Maven)
 
 ```bash
-# Compile all modules
-mvn clean compile
-
-# Package the admin module as a runnable JAR
-mvn clean package -pl ruoyi-admin -am
-
-# Run locally (JDK 17+ required, MySQL + Redis must be running)
-cd ruoyi-admin && mvn spring-boot:run
+mvn clean compile                                    # Compile all modules
+mvn clean package -pl ruoyi-admin -am                # Package admin as runnable JAR
+cd ruoyi-admin && mvn spring-boot:run                # Run locally (JDK 17+, MySQL + Redis required)
 ```
 
 ### Frontend (Vue CLI)
@@ -59,46 +55,36 @@ npm run build:prod    # Production build
 
 ### Database
 
-Import the SQL scripts in order:
-1. `sql/ry_20260417.sql` — core system tables + seed data
-2. `sql/quartz.sql` — Quartz scheduler tables
-
-Update `ruoyi-admin/src/main/resources/application-druid.yml` with your DB credentials.
+1. Import `sql/ry_20260417.sql` (core tables + seed data), then `sql/quartz.sql`.
+2. Update credentials in `ruoyi-admin/src/main/resources/application-druid.yml`.
 
 ## Coding Style & Naming Conventions
 
-- **Java**: Follow standard Java conventions. Controllers use `@Autowired` field injection on interfaces. Each method documents permission requirements with `@PreAuthorize`.
+- **Java**: Standard Java conventions. Controllers use `@Autowired` field injection on interfaces. Service interfaces follow `ISysXxxService`; implementations `SysXxxServiceImpl`.
 - **Frontend**: 2-space indentation, LF line endings, UTF-8 encoding (see `ruoyi-ui/.editorconfig`).
 - **Package naming**: `com.ruoyi.<module>.<layer>` — e.g., `com.ruoyi.system.service`, `com.ruoyi.generator.controller`.
-- **Entity naming**: Domain classes in `com.ruoyi.common.core.domain.entity` (e.g., `SysUser`, `SysRole`); related tables use `SysUserRole`, `SysRoleMenu`, etc.
+- **Entity naming**: Domain classes in `com.ruoyi.common.core.domain.entity` (`SysUser`, `SysRole`); join tables use `SysUserRole`, `SysRoleMenu`, etc.
+- **Utilities**: Prefer **Hutool** (`cn.hutool.*`) over ad-hoc utility classes. Common patterns like tree-building are centralized in `TreeUtils` (wraps `cn.hutool.core.lang.tree.TreeUtil`).
 
 ## MyBatis-Flex Data Access Patterns
 
-### Entities
+### Services
 
-Entities use MyBatis-Flex annotations instead of XML mapping:
-
-```java
-@Table("sys_user")
-public class SysUser extends BaseEntity {
-    @Id
-    private Long userId;
-    private String userName;
-    // ...
-}
-```
-
-### Mappers
-
-Mappers extend `BaseMapper<Entity>` — no XML and no method declarations needed:
+Service interfaces extend `IService<Entity>`; implementations extend `ServiceImpl<Mapper, Entity>`:
 
 ```java
-public interface SysUserMapper extends BaseMapper<SysUser> { }
+public interface ISysUserService extends IService<SysUser> { }
+
+public class SysUserServiceImpl
+    extends ServiceImpl<SysUserMapper, SysUser>
+    implements ISysUserService { }
 ```
+
+`IService` provides built-in `getById()`, `save()`, `updateById()`, `removeByIds()`, `list()`, etc. — override only to add logic.
 
 ### Query Building
 
-Build queries in service implementations with `QueryWrapper`:
+Build queries with `QueryWrapper` in service implementations:
 
 ```java
 QueryWrapper qw = QueryWrapper.create()
@@ -110,36 +96,49 @@ QueryWrapper qw = QueryWrapper.create()
 
 ### Pagination
 
-Use `PageUtils.startPage(pageNum, pageSize, orderBy)` before executing the query and `PageUtils.clearPage()` in `BaseController.getDataTable()`. A custom `FlexPageInterceptor` (registered in `MyBatisConfig`) intercepts SQL to inject `LIMIT` and run a separate `COUNT` query.
+`BaseController` provides `Page<T> startPage(Class<T>)` which reads page params from the request. Services use `mapper.paginate(page, queryWrapper)`:
+
+```java
+// Controller
+Page<SysUser> page = startPage(SysUser.class);
+page = userService.selectUserPage(page, user);
+return getDataTable(page);
+
+// Service
+public Page<SysUser> selectUserPage(Page<SysUser> page, SysUser user) {
+    QueryWrapper qw = buildUserQuery(user);
+    return userMapper.paginate(page, qw);
+}
+```
 
 ### Data Scope
 
-Use `DataScopeHelper.applyDataScope(queryWrapper, entity.getParams())` to inject row-level data permission conditions set by `DataScopeAspect`.
+Use `DataScopeHelper.applyDataScope(queryWrapper, entity.getParams())` to inject row-level data permissions set by `DataScopeAspect`.
 
 ### Auto Trim
 
-The `@AutoTrim` annotation auto-trims String fields on deserialization. It works via:
-- **JSON**: `AutoTrimModule` (Jackson module, registered in `ApplicationConfig`)
-- **Form/query params**: `AutoTrimControllerAdvice` (Spring `@InitBinder`)
+`@AutoTrim` trims String fields on deserialization — works via `AutoTrimModule` (Jackson) for JSON and `AutoTrimControllerAdvice` (`@InitBinder`) for form params.
 
-Apply `@AutoTrim` on a class to trim all String fields, or on individual fields for targeted trimming.
+### Tree Building
+
+Use `TreeUtils.buildTree(flatList, rootId, idGetter, parentIdGetter, childrenSetter)` to convert flat entity lists to nested tree structures. Based on Hutool `TreeUtil`.
 
 ## Testing Guidelines
 
-The repository does not currently include a test suite. When adding tests:
+No test suite currently exists. When adding tests:
 - Place them under `src/test/java/` mirroring the main source path.
 - Use JUnit 5 (included via Spring Boot starter).
 - Name test classes `*Test.java` or `*Tests.java`.
 
 ## Commit & Pull Request Guidelines
 
-- **Commit style**: Descriptive Chinese-language summaries (e.g., `用户密码支持自定义配置规则`). Keep each commit focused on a single logical change.
-- **PRs**: Reference the upstream Gitee repository at `https://gitee.com/y_project/RuoYi-Vue`. Include a clear description of the problem solved, linked issues if any, and screenshots for UI changes.
-- **Branch strategy**: This is the `springboot3` branch (JDK 17 / Spring Boot 3.x). See the README for the `master` (Spring Boot 4.x) and `springboot2` (JDK 8) branches.
+- **Commit style**: Descriptive Chinese-language summaries (e.g., `用户密码支持自定义配置规则`). One logical change per commit.
+- **PRs**: Reference the upstream Gitee repository at `https://gitee.com/y_project/RuoYi-Vue`. Include a clear description, linked issues, and screenshots for UI changes.
+- **Branch strategy**: This is the `springboot3` branch. See the README for `master` (Spring Boot 4.x) and `springboot2` branches.
 
 ## Security & Configuration Tips
 
 - **JWT secret**: Override `token.secret` in `application.yml` for production.
-- **Password policy**: Max retry count (`user.password.maxRetryCount`) and lock time (`user.password.lockTime`) are configurable.
-- **XSS filter**: Enabled by default on `/system/*`, `/monitor/*`, `/tool/*`. Add exclusions in `xss.excludes`.
-- **Druid console**: Available at `/druid/` (default login: `ruoyi` / `123456`). Restrict access in production.
+- **Password policy**: Configure `user.password.maxRetryCount` and `user.password.lockTime`.
+- **XSS filter**: Enabled on `/system/*`, `/monitor/*`, `/tool/*`. Add exclusions in `xss.excludes`.
+- **Druid console**: Available at `/druid/` (default: `ruoyi` / `123456`). Restrict in production.

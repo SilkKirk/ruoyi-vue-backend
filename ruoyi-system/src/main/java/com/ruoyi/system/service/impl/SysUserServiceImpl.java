@@ -19,7 +19,6 @@ import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysPost;
@@ -28,6 +27,10 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.*;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.system.service.*;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.collection.CollUtil;
 
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService
@@ -90,14 +93,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             .leftJoin("sys_dept").as("d").on("u.dept_id = d.dept_id")
             .select("u.*, d.dept_name, d.leader")
             .where("u.del_flag = '0'");
-        if (StringUtils.isNotNull(user.getUserId()) && user.getUserId() != 0) qw.eq("u.user_id", user.getUserId());
-        if (StringUtils.isNotEmpty(user.getUserName())) qw.like("u.user_name", user.getUserName());
-        if (StringUtils.isNotEmpty(user.getStatus())) qw.eq("u.status", user.getStatus());
-        if (StringUtils.isNotEmpty(user.getPhonenumber())) qw.like("u.phonenumber", user.getPhonenumber());
-        if (StringUtils.isNotNull(user.getDeptId()) && user.getDeptId() != 0)
+        if (ObjectUtil.isNotNull(user.getUserId()) && user.getUserId() != 0) qw.eq("u.user_id", user.getUserId());
+        if (StrUtil.isNotEmpty(user.getUserName())) qw.like("u.user_name", user.getUserName());
+        if (StrUtil.isNotEmpty(user.getStatus())) qw.eq("u.status", user.getStatus());
+        if (StrUtil.isNotEmpty(user.getPhonenumber())) qw.like("u.phonenumber", user.getPhonenumber());
+        if (ObjectUtil.isNotNull(user.getDeptId()) && user.getDeptId() != 0)
             qw.and("(u.dept_id = ? or u.dept_id in (select t.dept_id from sys_dept t where find_in_set(?, ancestors)))", user.getDeptId(), user.getDeptId());
-        if (StringUtils.isNotNull(user.getParams().get("beginTime"))) qw.ge("u.create_time", user.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(user.getParams().get("endTime"))) qw.le("u.create_time", user.getParams().get("endTime"));
+        if (ObjectUtil.isNotNull(user.getParams().get("beginTime"))) qw.ge("u.create_time", user.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(user.getParams().get("endTime"))) qw.le("u.create_time", user.getParams().get("endTime"));
         // 应用数据权限过滤条件（由 @DataScope 注解触发注入）
         DataScopeHelper.applyDataScope(qw, user.getParams());
         return qw;
@@ -143,7 +146,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .leftJoin("sys_user").as("u").on("u.user_id = ur.user_id")
                 .where("u.user_name = ?", userName)
         );
-        return CollectionUtils.isEmpty(list) ? StringUtils.EMPTY : list.stream().map(SysRole::getRoleName).collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysRole::getRoleName).collect(Collectors.joining(","));
     }
 
     @Override
@@ -155,7 +158,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .leftJoin("sys_user").as("u").on("u.user_id = up.user_id")
                 .where("u.user_name = ?", userName)
         );
-        return CollectionUtils.isEmpty(list) ? StringUtils.EMPTY : list.stream().map(SysPost::getPostName).collect(Collectors.joining(","));
+        return CollectionUtils.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysPost::getPostName).collect(Collectors.joining(","));
     }
 
     @Override
@@ -184,14 +187,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public void checkUserAllowed(SysUser user) {
-        if (StringUtils.isNotNull(user.getUserId()) && user.isAdmin()) throw new ServiceException("不允许操作超级管理员用户");
+        if (ObjectUtil.isNotNull(user.getUserId()) && user.isAdmin()) throw new ServiceException("不允许操作超级管理员用户");
     }
 
     @Override
     public void checkUserDataScope(Long userId) {
         if (!SecurityUtils.isAdmin()) {
             SysUser user = new SysUser(); user.setUserId(userId);
-            if (StringUtils.isEmpty(selectUserList(user))) throw new ServiceException("没有权限访问用户数据！");
+            if (CollUtil.isEmpty(selectUserList(user))) throw new ServiceException("没有权限访问用户数据！");
         }
     }
 
@@ -260,7 +263,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     public void insertUserPost(SysUser user) {
         Long[] posts = user.getPostIds();
-        if (StringUtils.isNotEmpty(posts)) {
+        if (ArrayUtil.isNotEmpty(posts)) {
             List<SysUserPost> list = new ArrayList<>();
             for (Long postId : posts) { SysUserPost up = new SysUserPost(); up.setUserId(user.getUserId()); up.setPostId(postId); list.add(up); }
             userPostMapper.insertBatch(list, list.size());
@@ -268,7 +271,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     public void insertUserRole(Long userId, Long[] roleIds) {
-        if (StringUtils.isNotEmpty(roleIds)) {
+        if (ArrayUtil.isNotEmpty(roleIds)) {
             List<SysUserRole> list = new ArrayList<>();
             for (Long roleId : roleIds) { SysUserRole ur = new SysUserRole(); ur.setUserId(userId); ur.setRoleId(roleId); list.add(ur); }
             userRoleMapper.insertBatch(list, list.size());
@@ -292,13 +295,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName) {
-        if (StringUtils.isNull(userList) || userList.isEmpty()) throw new ServiceException("导入用户数据不能为空！");
+        if (ObjectUtil.isNull(userList) || userList.isEmpty()) throw new ServiceException("导入用户数据不能为空！");
         int successNum = 0, failureNum = 0;
         StringBuilder successMsg = new StringBuilder(), failureMsg = new StringBuilder();
         for (SysUser user : userList) {
             try {
                 SysUser u = selectUserByUserName(user.getUserName());
-                if (StringUtils.isNull(u)) {
+                if (ObjectUtil.isNull(u)) {
                     BeanValidators.validateWithException(validator, user);
                     deptService.checkDeptDataScope(user.getDeptId());
                     user.setPassword(SecurityUtils.encryptPassword(configService.selectConfigByKey("sys.user.initPassword")));

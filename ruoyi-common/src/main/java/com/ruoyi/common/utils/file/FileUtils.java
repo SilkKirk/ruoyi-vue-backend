@@ -17,8 +17,9 @@ import cn.hutool.core.util.ArrayUtil;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.IdUtil;
 
 /**
  * 文件处理工具类
@@ -92,7 +93,7 @@ public class FileUtils
         try
         {
             String extension = getFileExtendName(data);
-            pathName = DateUtils.datePath() + "/" + IdUtils.fastUUID() + "." + extension;
+            pathName = DateUtils.datePath() + "/" + IdUtil.fastUUID() + "." + extension;
             File file = FileUploadUtils.getAbsoluteFile(uploadDir, pathName);
             fos = new FileOutputStream(file);
             fos.write(data);
@@ -112,7 +113,7 @@ public class FileUtils
      */
     public static String stripPrefix(String filePath)
     {
-        return StringUtils.substringAfter(filePath, Constants.RESOURCE_PREFIX);
+        return StrUtil.subAfter(filePath, Constants.RESOURCE_PREFIX, false);
     }
 
     /**
@@ -153,7 +154,7 @@ public class FileUtils
     public static boolean checkAllowDownload(String resource)
     {
         // 禁止目录上跳级别
-        if (StringUtils.contains(resource, ".."))
+        if (StrUtil.contains(resource, ".."))
         {
             return false;
         }

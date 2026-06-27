@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import cn.hutool.core.io.IoUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.html.EscapeUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HtmlUtil;
 
 /**
  * XSS过滤处理
@@ -38,7 +38,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper
             for (int i = 0; i < length; i++)
             {
                 // 防xss攻击和过滤前后空格
-                escapesValues[i] = EscapeUtil.clean(values[i]).trim();
+                escapesValues[i] = HtmlUtil.cleanHtmlTag(values[i]).trim();
             }
             return escapesValues;
         }
@@ -56,13 +56,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper
 
         // 为空，直接返回
         String json = IoUtil.readUtf8(super.getInputStream());
-        if (StringUtils.isEmpty(json))
+        if (StrUtil.isEmpty(json))
         {
             return super.getInputStream();
         }
 
         // xss过滤
-        json = EscapeUtil.clean(json).trim();
+        json = HtmlUtil.cleanHtmlTag(json).trim();
         byte[] jsonBytes = json.getBytes("utf-8");
         final ByteArrayInputStream bis = new ByteArrayInputStream(jsonBytes);
         return new ServletInputStream()
@@ -106,6 +106,6 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper
     public boolean isJsonRequest()
     {
         String header = super.getHeader(HttpHeaders.CONTENT_TYPE);
-        return StringUtils.startsWithIgnoreCase(header, MediaType.APPLICATION_JSON_VALUE);
+        return StrUtil.startWithIgnoreCase(header, MediaType.APPLICATION_JSON_VALUE);
     }
 }

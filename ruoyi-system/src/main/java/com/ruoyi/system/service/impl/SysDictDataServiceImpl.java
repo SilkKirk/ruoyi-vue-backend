@@ -8,9 +8,9 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.mapper.SysDictDataMapper;
 import com.ruoyi.system.service.ISysDictDataService;
+import cn.hutool.core.util.StrUtil;
 
 @Service
 public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDictData> implements ISysDictDataService
@@ -20,18 +20,18 @@ public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDi
     @Override
     public List<SysDictData> selectDictDataList(SysDictData dictData) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
-        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
-        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
+        if (StrUtil.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
+        if (StrUtil.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
+        if (StrUtil.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
         return dictDataMapper.selectListByQuery(qw);
     }
 
     @Override
     public Page<SysDictData> selectDictDataPage(Page<SysDictData> page, SysDictData dictData) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
-        if (StringUtils.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
-        if (StringUtils.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
+        if (StrUtil.isNotEmpty(dictData.getDictType())) qw.eq(SysDictData::getDictType, dictData.getDictType());
+        if (StrUtil.isNotEmpty(dictData.getDictLabel())) qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
+        if (StrUtil.isNotEmpty(dictData.getStatus())) qw.eq(SysDictData::getStatus, dictData.getStatus());
         return dictDataMapper.paginate(page, qw);
     }
 
@@ -45,5 +45,4 @@ public class SysDictDataServiceImpl extends ServiceImpl<SysDictDataMapper, SysDi
     }
 
 }
-
 

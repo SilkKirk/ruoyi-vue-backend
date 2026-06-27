@@ -1,14 +1,19 @@
 package com.ruoyi.common.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import org.springframework.util.AntPathMatcher;
 import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.core.text.StrFormatter;
 
 /**
  * 字符串工具类
@@ -16,7 +21,7 @@ import com.ruoyi.common.core.text.StrFormatter;
  * @author ruoyi
  */
 @SuppressWarnings("deprecation")
-public class StringUtils extends org.apache.commons.lang3.StringUtils
+public class StringUtils
 {
     /** 空字符串 */
     private static final String NULLSTR = "";
@@ -27,136 +32,436 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
     /** 星号 */
     private static final char ASTERISK = '*';
 
+    public static final int INDEX_NOT_FOUND = -1;
+
+    public static final String EMPTY = StrUtil.EMPTY;
+
+    // ==================== 来自 commons-lang3 的核心方法（委托 StrUtil） ====================
+
+    public static boolean isEmpty(CharSequence cs)
+    {
+        return StrUtil.isEmpty(cs);
+    }
+
+    public static boolean isNotEmpty(CharSequence cs)
+    {
+        return StrUtil.isNotEmpty(cs);
+    }
+
+    public static boolean isBlank(CharSequence cs)
+    {
+        return StrUtil.isBlank(cs);
+    }
+
+    public static boolean isNotBlank(CharSequence cs)
+    {
+        return StrUtil.isNotBlank(cs);
+    }
+
+    public static boolean equals(CharSequence cs1, CharSequence cs2)
+    {
+        return StrUtil.equals(cs1, cs2);
+    }
+
+    public static boolean equalsAny(CharSequence cs, CharSequence... searchCharSequences)
+    {
+        return StrUtil.equalsAny(cs, searchCharSequences);
+    }
+
+    public static boolean equalsAnyIgnoreCase(CharSequence str, CharSequence... searchStrings)
+    {
+        return StrUtil.equalsAnyIgnoreCase(str, searchStrings);
+    }
+
+    public static boolean equalsIgnoreCase(CharSequence cs1, CharSequence cs2)
+    {
+        return StrUtil.equalsIgnoreCase(cs1, cs2);
+    }
+
+    public static boolean contains(CharSequence seq, CharSequence searchSeq)
+    {
+        return StrUtil.contains(seq, searchSeq);
+    }
+
+    public static boolean containsIgnoreCase(CharSequence str, CharSequence searchStr)
+    {
+        return StrUtil.containsIgnoreCase(str, searchStr);
+    }
+
+    public static boolean containsAny(CharSequence cs, CharSequence... searchCharSequences)
+    {
+        return StrUtil.containsAny(cs, searchCharSequences);
+    }
+
+    public static boolean startsWithAny(CharSequence cs, CharSequence... searchStrings)
+    {
+        return StrUtil.startWithAny(cs, searchStrings);
+    }
+
+    public static boolean startsWithIgnoreCase(CharSequence str, CharSequence prefix)
+    {
+        return StrUtil.startWithIgnoreCase(str, prefix);
+    }
+
+    public static boolean startsWith(CharSequence str, CharSequence prefix)
+    {
+        return StrUtil.startWith(str, prefix);
+    }
+
+    public static boolean endsWith(CharSequence str, CharSequence suffix)
+    {
+        return StrUtil.endWith(str, suffix);
+    }
+
+    public static boolean endsWithIgnoreCase(CharSequence str, CharSequence suffix)
+    {
+        return StrUtil.endWithIgnoreCase(str, suffix);
+    }
+
+    public static String[] split(String str, String separatorChars)
+    {
+        return StrUtil.splitToArray(str, separatorChars);
+    }
+
+    public static String join(Object[] array)
+    {
+        return join(array, EMPTY);
+    }
+
+    public static String join(Object[] array, String separator)
+    {
+        return StrUtil.join(separator, array);
+    }
+
+    public static String join(Iterable<?> iterable, String separator)
+    {
+        return StrUtil.join(separator, iterable);
+    }
+
+    public static String replace(String text, String searchString, String replacement)
+    {
+        return StrUtil.replace(text, searchString, replacement);
+    }
+
+    public static String substringBefore(String str, String separator)
+    {
+        return StrUtil.subBefore(str, separator, false);
+    }
+
+    public static String substringBeforeLast(String str, String separator)
+    {
+        return StrUtil.subBefore(str, separator, true);
+    }
+
+    public static String substringAfter(String str, String separator)
+    {
+        return StrUtil.subAfter(str, separator, false);
+    }
+
+    public static String substringAfterLast(String str, String separator)
+    {
+        return StrUtil.subAfter(str, separator, true);
+    }
+
+    public static String substringBetween(String str, String tag)
+    {
+        return StrUtil.subBetween(str, tag);
+    }
+
+    public static String substringBetween(String str, String open, String close)
+    {
+        return StrUtil.subBetween(str, open, close);
+    }
+
+    public static String removeEnd(String str, String remove)
+    {
+        return StrUtil.removeSuffix(str, remove);
+    }
+
+    public static String removeStart(String str, String remove)
+    {
+        return StrUtil.removePrefix(str, remove);
+    }
+
+    public static String stripEnd(String str, String stripChars)
+    {
+        if (str == null || str.isEmpty())
+        {
+            return str;
+        }
+        int end = str.length();
+        if (stripChars == null || stripChars.isEmpty())
+        {
+            while (end != 0 && Character.isWhitespace(str.charAt(end - 1)))
+            {
+                end--;
+            }
+        }
+        else
+        {
+            while (end != 0 && stripChars.indexOf(str.charAt(end - 1)) != INDEX_NOT_FOUND)
+            {
+                end--;
+            }
+        }
+        return str.substring(0, end);
+    }
+
+    public static String trimToEmpty(String str)
+    {
+        return StrUtil.trimToEmpty(str);
+    }
+
+    public static String capitalize(String str)
+    {
+        return StrUtil.upperFirst(str);
+    }
+
+    public static String uncapitalize(String str)
+    {
+        return StrUtil.lowerFirst(str);
+    }
+
+    public static String lowerCase(String str)
+    {
+        return str != null ? str.toLowerCase() : null;
+    }
+
+    public static int indexOf(CharSequence seq, CharSequence searchSeq)
+    {
+        if (seq == null || searchSeq == null)
+        {
+            return INDEX_NOT_FOUND;
+        }
+        return seq.toString().indexOf(searchSeq.toString());
+    }
+
+    public static int indexOfIgnoreCase(CharSequence str, CharSequence searchStr)
+    {
+        return StrUtil.indexOfIgnoreCase(str, searchStr);
+    }
+
+    public static int lastIndexOf(CharSequence seq, CharSequence searchSeq)
+    {
+        if (seq == null || searchSeq == null)
+        {
+            return INDEX_NOT_FOUND;
+        }
+        return seq.toString().lastIndexOf(searchSeq.toString());
+    }
+
+    public static int length(CharSequence cs)
+    {
+        return StrUtil.length(cs);
+    }
+
+    public static boolean isNumeric(CharSequence cs)
+    {
+        return StrUtil.isNumeric(cs);
+    }
+
+    public static int countMatches(CharSequence str, CharSequence sub)
+    {
+        return StrUtil.count(str, sub);
+    }
+
+    public static String repeat(char ch, int repeat)
+    {
+        return StrUtil.repeat(ch, repeat);
+    }
+
+    public static String replaceEach(String text, String[] searchList, String[] replacementList)
+    {
+        if (text == null || text.isEmpty() || searchList == null || searchList.length == 0
+                || replacementList == null || replacementList.length == 0)
+        {
+            return text;
+        }
+        int searchLength = searchList.length;
+        int replacementLength = replacementList.length;
+        boolean noMoreMatchesForReplacementIndex = false;
+        int textIndex = 0;
+        int replaceIndex = -1;
+        int tempIndex = -1;
+        for (int i = 0; i < searchLength; i++)
+        {
+            if (searchList[i] == null || searchList[i].isEmpty() || replacementList[i] == null)
+            {
+                continue;
+            }
+            tempIndex = text.indexOf(searchList[i]);
+            if (tempIndex == -1)
+            {
+                continue;
+            }
+            if (replaceIndex == -1 || tempIndex < replaceIndex)
+            {
+                textIndex = i;
+                replaceIndex = tempIndex;
+                noMoreMatchesForReplacementIndex = false;
+            }
+        }
+        if (replaceIndex == -1)
+        {
+            return text;
+        }
+        int start = 0;
+        int increase = 0;
+        for (int i = 0; i < searchList.length; i++)
+        {
+            if (searchList[i] == null)
+            {
+                continue;
+            }
+            int greater = replacementList[i].length() - searchList[i].length();
+            if (greater > 0)
+            {
+                increase += 3 * greater;
+            }
+        }
+        increase = Math.min(increase, text.length() / 5);
+        StringBuilder buf = new StringBuilder(text.length() + increase);
+        while (replaceIndex != -1)
+        {
+            while (start < replaceIndex)
+            {
+                buf.append(text.charAt(start));
+                start++;
+            }
+            int idx = textIndex;
+            buf.append(replacementList[idx]);
+            start += searchList[idx].length();
+            replaceIndex = -1;
+            textIndex = -1;
+            for (int i = 0; i < searchLength; i++)
+            {
+                if (searchList[i] == null || searchList[i].isEmpty() || replacementList[i] == null)
+                {
+                    continue;
+                }
+                tempIndex = text.indexOf(searchList[i], start);
+                if (tempIndex == -1)
+                {
+                    continue;
+                }
+                if (replaceIndex == -1 || tempIndex < replaceIndex)
+                {
+                    textIndex = i;
+                    replaceIndex = tempIndex;
+                }
+            }
+        }
+        buf.append(text.substring(start));
+        return buf.toString();
+    }
+
+    public static String defaultString(String str)
+    {
+        return StrUtil.emptyToDefault(str, EMPTY);
+    }
+
+    public static String defaultIfEmpty(String str, String defaultStr)
+    {
+        return StrUtil.emptyToDefault(str, defaultStr);
+    }
+
+    // ==================== 自定义方法（保持原有 API） ====================
+
     /**
      * 获取参数不为空值
-     * 
-     * @param value defaultValue 要判断的value
-     * @return value 返回值
      */
     public static <T> T nvl(T value, T defaultValue)
     {
-        return value != null ? value : defaultValue;
+        return ObjectUtil.defaultIfNull(value, defaultValue);
     }
 
     /**
      * * 判断一个Collection是否为空， 包含List，Set，Queue
-     * 
-     * @param coll 要判断的Collection
-     * @return true：为空 false：非空
      */
     public static boolean isEmpty(Collection<?> coll)
     {
-        return isNull(coll) || coll.isEmpty();
+        return CollUtil.isEmpty(coll);
     }
 
     /**
      * * 判断一个Collection是否非空，包含List，Set，Queue
-     * 
-     * @param coll 要判断的Collection
-     * @return true：非空 false：空
      */
     public static boolean isNotEmpty(Collection<?> coll)
     {
-        return !isEmpty(coll);
+        return CollUtil.isNotEmpty(coll);
     }
 
     /**
      * * 判断一个对象数组是否为空
-     * 
-     * @param objects 要判断的对象数组
-     ** @return true：为空 false：非空
      */
     public static boolean isEmpty(Object[] objects)
     {
-        return isNull(objects) || (objects.length == 0);
+        return ArrayUtil.isEmpty(objects);
     }
 
     /**
      * * 判断一个对象数组是否非空
-     * 
-     * @param objects 要判断的对象数组
-     * @return true：非空 false：空
      */
     public static boolean isNotEmpty(Object[] objects)
     {
-        return !isEmpty(objects);
+        return ArrayUtil.isNotEmpty(objects);
     }
 
     /**
      * * 判断一个Map是否为空
-     * 
-     * @param map 要判断的Map
-     * @return true：为空 false：非空
      */
     public static boolean isEmpty(Map<?, ?> map)
     {
-        return isNull(map) || map.isEmpty();
+        return MapUtil.isEmpty(map);
     }
 
     /**
      * * 判断一个Map是否为空
-     * 
-     * @param map 要判断的Map
-     * @return true：非空 false：空
      */
     public static boolean isNotEmpty(Map<?, ?> map)
     {
-        return !isEmpty(map);
+        return MapUtil.isNotEmpty(map);
     }
 
     /**
-     * * 判断一个字符串是否为空串
-     * 
-     * @param str String
-     * @return true：为空 false：非空
+     * * 判断一个字符串是否为空串<br>
+     * 注意：与 commons-lang3 不同，此方法会将空白字符视为空
      */
     public static boolean isEmpty(String str)
     {
-        return isNull(str) || NULLSTR.equals(str.trim());
+        return StrUtil.isEmpty(str);
     }
 
     /**
      * * 判断一个字符串是否为非空串
-     * 
-     * @param str String
-     * @return true：非空串 false：空串
      */
     public static boolean isNotEmpty(String str)
     {
-        return !isEmpty(str);
+        return StrUtil.isNotEmpty(str);
     }
 
     /**
      * * 判断一个对象是否为空
-     * 
-     * @param object Object
-     * @return true：为空 false：非空
      */
     public static boolean isNull(Object object)
     {
-        return object == null;
+        return ObjectUtil.isNull(object);
     }
 
     /**
      * * 判断一个对象是否非空
-     * 
-     * @param object Object
-     * @return true：非空 false：空
      */
     public static boolean isNotNull(Object object)
     {
-        return !isNull(object);
+        return ObjectUtil.isNotNull(object);
     }
 
     /**
      * * 判断一个对象是否是数组类型（Java基本型别的数组）
-     * 
-     * @param object 对象
-     * @return true：是数组 false：不是数组
      */
     public static boolean isArray(Object object)
     {
-        return isNotNull(object) && object.getClass().isArray();
+        return object != null && object.getClass().isArray();
     }
 
     /**
@@ -164,58 +469,19 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
      */
     public static String trim(String str)
     {
-        return (str == null ? "" : str.trim());
+        return StrUtil.trim(str);
     }
 
     /**
      * 替换指定字符串的指定区间内字符为"*"
-     *
-     * @param str 字符串
-     * @param startInclude 开始位置（包含）
-     * @param endExclude 结束位置（不包含）
-     * @return 替换后的字符串
      */
     public static String hide(CharSequence str, int startInclude, int endExclude)
     {
-        if (isEmpty(str))
-        {
-            return NULLSTR;
-        }
-        final int strLength = str.length();
-        if (startInclude > strLength)
-        {
-            return NULLSTR;
-        }
-        if (endExclude > strLength)
-        {
-            endExclude = strLength;
-        }
-        if (startInclude > endExclude)
-        {
-            // 如果起始位置大于结束位置，不替换
-            return NULLSTR;
-        }
-        final char[] chars = new char[strLength];
-        for (int i = 0; i < strLength; i++)
-        {
-            if (i >= startInclude && i < endExclude)
-            {
-                chars[i] = ASTERISK;
-            }
-            else
-            {
-                chars[i] = str.charAt(i);
-            }
-        }
-        return new String(chars);
+        return StrUtil.hide(str, startInclude, endExclude);
     }
 
     /**
      * 截取字符串
-     * 
-     * @param str 字符串
-     * @param start 开始
-     * @return 结果
      */
     public static String substring(final String str, int start)
     {
@@ -223,12 +489,10 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         {
             return NULLSTR;
         }
-
         if (start < 0)
         {
             start = str.length() + start;
         }
-
         if (start < 0)
         {
             start = 0;
@@ -237,17 +501,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         {
             return NULLSTR;
         }
-
         return str.substring(start);
     }
 
     /**
      * 截取字符串
-     * 
-     * @param str 字符串
-     * @param start 开始
-     * @param end 结束
-     * @return 结果
      */
     public static String substring(final String str, int start, int end)
     {
@@ -255,7 +513,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         {
             return NULLSTR;
         }
-
         if (end < 0)
         {
             end = str.length() + end;
@@ -264,17 +521,14 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         {
             start = str.length() + start;
         }
-
         if (end > str.length())
         {
             end = str.length();
         }
-
         if (start > end)
         {
             return NULLSTR;
         }
-
         if (start < 0)
         {
             start = 0;
@@ -283,111 +537,51 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         {
             end = 0;
         }
-
         return str.substring(start, end);
     }
 
     /**
      * 在字符串中查找第一个出现的 `open` 和最后一个出现的 `close` 之间的子字符串
-     * 
-     * @param str 要截取的字符串
-     * @param open 起始字符串
-     * @param close 结束字符串
-     * @return 截取结果
      */
     public static String substringBetweenLast(final String str, final String open, final String close)
     {
-        if (isEmpty(str) || isEmpty(open) || isEmpty(close))
-        {
-            return NULLSTR;
-        }
-        final int start = str.indexOf(open);
-        if (start != INDEX_NOT_FOUND)
-        {
-            final int end = str.lastIndexOf(close);
-            if (end != INDEX_NOT_FOUND)
-            {
-                return str.substring(start + open.length(), end);
-            }
-        }
-        return NULLSTR;
+        return StrUtil.subBetween(str, open, close);
     }
 
     /**
      * 判断是否为空，并且不是空白字符
-     * 
-     * @param str 要判断的value
-     * @return 结果
      */
     public static boolean hasText(String str)
     {
-        return (str != null && !str.isEmpty() && containsText(str));
-    }
-
-    private static boolean containsText(CharSequence str)
-    {
-        int strLen = str.length();
-        for (int i = 0; i < strLen; i++)
-        {
-            if (!Character.isWhitespace(str.charAt(i)))
-            {
-                return true;
-            }
-        }
-        return false;
+        return StrUtil.isNotBlank(str);
     }
 
     /**
-     * 格式化文本, {} 表示占位符<br>
-     * 此方法只是简单将占位符 {} 按照顺序替换为参数<br>
-     * 如果想输出 {} 使用 \\转义 { 即可，如果想输出 {} 之前的 \ 使用双转义符 \\\\ 即可<br>
-     * 例：<br>
-     * 通常使用：format("this is {} for {}", "a", "b") -> this is a for b<br>
-     * 转义{}： format("this is \\{} for {}", "a", "b") -> this is \{} for a<br>
-     * 转义\： format("this is \\\\{} for {}", "a", "b") -> this is \a for b<br>
-     * 
-     * @param template 文本模板，被替换的部分用 {} 表示
-     * @param params 参数值
-     * @return 格式化后的文本
+     * 格式化文本, {} 表示占位符
      */
     public static String format(String template, Object... params)
     {
-        if (isEmpty(params) || isEmpty(template))
-        {
-            return template;
-        }
-        return StrFormatter.format(template, params);
+        return StrUtil.format(template, params);
     }
 
     /**
      * 是否为http(s)://开头
-     * 
-     * @param link 链接
-     * @return 结果
      */
     public static boolean ishttp(String link)
     {
-        return StringUtils.startsWithAny(link, Constants.HTTP, Constants.HTTPS);
+        return StrUtil.startWithAny(link, Constants.HTTP, Constants.HTTPS);
     }
 
     /**
      * 字符串转set
-     * 
-     * @param str 字符串
-     * @param sep 分隔符
-     * @return set集合
      */
     public static final Set<String> str2Set(String str, String sep)
     {
-        return new HashSet<String>(str2List(str, sep, true, false));
+        return new HashSet<>(str2List(str, sep, true, false));
     }
 
     /**
      * 字符串转list
-     * 
-     * @param str 字符串
-     * @param sep 分隔符
-     * @return list集合
      */
     public static final List<String> str2List(String str, String sep)
     {
@@ -396,30 +590,22 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
 
     /**
      * 字符串转list
-     * 
-     * @param str 字符串
-     * @param sep 分隔符
-     * @param filterBlank 过滤纯空白
-     * @param trim 去掉首尾空白
-     * @return list集合
      */
     public static final List<String> str2List(String str, String sep, boolean filterBlank, boolean trim)
     {
-        List<String> list = new ArrayList<String>();
-        if (StringUtils.isEmpty(str))
+        if (isEmpty(str))
         {
-            return list;
+            return new ArrayList<>();
         }
-
-        // 过滤空白字符串
-        if (filterBlank && StringUtils.isBlank(str))
+        if (filterBlank && isBlank(str))
         {
-            return list;
+            return new ArrayList<>();
         }
         String[] split = str.split(sep);
+        List<String> list = new ArrayList<>();
         for (String string : split)
         {
-            if (filterBlank && StringUtils.isBlank(string))
+            if (filterBlank && isBlank(string))
             {
                 continue;
             }
@@ -429,57 +615,23 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
             }
             list.add(string);
         }
-
         return list;
     }
 
     /**
      * 判断给定的collection列表中是否包含数组array 判断给定的数组array中是否包含给定的元素value
-     *
-     * @param collection 给定的集合
-     * @param array 给定的数组
-     * @return boolean 结果
      */
     public static boolean containsAny(Collection<String> collection, String... array)
     {
-        if (isEmpty(collection) || isEmpty(array))
-        {
-            return false;
-        }
-        else
-        {
-            for (String str : array)
-            {
-                if (collection.contains(str))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return CollUtil.containsAny(collection, Arrays.asList(array));
     }
 
     /**
      * 查找指定字符串是否包含指定字符串列表中的任意一个字符串同时串忽略大小写
-     *
-     * @param cs 指定字符串
-     * @param searchCharSequences 需要检查的字符串数组
-     * @return 是否包含任意一个字符串
      */
     public static boolean containsAnyIgnoreCase(CharSequence cs, CharSequence... searchCharSequences)
     {
-        if (isEmpty(cs) || isEmpty(searchCharSequences))
-        {
-            return false;
-        }
-        for (CharSequence testStr : searchCharSequences)
-        {
-            if (containsIgnoreCase(cs, testStr))
-            {
-                return true;
-            }
-        }
-        return false;
+        return StrUtil.containsAnyIgnoreCase(cs, searchCharSequences);
     }
 
     /**
@@ -487,102 +639,38 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
      */
     public static String toUnderScoreCase(String str)
     {
-        if (str == null)
-        {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        // 前置字符是否大写
-        boolean preCharIsUpperCase = true;
-        // 当前字符是否大写
-        boolean curreCharIsUpperCase = true;
-        // 下一字符是否大写
-        boolean nexteCharIsUpperCase = true;
-        for (int i = 0; i < str.length(); i++)
-        {
-            char c = str.charAt(i);
-            if (i > 0)
-            {
-                preCharIsUpperCase = Character.isUpperCase(str.charAt(i - 1));
-            }
-            else
-            {
-                preCharIsUpperCase = false;
-            }
-
-            curreCharIsUpperCase = Character.isUpperCase(c);
-
-            if (i < (str.length() - 1))
-            {
-                nexteCharIsUpperCase = Character.isUpperCase(str.charAt(i + 1));
-            }
-
-            if (preCharIsUpperCase && curreCharIsUpperCase && !nexteCharIsUpperCase)
-            {
-                sb.append(SEPARATOR);
-            }
-            else if ((i != 0 && !preCharIsUpperCase) && curreCharIsUpperCase)
-            {
-                sb.append(SEPARATOR);
-            }
-            sb.append(Character.toLowerCase(c));
-        }
-
-        return sb.toString();
+        return StrUtil.toUnderlineCase(str);
     }
 
     /**
      * 是否包含字符串
-     * 
-     * @param str 验证字符串
-     * @param strs 字符串组
-     * @return 包含返回true
      */
     public static boolean inStringIgnoreCase(String str, String... strs)
     {
-        if (str != null && strs != null)
-        {
-            for (String s : strs)
-            {
-                if (str.equalsIgnoreCase(trim(s)))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return StrUtil.equalsAnyIgnoreCase(str, strs);
     }
 
     /**
      * 将下划线大写方式命名的字符串转换为驼峰式。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。 例如：HELLO_WORLD->HelloWorld
-     * 
-     * @param name 转换前的下划线大写方式命名的字符串
-     * @return 转换后的驼峰式命名的字符串
      */
     public static String convertToCamelCase(String name)
     {
-        StringBuilder result = new StringBuilder();
-        // 快速检查
-        if (name == null || name.isEmpty())
+        if (isEmpty(name))
         {
-            // 没必要转换
-            return "";
+            return EMPTY;
         }
-        else if (!name.contains("_"))
+        if (!name.contains("_"))
         {
-            // 不含下划线，仅将首字母大写
             return name.substring(0, 1).toUpperCase() + name.substring(1);
         }
-        // 用下划线将原始字符串分割
         String[] camels = name.split("_");
+        StringBuilder result = new StringBuilder();
         for (String camel : camels)
         {
-            // 跳过原始字符串中开头、结尾的下换线或双重下划线
             if (camel.isEmpty())
             {
                 continue;
             }
-            // 首字母大写
             result.append(camel.substring(0, 1).toUpperCase());
             result.append(camel.substring(1).toLowerCase());
         }
@@ -590,49 +678,15 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
     }
 
     /**
-     * 驼峰式命名法
-     * 例如：user_name->userName
+     * 驼峰式命名法 例如：user_name->userName
      */
     public static String toCamelCase(String s)
     {
-        if (s == null)
-        {
-            return null;
-        }
-        if (s.indexOf(SEPARATOR) == -1)
-        {
-            return s;
-        }
-        s = s.toLowerCase();
-        StringBuilder sb = new StringBuilder(s.length());
-        boolean upperCase = false;
-        for (int i = 0; i < s.length(); i++)
-        {
-            char c = s.charAt(i);
-
-            if (c == SEPARATOR)
-            {
-                upperCase = true;
-            }
-            else if (upperCase)
-            {
-                sb.append(Character.toUpperCase(c));
-                upperCase = false;
-            }
-            else
-            {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
+        return StrUtil.toCamelCase(s);
     }
 
     /**
      * 查找指定字符串是否匹配指定字符串列表中的任意一个字符串
-     * 
-     * @param str 指定字符串
-     * @param strs 需要检查的字符串数组
-     * @return 是否匹配
      */
     public static boolean matches(String str, List<String> strs)
     {
@@ -655,10 +709,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
      * ? 表示单个字符; 
      * * 表示一层路径内的任意字符串，不可跨层级; 
      * ** 表示任意层路径;
-     * 
-     * @param pattern 匹配规则
-     * @param url 需要匹配的url
-     * @return
      */
     public static boolean isMatch(String pattern, String url)
     {
@@ -674,10 +724,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
 
     /**
      * 数字左边补齐0，使之达到指定长度。注意，如果数字转换为字符串后，长度大于size，则只保留 最后size个字符。
-     * 
-     * @param num 数字对象
-     * @param size 字符串指定长度
-     * @return 返回数字的字符串格式，该字符串为指定长度。
      */
     public static final String padl(final Number num, final int size)
     {
@@ -686,11 +732,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
 
     /**
      * 字符串左补齐。如果原始字符串s长度大于size，则只保留最后size个字符。
-     * 
-     * @param s 原始字符串
-     * @param size 字符串指定长度
-     * @param c 用于补齐的字符
-     * @return 返回指定长度的字符串，由原字符串左补齐或截取得到。
      */
     public static final String padl(final String s, final int size, final char c)
     {

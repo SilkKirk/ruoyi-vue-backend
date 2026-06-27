@@ -19,8 +19,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysMenu;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysMenuService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 菜单信息
@@ -90,7 +90,7 @@ public class SysMenuController extends BaseController
         {
             return error("新增菜单'" + menu.getMenuName() + "'失败，菜单名称已存在");
         }
-        else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StringUtils.ishttp(menu.getPath()))
+        else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StrUtil.startWithAny(menu.getPath(), "http://", "https://"))
         {
             return error("新增菜单'" + menu.getMenuName() + "'失败，地址必须以http(s)://开头");
         }
@@ -114,7 +114,7 @@ public class SysMenuController extends BaseController
         {
             return error("修改菜单'" + menu.getMenuName() + "'失败，菜单名称已存在");
         }
-        else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StringUtils.ishttp(menu.getPath()))
+        else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StrUtil.startWithAny(menu.getPath(), "http://", "https://"))
         {
             return error("修改菜单'" + menu.getMenuName() + "'失败，地址必须以http(s)://开头");
         }

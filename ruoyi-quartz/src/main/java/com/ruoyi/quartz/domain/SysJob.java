@@ -8,12 +8,12 @@ import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.core.domain.BaseEntity;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.quartz.util.CronUtils;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import lombok.Data;
+import cn.hutool.core.util.StrUtil;
 import lombok.ToString;
 
 /**
@@ -70,7 +70,7 @@ public class SysJob extends BaseEntity
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public Date getNextValidTime()
     {
-        if (StringUtils.isNotEmpty(cronExpression))
+        if (StrUtil.isNotEmpty(cronExpression))
         {
             return CronUtils.getNextExecution(cronExpression);
         }

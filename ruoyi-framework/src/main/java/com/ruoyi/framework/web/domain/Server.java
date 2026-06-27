@@ -4,7 +4,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import com.ruoyi.common.utils.Arith;
+import cn.hutool.core.util.NumberUtil;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.web.domain.server.Cpu;
 import com.ruoyi.framework.web.domain.server.Jvm;
@@ -154,7 +154,7 @@ public class Server
             sysFile.setTotal(convertFileSize(total));
             sysFile.setFree(convertFileSize(free));
             sysFile.setUsed(convertFileSize(used));
-            sysFile.setUsage(Arith.mul(Arith.div(used, total, 4), 100));
+            sysFile.setUsage(NumberUtil.mul(NumberUtil.div(used, total, 4), 100));
             sysFiles.add(sysFile);
         }
     }

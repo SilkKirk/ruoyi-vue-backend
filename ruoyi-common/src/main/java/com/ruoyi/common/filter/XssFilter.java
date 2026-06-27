@@ -11,8 +11,9 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.enums.HttpMethod;
+import cn.hutool.core.util.StrUtil;
+import com.ruoyi.common.utils.StringUtils;
 
 /**
  * 防止XSS攻击的过滤器
@@ -30,7 +31,7 @@ public class XssFilter implements Filter
     public void init(FilterConfig filterConfig) throws ServletException
     {
         String tempExcludes = filterConfig.getInitParameter("excludes");
-        if (StringUtils.isNotEmpty(tempExcludes))
+        if (StrUtil.isNotEmpty(tempExcludes))
         {
             String[] urls = tempExcludes.split(",");
             for (String url : urls)

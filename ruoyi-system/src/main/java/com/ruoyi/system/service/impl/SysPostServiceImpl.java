@@ -12,12 +12,13 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.mapper.SysPostMapper;
 import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.service.ISysPostService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 岗位信息 服务层处理
@@ -47,11 +48,11 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPost> impl
 
     private QueryWrapper buildPostQuery(SysPost post) {
         QueryWrapper qw = QueryWrapper.create();
-        if (StringUtils.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
-        if (StringUtils.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
-        if (StringUtils.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
-        if (StringUtils.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
-        if (StringUtils.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
+        if (StrUtil.isNotEmpty(post.getPostCode())) qw.like(SysPost::getPostCode, post.getPostCode());
+        if (StrUtil.isNotEmpty(post.getStatus())) qw.eq(SysPost::getStatus, post.getStatus());
+        if (StrUtil.isNotEmpty(post.getPostName())) qw.like(SysPost::getPostName, post.getPostName());
+        if (ObjectUtil.isNotNull(post.getParams().get("beginTime"))) qw.ge(SysPost::getCreateTime, post.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(post.getParams().get("endTime"))) qw.le(SysPost::getCreateTime, post.getParams().get("endTime"));
         qw.orderBy(SysPost::getPostSort, true);
         return qw;
     }
@@ -136,5 +137,4 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPost> impl
     }
 
 }
-
 

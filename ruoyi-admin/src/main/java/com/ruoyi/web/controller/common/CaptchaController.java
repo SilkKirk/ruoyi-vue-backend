@@ -17,7 +17,7 @@ import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.sign.Base64;
-import com.ruoyi.common.utils.uuid.IdUtils;
+import cn.hutool.core.util.IdUtil;
 import com.ruoyi.system.service.ISysConfigService;
 
 /**
@@ -54,7 +54,7 @@ public class CaptchaController
         }
 
         // 保存验证码信息
-        String uuid = IdUtils.simpleUUID();
+        String uuid = IdUtil.fastSimpleUUID();
         String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + uuid;
 
         String capStr = null, code = null;

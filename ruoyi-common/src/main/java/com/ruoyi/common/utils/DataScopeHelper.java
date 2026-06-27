@@ -2,6 +2,7 @@ package com.ruoyi.common.utils;
 
 import java.util.Map;
 import com.mybatisflex.core.query.QueryWrapper;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 数据权限工具类 — 将 DataScopeAspect 注入的 SQL 条件应用到 MyBatis-Flex QueryWrapper
@@ -25,7 +26,7 @@ public class DataScopeHelper
         if (params != null && params.containsKey(DATA_SCOPE))
         {
             String condition = (String) params.get(DATA_SCOPE);
-            if (StringUtils.isNotBlank(condition))
+            if (StrUtil.isNotBlank(condition))
             {
                 qw.and(condition);
             }
