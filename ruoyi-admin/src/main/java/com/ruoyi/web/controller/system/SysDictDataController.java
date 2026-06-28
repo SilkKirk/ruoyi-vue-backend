@@ -108,7 +108,7 @@ public class SysDictDataController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dict:edit')")
     @Log(title = "字典数据", businessType = BusinessType.UPDATE)
-    @PostMapping
+    @PostMapping("/edit")
     public AjaxResult edit(@Validated @RequestBody SysDictData dict)
     {
         dict.setUpdateBy(getUsername());

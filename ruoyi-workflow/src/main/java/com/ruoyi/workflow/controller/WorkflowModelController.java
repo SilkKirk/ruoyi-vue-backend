@@ -78,7 +78,7 @@ public class WorkflowModelController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('workflow:model:edit')")
     @Log(title = "流程模型", businessType = BusinessType.UPDATE)
-    @PostMapping
+    @PostMapping("/edit")
     public AjaxResult save(@RequestBody Map<String, Object> params)
     {
         String modelId = (String) params.get("modelId");
