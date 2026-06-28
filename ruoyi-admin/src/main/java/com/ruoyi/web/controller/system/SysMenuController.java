@@ -5,11 +5,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -107,7 +105,7 @@ public class SysMenuController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:menu:edit')")
     @Log(title = "菜单管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult edit(@Validated @RequestBody SysMenu menu)
     {
         if (!menuService.checkMenuNameUnique(menu))
@@ -135,7 +133,7 @@ public class SysMenuController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:menu:edit')")
     @Log(title = "保存菜单排序", businessType = BusinessType.UPDATE)
-    @PutMapping("/updateSort")
+    @PostMapping("/updateSort")
     public AjaxResult updateSort(@RequestBody Map<String, String> params)
     {
         String[] menuIds = params.get("menuIds").split(",");
@@ -149,7 +147,7 @@ public class SysMenuController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:menu:remove')")
     @Log(title = "菜单管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{menuId}")
+    @PostMapping("/{menuId}")
     public AjaxResult remove(@PathVariable("menuId") Long menuId)
     {
         if (menuService.hasChildByMenuId(menuId))

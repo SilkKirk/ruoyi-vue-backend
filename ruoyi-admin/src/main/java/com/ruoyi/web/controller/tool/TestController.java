@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,7 +69,7 @@ public class TestController extends BaseController
     }
     
     @Operation(summary = "更新用户")
-    @PutMapping("/update")
+    @PostMapping("/update")
     public R<String> update(@RequestBody
     UserEntity user)
     {
@@ -89,7 +87,7 @@ public class TestController extends BaseController
     }
     
     @Operation(summary = "删除用户信息")
-    @DeleteMapping("/{userId}")
+    @PostMapping("/{userId}")
     public R<String> delete(@PathVariable(name = "userId")
     Integer userId)
     {

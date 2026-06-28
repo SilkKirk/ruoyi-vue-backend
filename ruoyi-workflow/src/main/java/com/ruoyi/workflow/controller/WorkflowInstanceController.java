@@ -6,7 +6,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,7 +69,7 @@ public class WorkflowInstanceController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('workflow:instance:stop')")
     @Log(title = "流程实例", businessType = BusinessType.OTHER)
-    @PutMapping("/stop/{instanceId}")
+    @PostMapping("/stop/{instanceId}")
     public AjaxResult stop(@PathVariable String instanceId, @RequestBody(required = false) Map<String, String> params)
     {
         String reason = params != null ? params.get("reason") : "手动终止";
@@ -83,7 +82,7 @@ public class WorkflowInstanceController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('workflow:instance:edit')")
     @Log(title = "流程实例", businessType = BusinessType.UPDATE)
-    @PutMapping("/updateState")
+    @PostMapping("/updateState")
     public AjaxResult updateState(@RequestBody Map<String, Object> params)
     {
         String instanceId = (String) params.get("instanceId");

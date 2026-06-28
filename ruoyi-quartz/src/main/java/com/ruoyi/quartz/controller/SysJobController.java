@@ -6,11 +6,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -115,7 +113,7 @@ public class SysJobController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:edit')")
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult edit(@RequestBody SysJob job) throws SchedulerException, TaskException
     {
         if (!CronUtils.isValid(job.getCronExpression()))
@@ -151,7 +149,7 @@ public class SysJobController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:changeStatus')")
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
-    @PutMapping("/changeStatus")
+    @PostMapping("/changeStatus")
     public AjaxResult changeStatus(@RequestBody SysJob job) throws SchedulerException
     {
         SysJob newJob = jobService.selectJobById(job.getJobId());
@@ -164,7 +162,7 @@ public class SysJobController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:changeStatus')")
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
-    @PutMapping("/run")
+    @PostMapping("/run")
     public AjaxResult run(@RequestBody SysJob job) throws SchedulerException
     {
         boolean result = jobService.run(job);
@@ -176,7 +174,7 @@ public class SysJobController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:remove')")
     @Log(title = "定时任务", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{jobIds}")
+    @PostMapping("/{jobIds}")
     public AjaxResult remove(@PathVariable Long[] jobIds) throws SchedulerException
     {
         jobService.deleteJobByIds(jobIds);

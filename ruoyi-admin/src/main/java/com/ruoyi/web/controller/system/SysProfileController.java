@@ -4,7 +4,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,7 +58,7 @@ public class SysProfileController extends BaseController
      * 修改用户
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult updateProfile(@RequestBody SysUser user)
     {
         LoginUser loginUser = getLoginUser();
@@ -89,7 +88,7 @@ public class SysProfileController extends BaseController
      * 重置密码
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping("/updatePwd")
+    @PostMapping("/updatePwd")
     public AjaxResult updatePwd(@RequestBody Map<String, String> params)
     {
         String oldPassword = params.get("oldPassword");

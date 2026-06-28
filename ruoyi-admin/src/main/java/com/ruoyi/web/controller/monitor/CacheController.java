@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -95,7 +95,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheName/{cacheName}")
+    @PostMapping("/clearCacheName/{cacheName}")
     public AjaxResult clearCacheName(@PathVariable String cacheName)
     {
         Collection<String> cacheKeys = redisTemplate.keys(cacheName + "*");
@@ -104,7 +104,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheKey/{cacheKey}")
+    @PostMapping("/clearCacheKey/{cacheKey}")
     public AjaxResult clearCacheKey(@PathVariable String cacheKey)
     {
         redisTemplate.delete(cacheKey);
@@ -112,7 +112,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheAll")
+    @PostMapping("/clearCacheAll")
     public AjaxResult clearCacheAll()
     {
         Collection<String> cacheKeys = redisTemplate.keys("*");

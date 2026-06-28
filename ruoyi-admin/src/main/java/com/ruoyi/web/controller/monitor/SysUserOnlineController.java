@@ -7,7 +7,7 @@ import java.util.List;
 import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,7 +83,7 @@ public class SysUserOnlineController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")
     @Log(title = "在线用户", businessType = BusinessType.FORCE)
-    @DeleteMapping("/{tokenId}")
+    @PostMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)
     {
         redisCache.deleteObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);

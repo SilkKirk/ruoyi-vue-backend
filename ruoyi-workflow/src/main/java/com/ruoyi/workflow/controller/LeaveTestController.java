@@ -49,14 +49,14 @@ public class LeaveTestController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('workflow:leave:edit')")
     @Log(title = "请假测试", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult edit(@RequestBody LeaveTest leaveTest) {
         return toAjax(leaveTestService.updateLeaveTest(leaveTest));
     }
 
     @PreAuthorize("@ss.hasPermi('workflow:leave:remove')")
     @Log(title = "请假测试", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public AjaxResult remove(@PathVariable String id) {
         return toAjax(leaveTestService.deleteLeaveTestById(id));
     }

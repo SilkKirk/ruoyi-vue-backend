@@ -2,11 +2,9 @@ package com.ruoyi.workflow.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,7 +78,7 @@ public class WorkflowModelController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('workflow:model:edit')")
     @Log(title = "流程模型", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult save(@RequestBody Map<String, Object> params)
     {
         String modelId = (String) params.get("modelId");
@@ -94,7 +92,7 @@ public class WorkflowModelController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('workflow:model:remove')")
     @Log(title = "流程模型", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{modelId}")
+    @PostMapping("/{modelId}")
     public AjaxResult remove(@PathVariable String modelId)
     {
         return toAjax(workflowModelService.deleteModelById(modelId));

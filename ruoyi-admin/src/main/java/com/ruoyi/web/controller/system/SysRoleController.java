@@ -6,11 +6,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -109,7 +107,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult edit(@Validated @RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -138,7 +136,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/dataScope")
+    @PostMapping("/dataScope")
     public AjaxResult dataScope(@RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -151,7 +149,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/changeStatus")
+    @PostMapping("/changeStatus")
     public AjaxResult changeStatus(@RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -165,7 +163,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:remove')")
     @Log(title = "角色管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{roleIds}")
+    @PostMapping("/{roleIds}")
     public AjaxResult remove(@PathVariable Long[] roleIds)
     {
         return toAjax(roleService.removeByIds(java.util.Arrays.asList(roleIds)));
@@ -206,7 +204,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/cancel")
+    @PostMapping("/authUser/cancel")
     public AjaxResult cancelAuthUser(@RequestBody SysUserRole userRole)
     {
         return toAjax(roleService.deleteAuthUser(userRole));
@@ -217,7 +215,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/cancelAll")
+    @PostMapping("/authUser/cancelAll")
     public AjaxResult cancelAuthUserAll(Long roleId, Long[] userIds)
     {
         return toAjax(roleService.deleteAuthUsers(roleId, userIds));
@@ -228,7 +226,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/selectAll")
+    @PostMapping("/authUser/selectAll")
     public AjaxResult selectAuthUserAll(Long roleId, Long[] userIds)
     {
         roleService.checkRoleDataScope(roleId);

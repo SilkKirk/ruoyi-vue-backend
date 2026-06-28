@@ -6,10 +6,9 @@ import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
@@ -57,7 +56,7 @@ public class SysLogininforController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:remove')")
     @Log(title = "登录日志", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{infoIds}")
+    @PostMapping("/{infoIds}")
     public AjaxResult remove(@PathVariable Long[] infoIds)
     {
         return toAjax(logininforService.removeByIds(java.util.Arrays.asList(infoIds)));
@@ -65,7 +64,7 @@ public class SysLogininforController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:remove')")
     @Log(title = "登录日志", businessType = BusinessType.CLEAN)
-    @DeleteMapping("/clean")
+    @PostMapping("/clean")
     public AjaxResult clean()
     {
         logininforService.cleanLogininfor();
