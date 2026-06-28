@@ -96,7 +96,6 @@ public class WorkflowTaskController extends BaseController
     /**
      * 通用提交审批（测试新架构）
      */
-    @PreAuthorize("@ss.hasPermi('workflow:task:execute')")
     @PostMapping("/start")
     public AjaxResult start(@RequestBody Map<String, String> params) {
         String businessType = params.get("businessType");
@@ -117,7 +116,6 @@ public class WorkflowTaskController extends BaseController
     /**
      * 通用业务数据查询（供待办/已办查看详情）
      */
-    @PreAuthorize("@ss.hasPermi('workflow:task:query')")
     @GetMapping("/businessData/{businessType}/{businessId}")
     public AjaxResult businessData(@PathVariable String businessType, @PathVariable String businessId) {
         return success(workflowTaskService.loadBusinessData(businessType, businessId));
