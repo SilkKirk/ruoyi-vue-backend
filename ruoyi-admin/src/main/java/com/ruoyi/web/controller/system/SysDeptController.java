@@ -52,10 +52,11 @@ public class SysDeptController extends BaseController
      * 查询部门列表（排除节点）
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
+    @DataScope(deptAlias = "sys_dept")
     @GetMapping("/list/exclude/{deptId}")
-    public AjaxResult excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
+    public AjaxResult excludeChild(SysDept dept, @PathVariable(value = "deptId", required = false) Long deptId)
     {
-        List<SysDept> depts = deptService.selectDeptList(new SysDept());
+        List<SysDept> depts = deptService.selectDeptList(dept);
         depts.removeIf(d -> d.getDeptId().intValue() == deptId || ArrayUtil.contains(StrUtil.splitToArray(d.getAncestors(), ","), deptId + ""));
         return success(depts);
     }

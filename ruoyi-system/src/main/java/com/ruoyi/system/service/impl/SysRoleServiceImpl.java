@@ -11,7 +11,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.DataScopeHelper;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.domain.SysRoleDept;
 import com.ruoyi.system.domain.SysRoleMenu;
@@ -46,20 +45,16 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     private QueryWrapper buildRoleQuery(SysRole role) {
-        QueryWrapper qw = QueryWrapper.create().from("sys_role").as("r");
+        QueryWrapper qw = QueryWrapper.create();
         if (StrUtil.isNotEmpty(role.getRoleName())) qw.like(SysRole::getRoleName, role.getRoleName());
         if (StrUtil.isNotEmpty(role.getRoleKey())) qw.like(SysRole::getRoleKey, role.getRoleKey());
         if (StrUtil.isNotEmpty(role.getStatus())) qw.eq(SysRole::getStatus, role.getStatus());
         if (ObjectUtil.isNotNull(role.getParams().get("beginTime"))) qw.ge(SysRole::getCreateTime, role.getParams().get("beginTime"));
         if (ObjectUtil.isNotNull(role.getParams().get("endTime"))) qw.le(SysRole::getCreateTime, role.getParams().get("endTime"));
-        // 非超级管理员：隐藏超级管理员角色，并按数据权限过滤可查看的角色
+        // 非超级管理员：隐藏超级管理员角色
         if (!SecurityUtils.isAdmin()) {
-            qw.and("r.role_id <> 1");
-            // 应用数据权限过滤（由 @DataScope 注解注入条件）
-            DataScopeHelper.applyDataScope(qw, role.getParams());
+            qw.ne(SysRole::getRoleId, 1L);
         }
-        // 查询单表字段，不需要group by
-        qw.select("r.*");
         qw.orderBy(SysRole::getRoleSort, true);
         return qw;
     }

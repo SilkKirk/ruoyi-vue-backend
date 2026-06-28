@@ -83,9 +83,13 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
     @Override
     public List<Long> selectDeptListByRoleId(Long roleId) {
         SysRole role = roleMapper.selectOneById(roleId);
-        return deptMapper.selectListByQuery(
-            QueryWrapper.create().select(SysDept::getDeptId).where(SysDept::getStatus).eq("0")
-        ).stream().map(SysDept::getDeptId).toList();
+        // 非管理员复用数据权限过滤，只返回用户有权访问的部门
+        if (SecurityUtils.isAdmin()) {
+            return deptMapper.selectListByQuery(
+                QueryWrapper.create().select(SysDept::getDeptId).where(SysDept::getStatus).eq("0")
+            ).stream().map(SysDept::getDeptId).toList();
+        }
+        return selectDeptList(new SysDept()).stream().map(SysDept::getDeptId).toList();
     }
 
     @Override

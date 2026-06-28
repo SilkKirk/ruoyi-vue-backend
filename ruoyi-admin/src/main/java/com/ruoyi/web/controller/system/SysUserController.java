@@ -30,6 +30,7 @@ import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
+import com.ruoyi.framework.web.service.SysPasswordService;
 import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysPostService;
 import com.ruoyi.system.service.ISysRoleService;
@@ -57,6 +58,9 @@ public class SysUserController extends BaseController
 
     @Autowired
     private ISysPostService postService;
+
+    @Autowired
+    private SysPasswordService passwordService;
 
     /**
      * 获取用户列表
@@ -203,6 +207,11 @@ public class SysUserController extends BaseController
         userService.checkUserDataScope(user.getUserId());
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
         user.setUpdateBy(getUsername());
+        // 重置密码后清除登录锁定记录
+        SysUser currentUser = userService.selectUserById(user.getUserId());
+        if (currentUser != null) {
+            passwordService.clearLoginRecordCache(currentUser.getUserName());
+        }
         return toAjax(userService.resetPwd(user));
     }
 
