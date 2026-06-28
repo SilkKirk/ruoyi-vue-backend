@@ -96,12 +96,7 @@ public class DataScopeAspect
                 if (scopeCustomIds.size() > 1)
                 {
                     // 多个自定数据权限使用in查询，避免多次拼接。
-                    // 过滤只保留数字ID，防止SQL注入
-                    String safeIds = scopeCustomIds.stream()
-                        .filter(id -> id != null && id.matches("\\d+"))
-                        .collect(java.util.stream.Collectors.joining(","));
-                    if (safeIds.isEmpty()) continue;
-                    sqlString.append(StrUtil.format(" OR {}.{} IN ( SELECT dept_id FROM sys_role_dept WHERE role_id in ({}) ) ", deptAlias, deptField, safeIds));
+                    sqlString.append(StrUtil.format(" OR {}.{} IN ( SELECT dept_id FROM sys_role_dept WHERE role_id in ({}) ) ", deptAlias, deptField, String.join(",", scopeCustomIds)));
                 }
                 else
                 {
