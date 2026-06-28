@@ -1,4 +1,6 @@
 package com.ruoyi.workflow.controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,8 @@ import java.util.Map;
 @RequestMapping("/workflow/model")
 public class WorkflowModelController extends BaseController
 {
+    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(WorkflowModelController.class);
     @Autowired
     private IWorkflowModelService workflowModelService;
 

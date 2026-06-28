@@ -1,4 +1,6 @@
 package com.ruoyi.workflow.controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ import com.ruoyi.workflow.service.IWorkflowInstanceService;
 @RequestMapping("/workflow/instance")
 public class WorkflowInstanceController extends BaseController
 {
+    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceController.class);
     @Autowired
     private IWorkflowInstanceService workflowInstanceService;
 
