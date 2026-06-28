@@ -38,9 +38,7 @@ public class WorkflowDefinitionController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(WorkflowDefinition definition)
     {
-        Page<WorkflowDefinition> page = startPage(WorkflowDefinition.class);
-        workflowDefinitionService.selectDefinitionList(page, definition);
-        return getDataTable(page);
+        return getDataTable(workflowDefinitionService.selectDefinitionList(startPage(WorkflowDefinition.class), definition));
     }
 
     /**

@@ -66,9 +66,7 @@ public class SysUserController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysUser user)
     {
-        Page<SysUser> page = startPage(SysUser.class);
-        page = userService.selectUserPage(page, user);
-        return getDataTable(page);
+        return getDataTable(userService.selectUserPage(startPage(SysUser.class), user));
     }
 
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
@@ -255,6 +253,7 @@ public class SysUserController extends BaseController
      * 获取部门树列表
      */
     @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @DataScope(deptAlias = "sys_dept")
     @GetMapping("/deptTree")
     public AjaxResult deptTree(SysDept dept)
     {

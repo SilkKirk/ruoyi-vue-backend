@@ -13,6 +13,7 @@ import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.workflow.domain.WorkflowModel;
 import com.ruoyi.workflow.service.IWorkflowModelService;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 
 /**
  * 流程模型 服务层实现
@@ -78,8 +79,8 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         newModel.setName(model.getName());
         newModel.setKey(model.getKey());
         newModel.setCategory(model.getCategory());
-        newModel.setMetaInfo("{\"description\": \"" +
-                (model.getDescription() != null ? model.getDescription() : "") + "\"}");
+        newModel.setMetaInfo(JSONUtil.toJsonStr(JSONUtil.createObj().set("description",
+                model.getDescription() != null ? model.getDescription() : "")));
 
         repositoryService.saveModel(newModel);
 

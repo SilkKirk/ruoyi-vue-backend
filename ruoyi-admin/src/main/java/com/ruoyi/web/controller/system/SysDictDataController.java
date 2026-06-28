@@ -51,9 +51,7 @@ public class SysDictDataController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysDictData dictData)
     {
-        Page<SysDictData> page = startPage(SysDictData.class);
-        page = dictDataService.selectDictDataPage(page, dictData);
-        return getDataTable(page);
+        return getDataTable(dictDataService.selectDictDataPage(startPage(SysDictData.class), dictData));
     }
 
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)

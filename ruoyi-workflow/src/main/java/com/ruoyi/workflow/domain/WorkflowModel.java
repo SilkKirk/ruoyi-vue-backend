@@ -1,6 +1,8 @@
 package com.ruoyi.workflow.domain;
 
+import java.util.Date;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

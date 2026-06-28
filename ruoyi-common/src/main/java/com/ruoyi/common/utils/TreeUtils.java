@@ -40,7 +40,7 @@ public class TreeUtils {
             tree.put("raw", entity);
         });
 
-        if (treeList.isEmpty()) return list;
+        if (treeList == null || treeList.isEmpty()) return list;
 
         return treeList.stream()
             .map(node -> treeToEntity(node, childrenSetter))

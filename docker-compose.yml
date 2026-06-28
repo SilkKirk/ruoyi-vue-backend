@@ -1,0 +1,77 @@
+# ============================================================
+# RuoYi-Vue Docker Compose
+# 启动方式: docker compose up -d
+# 访问地址: http://localhost
+# ============================================================
+version: "3.9"
+
+services:
+  # ---- MySQL ----
+  mysql:
+    image: mysql:8.4
+    container_name: ruoyi-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ruoyi
+      MYSQL_USER: ruoyi
+      MYSQL_PASSWORD: ruoyi123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Redis ----
+  redis:
+    image: redis:7-alpine
+    container_name: ruoyi-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- 后端 ----
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ruoyi-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ruoyi?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+      SPRING_DATASOURCE_USERNAME: ruoyi
+      SPRING_DATASOURCE_PASSWORD: ruoyi123
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ""
+    ports:
+      - "8080:8080"
+
+  # ---- 前端 ----
+  frontend:
+    build:
+      context: ../ruoyi-vue3
+      dockerfile: Dockerfile
+    container_name: ruoyi-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql-data:

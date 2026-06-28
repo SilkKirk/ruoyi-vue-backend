@@ -33,25 +33,21 @@ public class WorkflowTaskController extends BaseController
     /**
      * 查询我的待办任务
      */
-    @PreAuthorize("@ss.hasPermi('workflow:task:list')")
+    @PreAuthorize("@ss.hasPermi('workflow:task:todoList')")
     @GetMapping("/todoList")
     public TableDataInfo todoList(WorkflowTask task)
     {
-        Page<WorkflowTask> page = startPage(WorkflowTask.class);
-        workflowTaskService.selectTodoList(page, task);
-        return getDataTable(page);
+        return getDataTable(workflowTaskService.selectTodoList(startPage(WorkflowTask.class), task));
     }
 
     /**
      * 查询我的已办任务
      */
-    @PreAuthorize("@ss.hasPermi('workflow:task:list')")
+    @PreAuthorize("@ss.hasPermi('workflow:task:doneList')")
     @GetMapping("/doneList")
     public TableDataInfo doneList(WorkflowTask task)
     {
-        Page<WorkflowTask> page = startPage(WorkflowTask.class);
-        workflowTaskService.selectDoneList(page, task);
-        return getDataTable(page);
+        return getDataTable(workflowTaskService.selectDoneList(startPage(WorkflowTask.class), task));
     }
 
     /**

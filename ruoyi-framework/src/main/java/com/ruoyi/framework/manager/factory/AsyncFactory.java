@@ -10,6 +10,7 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.http.UserAgentUtils;
 import com.ruoyi.common.utils.ip.AddressUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysLogininfor;
 import com.ruoyi.system.domain.SysOperLog;
@@ -45,7 +46,7 @@ public class AsyncFactory
             @Override
             public void run()
             {
-                String address = AddressUtils.getRealAddressByIP(ip);
+                String address = RuoYiConfig.isAddressEnabled() ? AddressUtils.getRealAddressByIP(ip) : "内网IP";
                 StringBuilder s = new StringBuilder();
                 s.append(LogUtils.getBlock(ip));
                 s.append(address);
@@ -97,7 +98,9 @@ public class AsyncFactory
             public void run()
             {
                 // 远程查询操作地点
-                operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
+                if (RuoYiConfig.isAddressEnabled()) {
+                    operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
+                }
                 SpringUtils.getBean(ISysOperLogService.class).insertOperlog(operLog);
             }
         };

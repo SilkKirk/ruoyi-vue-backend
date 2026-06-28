@@ -38,9 +38,7 @@ public class SysOperlogController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysOperLog operLog)
     {
-        Page<SysOperLog> page = startPage(SysOperLog.class);
-        page = operLogService.selectOperLogPage(page, operLog);
-        return getDataTable(page);
+        return getDataTable(operLogService.selectOperLogPage(startPage(SysOperLog.class), operLog));
     }
 
     @Log(title = "操作日志", businessType = BusinessType.EXPORT)

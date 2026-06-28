@@ -18,10 +18,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ThreadPoolConfig
 {
     // 核心线程池大小
-    private int corePoolSize = 50;
+    private int corePoolSize = 10;
 
     // 最大可创建的线程数
-    private int maxPoolSize = 200;
+    private int maxPoolSize = 50;
 
     // 队列最大长度
     private int queueCapacity = 1000;
@@ -48,7 +48,7 @@ public class ThreadPoolConfig
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService()
     {
-        return new ScheduledThreadPoolExecutor(corePoolSize,
+        return new ScheduledThreadPoolExecutor(5,
                 new ThreadFactoryBuilder().setNamePrefix("schedule-pool-").setDaemon(true).build(),
                 new ThreadPoolExecutor.CallerRunsPolicy())
         {

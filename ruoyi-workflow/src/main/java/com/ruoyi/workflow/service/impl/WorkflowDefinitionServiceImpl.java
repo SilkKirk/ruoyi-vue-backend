@@ -2,9 +2,11 @@ package com.ruoyi.workflow.service.impl;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -133,6 +135,20 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
         def.setDescription(pd.getDescription());
         def.setDeploymentId(pd.getDeploymentId());
         def.setSuspended(pd.isSuspended() ? 1 : 0);
+        // 查询部署时间
+        try
+        {
+            Deployment deployment = repositoryService.createDeploymentQuery()
+                    .deploymentId(pd.getDeploymentId()).singleResult();
+            if (deployment != null)
+            {
+                def.setDeployTime(deployment.getDeploymentTime());
+            }
+        }
+        catch (Exception e)
+        {
+            // 部署时间查询失败不影响主流程
+        }
         return def;
     }
 }

@@ -44,9 +44,7 @@ public class SysPostController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysPost post)
     {
-        Page<SysPost> page = startPage(SysPost.class);
-        page = postService.selectPostPage(page, post);
-        return getDataTable(page);
+        return getDataTable(postService.selectPostPage(startPage(SysPost.class), post));
     }
     
     @Log(title = "岗位管理", businessType = BusinessType.EXPORT)

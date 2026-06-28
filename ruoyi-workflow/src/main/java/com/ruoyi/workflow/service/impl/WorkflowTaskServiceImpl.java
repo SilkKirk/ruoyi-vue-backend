@@ -290,9 +290,16 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 
         // 流程开始事件
         if (hpi != null) {
+            // 查询发起人名称（优先用 initiator 流程变量）
+            String initiator = null;
+            HistoricVariableInstance initVar = historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(instanceId).variableName("initiator").singleResult();
+            if (initVar != null) {
+                initiator = (String) initVar.getValue();
+            }
             Map<String, Object> startEvent = new HashMap<>();
             startEvent.put("taskName", "流程发起");
-            startEvent.put("assignee", hpi.getStartUserId());
+            startEvent.put("assignee", initiator != null ? initiator : hpi.getStartUserId());
             startEvent.put("startTime", hpi.getStartTime());
             startEvent.put("endTime", hpi.getStartTime());
             startEvent.put("comment", "");

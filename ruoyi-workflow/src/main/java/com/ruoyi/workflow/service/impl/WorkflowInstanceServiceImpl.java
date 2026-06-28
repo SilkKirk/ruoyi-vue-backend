@@ -225,6 +225,9 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
             wi.setVersion(pd.getVersion());
         }
         wi.setBusinessType((String) runtimeService.getVariable(pi.getId(), "businessType"));
+        // 从流程变量中读取发起人名称（由 startProcess 时设置）
+        String initiator = (String) runtimeService.getVariable(pi.getId(), "initiator");
+        wi.setStartUserName(initiator != null ? initiator : pi.getStartUserId());
         return wi;
     }
 
@@ -249,6 +252,10 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         HistoricVariableInstance btVar = (HistoricVariableInstance) historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(hpi.getId()).variableName("businessType").singleResult();
         wi.setBusinessType(btVar != null ? (String) btVar.getValue() : null);
+        // 从历史流程变量中读取发起人名称
+        HistoricVariableInstance initVar = (HistoricVariableInstance) historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(hpi.getId()).variableName("initiator").singleResult();
+        wi.setStartUserName(initVar != null ? (String) initVar.getValue() : hpi.getStartUserId());
         return wi;
     }
 }

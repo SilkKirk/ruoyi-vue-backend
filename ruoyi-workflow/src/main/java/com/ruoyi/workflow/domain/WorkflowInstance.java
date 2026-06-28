@@ -2,6 +2,7 @@ package com.ruoyi.workflow.domain;
 
 import java.util.Date;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -38,9 +39,11 @@ public class WorkflowInstance extends BaseEntity
     private String startUserName;
 
     /** 发起时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
 
     /** 结束时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
 
     /** 状态（RUNNING=运行中, SUSPENDED=挂起, COMPLETED=已完成, TERMINATED=已终止） */

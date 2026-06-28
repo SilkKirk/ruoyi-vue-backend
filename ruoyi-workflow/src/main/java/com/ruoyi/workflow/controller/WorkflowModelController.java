@@ -40,9 +40,7 @@ public class WorkflowModelController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(WorkflowModel model)
     {
-        Page<WorkflowModel> page = startPage(WorkflowModel.class);
-        workflowModelService.selectModelList(page, model);
-        return getDataTable(page);
+        return getDataTable(workflowModelService.selectModelList(startPage(WorkflowModel.class), model));
     }
 
     /**

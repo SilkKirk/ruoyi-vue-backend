@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.DataScope;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -58,9 +59,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysRole role)
     {
-        Page<SysRole> page = startPage(SysRole.class);
-        page = roleService.selectRolePage(page, role);
-        return getDataTable(page);
+        return getDataTable(roleService.selectRolePage(startPage(SysRole.class), role));
     }
 
     @Log(title = "角色管理", businessType = BusinessType.EXPORT)
@@ -177,9 +176,9 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping("/optionselect")
-    public AjaxResult optionselect()
+    public AjaxResult optionselect(SysRole role)
     {
-        return success(roleService.selectRoleAll());
+        return success(roleService.selectRoleList(role));
     }
 
     /**
@@ -189,9 +188,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/allocatedList")
     public TableDataInfo allocatedList(SysUser user)
     {
-        Page<SysUser> page = startPage(SysUser.class);
-        page = userService.selectAllocatedPage(page, user);
-        return getDataTable(page);
+        return getDataTable(userService.selectAllocatedPage(startPage(SysUser.class), user));
     }
 
     /**
@@ -201,9 +198,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/unallocatedList")
     public TableDataInfo unallocatedList(SysUser user)
     {
-        Page<SysUser> page = startPage(SysUser.class);
-        page = userService.selectUnallocatedPage(page, user);
-        return getDataTable(page);
+        return getDataTable(userService.selectUnallocatedPage(startPage(SysUser.class), user));
     }
 
     /**

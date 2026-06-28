@@ -38,9 +38,7 @@ public class WorkflowInstanceController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(WorkflowInstance instance)
     {
-        Page<WorkflowInstance> page = startPage(WorkflowInstance.class);
-        workflowInstanceService.selectInstanceList(page, instance);
-        return getDataTable(page);
+        return getDataTable(workflowInstanceService.selectInstanceList(startPage(WorkflowInstance.class), instance));
     }
 
     /**

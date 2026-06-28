@@ -41,7 +41,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
         return deptMapper.selectListByQuery(qw);
     }
 
-    @Override public List<TreeSelect> selectDeptTreeList(SysDept dept) { return buildDeptTreeSelect(selectDeptList(dept)); }
+    @Override
+    public List<TreeSelect> selectDeptTreeList(SysDept dept) {
+        // 直接基于数据权限过滤结果构建树，不过滤祖先节点，权限优先
+        return buildDeptTreeSelect(selectDeptList(dept));
+    }
     @Override
     public int selectNormalChildrenDeptById(Long deptId) {
         return (int) deptMapper.selectCountByQuery(

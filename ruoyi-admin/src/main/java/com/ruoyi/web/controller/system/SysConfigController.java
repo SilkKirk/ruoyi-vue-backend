@@ -51,9 +51,7 @@ public class SysConfigController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysConfig config)
     {
-        Page<SysConfig> page = startPage(SysConfig.class);
-        page = configService.selectConfigPage(page, config);
-        return getDataTable(page);
+        return getDataTable(configService.selectConfigPage(startPage(SysConfig.class), config));
     }
 
     @Log(title = "参数管理", businessType = BusinessType.EXPORT)

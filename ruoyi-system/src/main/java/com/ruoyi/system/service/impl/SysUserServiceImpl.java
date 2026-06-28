@@ -114,6 +114,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user != null && user.getDeptId() != null) {
             user.setDept(deptMapper.selectOneById(user.getDeptId()));
         }
+        if (user != null) {
+            user.setRoles(roleMapper.selectListByQuery(
+                QueryWrapper.create()
+                    .select("r.*").from("sys_role").as("r")
+                    .leftJoin("sys_user_role").as("ur").on("r.role_id = ur.role_id")
+                    .where("ur.user_id = ?", user.getUserId())
+            ));
+        }
         return user;
     }
 

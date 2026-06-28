@@ -42,9 +42,7 @@ public class SysDictTypeController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysDictType dictType)
     {
-        Page<SysDictType> page = startPage(SysDictType.class);
-        page = dictTypeService.selectDictTypePage(page, dictType);
-        return getDataTable(page);
+        return getDataTable(dictTypeService.selectDictTypePage(startPage(SysDictType.class), dictType));
     }
 
     @Log(title = "字典类型", businessType = BusinessType.EXPORT)
