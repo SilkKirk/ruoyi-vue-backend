@@ -44,6 +44,9 @@ public class WorkflowTask extends BaseEntity
     /** 任务办理人名称 */
     private String assigneeName;
 
+    /** 任务办理人部门 */
+    private String deptName;
+
     /** 候选人IDs（逗号分隔） */
     private String candidateUsers;
 

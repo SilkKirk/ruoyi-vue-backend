@@ -45,6 +45,16 @@ public class WorkflowInstanceController extends BaseController
     }
 
     /**
+     * 查询我的流程列表（当前用户发起的所有任务）
+     */
+    @PreAuthorize("@ss.hasPermi('workflow:instance:list')")
+    @GetMapping("/myList")
+    public TableDataInfo myList(WorkflowInstance instance)
+    {
+        return getDataTable(workflowInstanceService.selectMyInstanceList(startPage(WorkflowInstance.class), instance));
+    }
+
+    /**
      * 启动流程实例
      */
     @PreAuthorize("@ss.hasPermi('workflow:instance:start')")

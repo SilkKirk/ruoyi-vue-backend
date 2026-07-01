@@ -37,6 +37,11 @@ public interface IWorkflowInstanceService
     String getInstanceDiagram(String instanceId);
 
     /**
+     * 查询我的流程（当前用户发起的）
+     */
+    Page<WorkflowInstance> selectMyInstanceList(Page<WorkflowInstance> page, WorkflowInstance instance);
+
+    /**
      * 根据流程实例ID查询
      */
     WorkflowInstance selectInstanceById(String instanceId);

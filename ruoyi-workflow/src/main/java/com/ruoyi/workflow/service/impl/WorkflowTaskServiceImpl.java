@@ -8,6 +8,7 @@ import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
+import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
@@ -21,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.mybatisflex.core.paginate.Page;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.workflow.domain.WorkflowTask;
 import com.ruoyi.workflow.handler.WorkflowBusinessHandler;
 import com.ruoyi.workflow.handler.WorkflowBusinessHandlerRegistry;
@@ -50,6 +53,9 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 
     @Autowired
     private WorkflowBusinessHandlerRegistry handlerRegistry;
+
+    @Autowired
+    private ISysUserService sysUserService;
 
     @Override
     public Page<WorkflowTask> selectTodoList(Page<WorkflowTask> page, WorkflowTask task)
@@ -197,6 +203,11 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         // 设置流程变量
         Map<String, Object> vars = variables != null ? variables : new HashMap<>();
         vars.put("businessType", businessType);
+        // 设置流程发起人（确保 Flowable 记录 startUserId）
+        String loginUsername = SecurityUtils.getUsername();
+        if (StrUtil.isNotBlank(loginUsername)) {
+            Authentication.setAuthenticatedUserId(loginUsername);
+        }
         // 启动流程
         ProcessInstance pi = runtimeService.startProcessInstanceById(pd.getId(), businessId, vars);
         // 回调处理器
@@ -291,15 +302,29 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         // 流程开始事件
         if (hpi != null) {
             // 查询发起人名称（优先用 initiator 流程变量）
-            String initiator = null;
+            String initiatorUserId = hpi.getStartUserId();
             HistoricVariableInstance initVar = historyService.createHistoricVariableInstanceQuery()
                     .processInstanceId(instanceId).variableName("initiator").singleResult();
             if (initVar != null) {
-                initiator = (String) initVar.getValue();
+                initiatorUserId = (String) initVar.getValue();
+            }
+            // 查询发起人的昵称和部门
+            String initiatorName = initiatorUserId;
+            String initiatorDept = "";
+            if (StrUtil.isNotBlank(initiatorUserId)) {
+                SysUser initUser = sysUserService.selectUserByUserName(initiatorUserId);
+                if (initUser != null) {
+                    initiatorName = initUser.getNickName();
+                    if (initUser.getDept() != null) {
+                        initiatorDept = initUser.getDept().getDeptName();
+                    }
+                }
             }
             Map<String, Object> startEvent = new HashMap<>();
             startEvent.put("taskName", "流程发起");
-            startEvent.put("assignee", initiator != null ? initiator : hpi.getStartUserId());
+            startEvent.put("assignee", initiatorUserId);
+            startEvent.put("assigneeName", initiatorName);
+            startEvent.put("assigneeDeptName", initiatorDept);
             startEvent.put("startTime", hpi.getStartTime());
             startEvent.put("endTime", hpi.getStartTime());
             startEvent.put("comment", "");
@@ -326,6 +351,20 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
             Map<String, Object> item = new HashMap<>();
             item.put("taskName", hti.getName());
             item.put("assignee", hti.getAssignee());
+            // 查询审批人昵称和部门
+            String assigneeName = hti.getAssignee();
+            String assigneeDept = "";
+            if (StrUtil.isNotBlank(hti.getAssignee())) {
+                SysUser usr = sysUserService.selectUserByUserName(hti.getAssignee());
+                if (usr != null) {
+                    assigneeName = usr.getNickName();
+                    if (usr.getDept() != null) {
+                        assigneeDept = usr.getDept().getDeptName();
+                    }
+                }
+            }
+            item.put("assigneeName", assigneeName);
+            item.put("assigneeDeptName", assigneeDept);
             item.put("startTime", hti.getCreateTime());
             item.put("endTime", hti.getEndTime());
             item.put("duration", hti.getDurationInMillis());
@@ -406,6 +445,9 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         wt.setAssignee(task.getAssignee());
         wt.setCreateTime(task.getCreateTime());
 
+        // 补全办理人名称和部门
+        fillUserInfo(wt, task.getAssignee());
+
         // 获取流程名称（从ProcessDefinition）
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(task.getProcessDefinitionId()).singleResult();
@@ -442,6 +484,9 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         wt.setCreateTime(task.getCreateTime());
         wt.setCompleteTime(task.getEndTime());
 
+        // 补全办理人名称和部门
+        fillUserInfo(wt, task.getAssignee());
+
         // 获取流程名称（从ProcessDefinition）
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(task.getProcessDefinitionId()).singleResult();
@@ -466,4 +511,19 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         }
         return wt;
     }
+
+    /**
+     * 根据用户名补全用户昵称和部门名称
+     */
+    private void fillUserInfo(WorkflowTask wt, String username) {
+        if (StrUtil.isBlank(username)) return;
+        SysUser user = sysUserService.selectUserByUserName(username);
+        if (user != null) {
+            wt.setAssigneeName(user.getNickName());
+            if (user.getDept() != null) {
+                wt.setDeptName(user.getDept().getDeptName());
+            }
+        }
+    }
+
 }

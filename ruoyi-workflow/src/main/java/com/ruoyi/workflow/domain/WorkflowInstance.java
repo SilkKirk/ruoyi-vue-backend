@@ -60,4 +60,11 @@ public class WorkflowInstance extends BaseEntity
 
     /** 业务类型（如 leave） */
     private String businessType;
+
+    /** 业务详情前端路由 */
+    private String detailRoute;
+
+    /** 业务摘要 */
+    private String businessSummary;
+
 }

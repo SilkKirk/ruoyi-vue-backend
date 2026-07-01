@@ -7,6 +7,7 @@ import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
+import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.workflow.domain.WorkflowInstance;
+import com.ruoyi.workflow.handler.WorkflowBusinessHandler;
+import com.ruoyi.workflow.handler.WorkflowBusinessHandlerRegistry;
 import com.ruoyi.workflow.service.IWorkflowInstanceService;
 import cn.hutool.core.util.StrUtil;
 
@@ -38,6 +41,9 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
 
     @Autowired
     private HistoryService historyService;
+
+    @Autowired
+    private WorkflowBusinessHandlerRegistry handlerRegistry;
 
     @Override
     public Page<WorkflowInstance> selectInstanceList(Page<WorkflowInstance> page, WorkflowInstance instance)
@@ -82,9 +88,14 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         }
 
         // 设置发起人
+        String loginUsername = SecurityUtils.getUsername();
         if (variables != null)
         {
-            variables.put("initiator", SecurityUtils.getUsername());
+            variables.put("initiator", loginUsername);
+        }
+        // 设置 Flowable 认证用户，确保 startUserId 被记录
+        if (StrUtil.isNotBlank(loginUsername)) {
+            Authentication.setAuthenticatedUserId(loginUsername);
         }
 
         ProcessInstance processInstance = runtimeService
@@ -184,6 +195,39 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
     }
 
     @Override
+    public Page<WorkflowInstance> selectMyInstanceList(Page<WorkflowInstance> page, WorkflowInstance instance)
+    {
+        String username = SecurityUtils.getUsername();
+
+        // 同时查运行中和已完成的流程实例（按发起人筛选）
+        List<HistoricProcessInstance> histList = historyService.createHistoricProcessInstanceQuery()
+                .startedBy(username)
+                .orderByProcessInstanceStartTime().desc()
+                .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
+                        Math.toIntExact(page.getPageSize()));
+
+        long count = historyService.createHistoricProcessInstanceQuery()
+                .startedBy(username)
+                .count();
+
+        // 组装结果
+        List<WorkflowInstance> resultList = histList.stream()
+                .map(this::convertHistoricToWorkflowInstance)
+                .collect(Collectors.toList());
+
+        // 修正状态：运行中的实例状态应为 RUNNING（历史查询返回的已完成实例已完成，运行中的没有 endTime）
+        for (int i = 0; i < resultList.size(); i++) {
+            if (resultList.get(i).getEndTime() == null) {
+                resultList.get(i).setStatus("RUNNING");
+            }
+        }
+
+        page.setRecords(resultList);
+        page.setTotalRow(count);
+        return page;
+    }
+
+    @Override
     public WorkflowInstance selectInstanceById(String instanceId)
     {
         ProcessInstance pi = runtimeService.createProcessInstanceQuery()
@@ -228,6 +272,17 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         // 从流程变量中读取发起人名称（由 startProcess 时设置）
         String initiator = (String) runtimeService.getVariable(pi.getId(), "initiator");
         wi.setStartUserName(initiator != null ? initiator : pi.getStartUserId());
+
+        // 当前活动节点
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(pi.getProcessDefinitionId());
+        List<String> activeIds = runtimeService.getActiveActivityIds(pi.getId());
+        if (!activeIds.isEmpty() && bpmnModel != null) {
+            wi.setCurrentActivity(activeIds.stream()
+                    .map(id -> { org.flowable.bpmn.model.FlowElement fe = bpmnModel.getFlowElement(id);
+                        return fe != null ? (fe.getName() != null ? fe.getName() : fe.getId()) : id; })
+                    .collect(Collectors.joining(",")));
+        }
+        fillBusinessInfo(wi);
         return wi;
     }
 
@@ -247,8 +302,27 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         wi.setStartUserId(hpi.getStartUserId());
         wi.setStartTime(hpi.getStartTime());
         wi.setEndTime(hpi.getEndTime());
+        // 先标记为已完成，如果是运行中的由调用方修正
         wi.setStatus("COMPLETED");
         wi.setDeploymentId(hpi.getDeploymentId());
+
+        // 如果流程还在运行中，查询当前活动节点
+        if (hpi.getEndTime() == null) {
+            ProcessInstance runningPi = runtimeService.createProcessInstanceQuery()
+                    .processInstanceId(hpi.getId()).singleResult();
+            if (runningPi != null) {
+                List<String> activeIds = runtimeService.getActiveActivityIds(runningPi.getId());
+                if (!activeIds.isEmpty()) {
+                    BpmnModel bpmnModel = repositoryService.getBpmnModel(hpi.getProcessDefinitionId());
+                    if (bpmnModel != null) {
+                        wi.setCurrentActivity(activeIds.stream()
+                                .map(id -> { org.flowable.bpmn.model.FlowElement fe = bpmnModel.getFlowElement(id);
+                                    return fe != null ? (fe.getName() != null ? fe.getName() : fe.getId()) : id; })
+                                .collect(Collectors.joining(",")));
+                    }
+                }
+            }
+        }
         HistoricVariableInstance btVar = (HistoricVariableInstance) historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(hpi.getId()).variableName("businessType").singleResult();
         wi.setBusinessType(btVar != null ? (String) btVar.getValue() : null);
@@ -256,6 +330,22 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         HistoricVariableInstance initVar = (HistoricVariableInstance) historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(hpi.getId()).variableName("initiator").singleResult();
         wi.setStartUserName(initVar != null ? (String) initVar.getValue() : hpi.getStartUserId());
+        fillBusinessInfo(wi);
         return wi;
+    }
+
+    /**
+     * 补全业务摘要和详情路由
+     */
+    private void fillBusinessInfo(WorkflowInstance wi) {
+        if (StrUtil.isBlank(wi.getBusinessType()) || StrUtil.isBlank(wi.getBusinessKey())) return;
+        try {
+            WorkflowBusinessHandler h = handlerRegistry.getHandler(wi.getBusinessType());
+            Object data = h.loadBusinessData(wi.getBusinessKey());
+            if (data != null) {
+                wi.setDetailRoute(h.getDetailRoute());
+                wi.setBusinessSummary(h.getBusinessSummary(data));
+            }
+        } catch (Exception ignored) {}
     }
 }
