@@ -30,7 +30,6 @@ import java.util.Map;
 @RequestMapping("/workflow/model")
 public class WorkflowModelController extends BaseController
 {
-    @Autowired
     private static final Logger log = LoggerFactory.getLogger(WorkflowModelController.class);
     @Autowired
     private IWorkflowModelService workflowModelService;

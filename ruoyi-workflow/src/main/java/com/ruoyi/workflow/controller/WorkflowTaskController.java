@@ -29,7 +29,6 @@ import com.ruoyi.workflow.service.IWorkflowTaskService;
 @RequestMapping("/workflow/task")
 public class WorkflowTaskController extends BaseController
 {
-    @Autowired
     private static final Logger log = LoggerFactory.getLogger(WorkflowTaskController.class);
     @Autowired
     private IWorkflowTaskService workflowTaskService;

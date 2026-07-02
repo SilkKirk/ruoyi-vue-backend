@@ -59,7 +59,7 @@ public class WorkflowDefinitionController extends BaseController
     public AjaxResult updateState(@RequestBody Map<String, Object> params)
     {
         String definitionId = (String) params.get("definitionId");
-        int state = (int) params.get("state");
+        int state = ((Number) params.get("state")).intValue();
         return toAjax(workflowDefinitionService.updateState(definitionId, state));
     }
 

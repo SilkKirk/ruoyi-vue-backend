@@ -29,7 +29,6 @@ import com.ruoyi.workflow.service.IWorkflowInstanceService;
 @RequestMapping("/workflow/instance")
 public class WorkflowInstanceController extends BaseController
 {
-    @Autowired
     private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceController.class);
     @Autowired
     private IWorkflowInstanceService workflowInstanceService;
@@ -100,7 +99,7 @@ public class WorkflowInstanceController extends BaseController
     public AjaxResult updateState(@RequestBody Map<String, Object> params)
     {
         String instanceId = (String) params.get("instanceId");
-        int state = (int) params.get("state");
+        int state = ((Number) params.get("state")).intValue();
         workflowInstanceService.updateState(instanceId, state);
         return success();
     }
