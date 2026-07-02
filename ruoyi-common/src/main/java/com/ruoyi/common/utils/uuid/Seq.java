@@ -2,7 +2,7 @@ package com.ruoyi.common.utils.uuid;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import cn.hutool.core.date.DateUtil;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * @author ruoyi 序列生成类
@@ -81,6 +81,6 @@ public class Seq
             atomicInt.set(1);
         }
         // 转字符串，用0左补齐
-        return StringUtils.padl(value, length);
+        return StrUtil.padPre(String.valueOf(value), length, '0');
     }
 }

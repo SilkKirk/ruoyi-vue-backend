@@ -99,14 +99,14 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
     @Override
     public void resetConfigCache() { clearConfigCache(); loadingConfigCache(); }
 
-    @Override @Transactional
+    @Override @Transactional(rollbackFor = Exception.class)
     public boolean save(SysConfig config) {
         boolean result = super.save(config);
         if (result) resetConfigCache();
         return result;
     }
 
-    @Override @Transactional
+    @Override @Transactional(rollbackFor = Exception.class)
     public boolean updateById(SysConfig config) {
         boolean result = super.updateById(config);
         if (result) resetConfigCache();

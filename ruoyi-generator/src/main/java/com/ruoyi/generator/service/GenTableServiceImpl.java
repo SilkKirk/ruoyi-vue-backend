@@ -213,7 +213,7 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateGenTable(GenTable genTable)
     {
         String options = JSON.toJSONString(genTable.getParams());
@@ -236,7 +236,7 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteGenTableByIds(Long[] tableIds)
     {
         genTableMapper.deleteBatchByIds(Arrays.asList(tableIds));
@@ -263,7 +263,7 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
      * @param tableList 导入表列表
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void importGenTable(List<GenTable> tableList, String tplWebType, String operName)
     {
         try
@@ -387,7 +387,7 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
      * @param tableName 表名称
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void synchDb(String tableName)
     {
         GenTable table = genTableMapper.selectOneByQuery(QueryWrapper.create().where(GenTable::getTableName).eq(tableName));

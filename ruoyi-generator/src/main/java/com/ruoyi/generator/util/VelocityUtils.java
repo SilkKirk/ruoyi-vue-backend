@@ -14,7 +14,6 @@ import com.ruoyi.generator.domain.GenTableColumn;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.map.MapUtil;
-import com.ruoyi.common.utils.StringUtils;
 
 /**
  * 模板处理工具类
@@ -127,7 +126,7 @@ public class VelocityUtils
         String subTableName = genTable.getSubTableName();
         String subTableFkName = genTable.getSubTableFkName();
         String subClassName = genTable.getSubTable().getClassName();
-        String subTableFkClassName = StringUtils.convertToCamelCase(subTableFkName);
+        String subTableFkClassName = StrUtil.toCamelCase(subTableFkName);
 
         context.put("subTable", subTable);
         context.put("subTableName", subTableName);

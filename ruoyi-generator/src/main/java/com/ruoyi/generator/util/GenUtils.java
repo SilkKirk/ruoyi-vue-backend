@@ -7,7 +7,6 @@ import com.ruoyi.generator.config.GenConfig;
 import com.ruoyi.generator.domain.GenTable;
 import com.ruoyi.generator.domain.GenTableColumn;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.common.utils.StringUtils;
 
 /**
  * 代码生成器 工具类
@@ -184,7 +183,7 @@ public class GenUtils
             String[] searchList = StrUtil.splitToArray(tablePrefix, ",");
             tableName = replaceFirst(tableName, searchList);
         }
-        return StringUtils.convertToCamelCase(tableName);
+        return StrUtil.toCamelCase(tableName);
     }
 
     /**

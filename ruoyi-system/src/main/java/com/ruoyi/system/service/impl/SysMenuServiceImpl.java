@@ -180,7 +180,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return roleMenuMapper.selectCountByQuery(QueryWrapper.create().where(SysRoleMenu::getMenuId).eq(menuId)) > 0;
     }
 
-    @Override @Transactional
+    @Override @Transactional(rollbackFor = Exception.class)
     public void updateMenuSort(String[] menuIds, String[] orderNums) {
         for (int i = 0; i < menuIds.length; i++) {
             SysMenu menu = new SysMenu(); menu.setMenuId(Convert.toLong(menuIds[i])); menu.setOrderNum(Convert.toInt(orderNums[i]));

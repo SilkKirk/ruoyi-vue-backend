@@ -137,7 +137,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
             children.forEach(deptMapper::update);
     }
 
-    @Override @Transactional
+    @Override @Transactional(rollbackFor = Exception.class)
     public void updateDeptSort(String[] deptIds, String[] orderNums) {
         for (int i = 0; i < deptIds.length; i++) {
             SysDept dept = new SysDept();

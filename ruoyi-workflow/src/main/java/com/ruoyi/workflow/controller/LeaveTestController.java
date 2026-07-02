@@ -23,6 +23,9 @@ public class LeaveTestController extends BaseController {
     @Autowired
     private ILeaveTestService leaveTestService;
 
+    @Autowired
+    private IWorkflowTaskService workflowTaskService;
+
     @PreAuthorize("@ss.hasPermi('workflow:leave:list')")
     @GetMapping("/list")
     public TableDataInfo list(LeaveTest leaveTest) {
@@ -73,6 +76,4 @@ public class LeaveTestController extends BaseController {
         return success();
     }
 
-    @Autowired
-    private IWorkflowTaskService workflowTaskService;
 }

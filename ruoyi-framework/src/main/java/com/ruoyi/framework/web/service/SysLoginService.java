@@ -19,7 +19,6 @@ import com.ruoyi.common.exception.user.CaptchaExpireException;
 import com.ruoyi.common.exception.user.UserNotExistsException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
 import cn.hutool.core.date.DateUtil;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.manager.AsyncManager;
@@ -113,7 +112,7 @@ public class SysLoginService
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         if (captchaEnabled)
         {
-            String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
+            String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StrUtil.blankToDefault(uuid, "");
             String captcha = redisCache.getCacheObject(verifyKey);
             if (captcha == null)
             {
