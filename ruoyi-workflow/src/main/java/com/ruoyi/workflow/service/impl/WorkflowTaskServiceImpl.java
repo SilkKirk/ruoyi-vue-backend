@@ -15,7 +15,8 @@ import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
-import org.flowable.image.impl.DefaultProcessDiagramGenerator;
+import org.flowable.engine.ProcessEngine;
+import org.flowable.image.ProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,9 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 
     @Autowired
     private WorkflowBusinessHandlerRegistry handlerRegistry;
+
+    @Autowired
+    private ProcessEngine processEngine;
 
     @Autowired
     private ISysUserService sysUserService;
@@ -416,7 +420,7 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 
         try
         {
-            DefaultProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
+            ProcessDiagramGenerator generator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
             InputStream is = generator.generateDiagram(
                     bpmnModel, "png", activeActivityIds, new ArrayList<>(),
                     "宋体", "宋体", "宋体", null, 1.0,

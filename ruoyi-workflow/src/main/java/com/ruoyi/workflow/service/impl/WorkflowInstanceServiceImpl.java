@@ -13,7 +13,8 @@ import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
-import org.flowable.image.impl.DefaultProcessDiagramGenerator;
+import org.flowable.engine.ProcessEngine;
+import org.flowable.image.ProcessDiagramGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,9 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
 
     @Autowired
     private HistoryService historyService;
+
+    @Autowired
+    private ProcessEngine processEngine;
 
     @Autowired
     private WorkflowBusinessHandlerRegistry handlerRegistry;
@@ -179,7 +183,7 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         // 生成高亮流程图
         try
         {
-            DefaultProcessDiagramGenerator generator = new DefaultProcessDiagramGenerator();
+            ProcessDiagramGenerator generator = processEngine.getProcessEngineConfiguration().getProcessDiagramGenerator();
             InputStream is = generator.generateDiagram(
                     bpmnModel, "png", new ArrayList<>(allHighlighted), new ArrayList<>(),
                     "宋体", "宋体", "宋体", null, 1.0,

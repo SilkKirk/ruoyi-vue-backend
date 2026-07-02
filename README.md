@@ -15,7 +15,7 @@
 
 * 本仓库为基于 [RuoYi-Vue](https://gitee.com/y_project/RuoYi-Vue) 的定制分支，在官方基础上进行了以下改进：
 * **ORM 框架**：MyBatis → **MyBatis-Flex**（v1.11.8），更轻量、更灵活。
-* **工作流引擎**：新增 **ruoyi-workflow** 模块，集成 **Flowable 7.1.0** 工作流引擎，支持流程设计、审批流转等。
+* **工作流引擎**：新增 **ruoyi-workflow** 模块，集成 **Flowable 8.0.0** 工作流引擎，支持流程设计、审批流转等。
 * **Spring Boot**：升级至 **4.1.0**，基于 JDK 17。
 * **API 文档**：Swagger → **SpringDoc**（v3.0.3），更贴合 Spring Boot 4 生态。
 * **Docker 部署**：提供 Dockerfile 及 docker-compose.yml，一键启动前后端 + MySQL + Redis。
@@ -29,8 +29,8 @@
 | :------------ | :----------------- | :----------------------------------- |
 | ORM           | MyBatis            | **MyBatis-Flex**                     |
 | Spring Boot   | 3.x                | **4.1.0**                           |
-| JDK           | 17+                | **17**                               |
-| 工作流        | 无                 | **Flowable 7.1.0（ruoyi-workflow）** |
+| JDK           | 17+                | **17+**                              |
+| 工作流        | 无                 | **Flowable 8.0.0（ruoyi-workflow）** |
 | API 文档      | Swagger            | **SpringDoc**                        |
 | 工具库        | -                  | **Hutool, Lombok**                   |
 | 容器部署      | -                  | **Docker + docker-compose**          |

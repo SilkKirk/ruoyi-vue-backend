@@ -2,7 +2,7 @@
 
 ## 项目结构
 
-Maven 多模块（7 个），JDK 17，Spring Boot 4.1.0，MyBatis-Flex，Flowable 7.1.0，SpringDoc。
+Maven 多模块（7 个），JDK 17+，Spring Boot 4.1.0，MyBatis-Flex，Flowable 8.0.0，SpringDoc。
 
 | 模块 | 用途 |
 |------|------|
@@ -19,7 +19,7 @@ Maven 多模块（7 个），JDK 17，Spring Boot 4.1.0，MyBatis-Flex，Flowabl
 ```bash
 mvn clean package -DskipTests          # 构建（无测试配置，默认跳过）
 java -jar ruoyi-admin/target/ruoyi-admin.jar
-ry.sh start|stop|restart|status        # Linux 启停
+ry.sh start|stop|restart|status        # Linux 启停（仅 Linux 可用）
 docker compose up -d                   # Docker 一键部署（含前端）
 ```
 
@@ -46,7 +46,7 @@ docker compose up -d                   # Docker 一键部署（含前端）
 ### Flowable 工作流
 - `database-schema-update: true` 启动时自动建表
 - `check-process-definitions: false` 不自动部署 classpath 下的 BPMN 文件
-- Flowable 7.1.0 可能有已知 CVE，注意及时更新
+- Flowable 8.0.0
 
 ## 已知问题（来自代码审查）
 
