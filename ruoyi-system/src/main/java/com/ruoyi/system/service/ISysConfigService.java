@@ -1,5 +1,7 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
+import com.mybatisflex.core.paginate.Page;
 import java.util.List;
 import com.ruoyi.system.domain.SysConfig;
 
@@ -8,15 +10,17 @@ import com.ruoyi.system.domain.SysConfig;
  * 
  * @author ruoyi
  */
-public interface ISysConfigService
+public interface ISysConfigService extends IService<SysConfig>
 {
     /**
-     * 查询参数配置信息
-     * 
-     * @param configId 参数配置ID
-     * @return 参数配置信息
+     * 查询参数配置列表
      */
-    public SysConfig selectConfigById(Long configId);
+    public List<SysConfig> selectConfigList(SysConfig config);
+
+    /**
+     * 分页查询参数配置
+     */
+    public Page<SysConfig> selectConfigPage(Page<SysConfig> page, SysConfig config);
 
     /**
      * 根据键名查询参数配置信息
@@ -32,37 +36,6 @@ public interface ISysConfigService
      * @return true开启，false关闭
      */
     public boolean selectCaptchaEnabled();
-
-    /**
-     * 查询参数配置列表
-     * 
-     * @param config 参数配置信息
-     * @return 参数配置集合
-     */
-    public List<SysConfig> selectConfigList(SysConfig config);
-
-    /**
-     * 新增参数配置
-     * 
-     * @param config 参数配置信息
-     * @return 结果
-     */
-    public int insertConfig(SysConfig config);
-
-    /**
-     * 修改参数配置
-     * 
-     * @param config 参数配置信息
-     * @return 结果
-     */
-    public int updateConfig(SysConfig config);
-
-    /**
-     * 批量删除参数信息
-     * 
-     * @param configIds 需要删除的参数ID
-     */
-    public void deleteConfigByIds(Long[] configIds);
 
     /**
      * 加载参数缓存数据

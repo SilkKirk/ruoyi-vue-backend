@@ -4,7 +4,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,14 +16,14 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.common.utils.file.MimeTypeUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 个人信息 业务处理
@@ -59,7 +58,7 @@ public class SysProfileController extends BaseController
      * 修改用户
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping
     public AjaxResult updateProfile(@RequestBody SysUser user)
     {
         LoginUser loginUser = getLoginUser();
@@ -68,11 +67,11 @@ public class SysProfileController extends BaseController
         currentUser.setEmail(user.getEmail());
         currentUser.setPhonenumber(user.getPhonenumber());
         currentUser.setSex(user.getSex());
-        if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(currentUser))
+        if (StrUtil.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(currentUser))
         {
             return error("修改用户'" + loginUser.getUsername() + "'失败，手机号码已存在");
         }
-        if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(currentUser))
+        if (StrUtil.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(currentUser))
         {
             return error("修改用户'" + loginUser.getUsername() + "'失败，邮箱账号已存在");
         }
@@ -89,7 +88,7 @@ public class SysProfileController extends BaseController
      * 重置密码
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping("/updatePwd")
+    @PostMapping("/updatePwd")
     public AjaxResult updatePwd(@RequestBody Map<String, String> params)
     {
         String oldPassword = params.get("oldPassword");
@@ -110,7 +109,7 @@ public class SysProfileController extends BaseController
         if (userService.resetUserPwd(userId, newPassword) > 0)
         {
             // 更新缓存用户密码&密码最后更新时间
-            loginUser.getUser().setPwdUpdateDate(DateUtils.getNowDate());
+            loginUser.getUser().setPwdUpdateDate(DateUtil.date());
             loginUser.getUser().setPassword(newPassword);
             tokenService.setLoginUser(loginUser);
             return success();
@@ -132,7 +131,7 @@ public class SysProfileController extends BaseController
             if (userService.updateUserAvatar(loginUser.getUserId(), avatar))
             {
                 String oldAvatar = loginUser.getUser().getAvatar();
-                if (StringUtils.isNotEmpty(oldAvatar))
+                if (StrUtil.isNotEmpty(oldAvatar))
                 {
                     FileUtils.deleteFile(RuoYiConfig.getProfile() + FileUtils.stripPrefix(oldAvatar));
                 }

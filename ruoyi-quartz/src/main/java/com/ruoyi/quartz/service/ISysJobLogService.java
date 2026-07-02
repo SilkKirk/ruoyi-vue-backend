@@ -1,6 +1,8 @@
 package com.ruoyi.quartz.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.quartz.domain.SysJobLog;
 
 /**
@@ -8,7 +10,7 @@ import com.ruoyi.quartz.domain.SysJobLog;
  * 
  * @author ruoyi
  */
-public interface ISysJobLogService
+public interface ISysJobLogService extends IService<SysJobLog>
 {
     /**
      * 获取quartz调度器日志的计划任务
@@ -18,36 +20,7 @@ public interface ISysJobLogService
      */
     public List<SysJobLog> selectJobLogList(SysJobLog jobLog);
 
-    /**
-     * 通过调度任务日志ID查询调度信息
-     * 
-     * @param jobLogId 调度任务日志ID
-     * @return 调度任务日志对象信息
-     */
-    public SysJobLog selectJobLogById(Long jobLogId);
-
-    /**
-     * 新增任务日志
-     * 
-     * @param jobLog 调度日志信息
-     */
-    public void addJobLog(SysJobLog jobLog);
-
-    /**
-     * 批量删除调度日志信息
-     * 
-     * @param logIds 需要删除的日志ID
-     * @return 结果
-     */
-    public int deleteJobLogByIds(Long[] logIds);
-
-    /**
-     * 删除任务日志
-     * 
-     * @param jobId 调度日志ID
-     * @return 结果
-     */
-    public int deleteJobLogById(Long jobId);
+    public Page<SysJobLog> selectJobLogPage(Page<SysJobLog> page, SysJobLog jobLog);
 
     /**
      * 清空任务日志

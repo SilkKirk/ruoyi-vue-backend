@@ -1,5 +1,6 @@
 package ${packageName}.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 #foreach ($column in $columns)
 #if($column.javaField == 'createTime' || $column.javaField == 'updateTime')
@@ -7,7 +8,6 @@ import com.ruoyi.common.utils.DateUtils;
 #break
 #end
 #end
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 #if($table.sub)
 import java.util.ArrayList;
@@ -15,6 +15,9 @@ import com.ruoyi.common.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import ${packageName}.domain.${subClassName};
 #end
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import ${packageName}.mapper.${ClassName}Mapper;
 import ${packageName}.domain.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
@@ -26,59 +29,84 @@ import ${packageName}.service.I${ClassName}Service;
  * @date ${datetime}
  */
 @Service
-public class ${ClassName}ServiceImpl implements I${ClassName}Service 
+public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}> implements I${ClassName}Service
 {
-    @Autowired
-    private ${ClassName}Mapper ${className}Mapper;
-
     /**
-     * 查询${functionName}
-     * 
-     * @param ${pkColumn.javaField} ${functionName}主键
-     * @return ${functionName}
-     */
-    @Override
-    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-        return ${className}Mapper.select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField});
-    }
-
-    /**
-     * 查询${functionName}列表
+     * 查询${functionName}列表（不分页）
      * 
      * @param ${className} ${functionName}
      * @return ${functionName}
      */
     @Override
-    public List<${ClassName}> select${ClassName}List(${ClassName} ${className})
+    public List<${ClassName}> select${BusinessName}List(${ClassName} ${className})
     {
-        return ${className}Mapper.select${ClassName}List(${className});
+        return mapper.selectListByQuery(buildQuery(${className}));
     }
 
+    /**
+     * 分页查询${functionName}列表
+     * 
+     * @param page 分页对象
+     * @param ${className} ${functionName}
+     * @return 分页结果
+     */
+    @Override
+    public Page<${ClassName}> select${BusinessName}Page(Page<${ClassName}> page, ${ClassName} ${className})
+    {
+        return mapper.paginate(page, buildQuery(${className}));
+    }
+
+    /**
+     * 构建查询条件
+     */
+    private QueryWrapper buildQuery(${ClassName} ${className})
+    {
+        QueryWrapper qw = QueryWrapper.create();
+#foreach($column in $columns)
+#if($column.query)
+#if($column.queryType == "EQ")
+        if (${className}.get${column.capJavaField}() != null) qw.eq(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "NE")
+        if (${className}.get${column.capJavaField}() != null) qw.ne(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "GT")
+        if (${className}.get${column.capJavaField}() != null) qw.gt(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "GTE")
+        if (${className}.get${column.capJavaField}() != null) qw.ge(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "LT")
+        if (${className}.get${column.capJavaField}() != null) qw.lt(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "LTE")
+        if (${className}.get${column.capJavaField}() != null) qw.le(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "LIKE")
+        if (${className}.get${column.capJavaField}() != null) qw.like(${ClassName}::get${column.capJavaField}, ${className}.get${column.capJavaField}());
+#elseif($column.queryType == "BETWEEN")
+        if (${className}.getParams().get("begin${column.capJavaField}") != null && ${className}.getParams().get("end${column.capJavaField}") != null)
+            qw.between(${ClassName}::get${column.capJavaField}, ${className}.getParams().get("begin${column.capJavaField}"), ${className}.getParams().get("end${column.capJavaField}"));
+#end
+#end
+#end
+        return qw;
+    }
+
+#if($table.sub)
     /**
      * 新增${functionName}
      * 
      * @param ${className} ${functionName}
      * @return 结果
      */
-#if($table.sub)
     @Transactional
-#end
     @Override
-    public int insert${ClassName}(${ClassName} ${className})
+    public boolean save(${ClassName} ${className})
     {
 #foreach ($column in $columns)
 #if($column.javaField == 'createTime')
         ${className}.setCreateTime(DateUtils.getNowDate());
 #end
 #end
-#if($table.sub)
-        int rows = ${className}Mapper.insert${ClassName}(${className});
-        insert${subClassName}(${className});
-        return rows;
-#else
-        return ${className}Mapper.insert${ClassName}(${className});
-#end
+        ${className}Mapper mapper = (${ClassName}Mapper) this.mapper;
+        mapper.insertSelective(${className});
+        insertSub(${className});
+        return true;
     }
 
     /**
@@ -87,67 +115,26 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
      * @param ${className} ${functionName}
      * @return 结果
      */
-#if($table.sub)
     @Transactional
-#end
     @Override
-    public int update${ClassName}(${ClassName} ${className})
+    public boolean updateById(${ClassName} ${className})
     {
 #foreach ($column in $columns)
 #if($column.javaField == 'updateTime')
         ${className}.setUpdateTime(DateUtils.getNowDate());
 #end
 #end
-#if($table.sub)
-        ${className}Mapper.delete${subClassName}By${subTableFkClassName}(${className}.get${pkColumn.capJavaField}());
-        insert${subClassName}(${className});
-#end
-        return ${className}Mapper.update${ClassName}(${className});
+        mapper.deleteByQuery(QueryWrapper.create().where(${subClassName}::get${subTableFkClassName}).eq(${className}.get${pkColumn.capJavaField}()));
+        insertSub(${className});
+        return super.updateById(${className});
     }
-
-    /**
-     * 批量删除${functionName}
-     * 
-     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键
-     * @return 结果
-     */
-#if($table.sub)
-    @Transactional
-#end
-    @Override
-    public int delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s)
-    {
-#if($table.sub)
-        ${className}Mapper.delete${subClassName}By${subTableFkClassName}s(${pkColumn.javaField}s);
-#end
-        return ${className}Mapper.delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaField}s);
-    }
-
-    /**
-     * 删除${functionName}信息
-     * 
-     * @param ${pkColumn.javaField} ${functionName}主键
-     * @return 结果
-     */
-#if($table.sub)
-    @Transactional
-#end
-    @Override
-    public int delete${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
-    {
-#if($table.sub)
-        ${className}Mapper.delete${subClassName}By${subTableFkClassName}(${pkColumn.javaField});
-#end
-        return ${className}Mapper.delete${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField});
-    }
-#if($table.sub)
 
     /**
      * 新增${subTable.functionName}信息
      * 
      * @param ${className} ${functionName}对象
      */
-    public void insert${subClassName}(${ClassName} ${className})
+    public void insertSub(${ClassName} ${className})
     {
         List<${subClassName}> ${subclassName}List = ${className}.get${subClassName}List();
         ${pkColumn.javaType} ${pkColumn.javaField} = ${className}.get${pkColumn.capJavaField}();
@@ -161,7 +148,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
             }
             if (list.size() > 0)
             {
-                ${className}Mapper.batch${subClassName}(list);
+                mapper.insertBatch(list, list.size());
             }
         }
     }

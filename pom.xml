@@ -17,20 +17,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
-        <spring-boot.version>4.0.6</spring-boot.version>
-        <mybatis-spring-boot.version>4.0.1</mybatis-spring-boot.version>
+        <spring-boot.version>3.5.14</spring-boot.version>
+        <mybatis-flex.version>1.10.9</mybatis-flex.version>
         <druid.version>1.2.28</druid.version>
         <yauaa.version>8.1.1</yauaa.version>
         <kaptcha.version>2.3.3</kaptcha.version>
-        <pagehelper.boot.version>4.1.0</pagehelper.boot.version>
         <fastjson.version>2.0.62</fastjson.version>
         <oshi.version>7.3.0</oshi.version>
         <commons.io.version>2.22.0</commons.io.version>
         <poi.version>4.1.2</poi.version>
         <velocity.version>2.3</velocity.version>
-        <jwt.version>0.9.1</jwt.version>
-        <jaxb-api.version>2.3.1</jaxb-api.version>
-        <springdoc.version>3.0.3</springdoc.version>
+        <jwt.version>0.12.6</jwt.version>
+        <springdoc.version>2.8.17</springdoc.version>
+        <lombok.version>1.18.38</lombok.version>
+        <hutool.version>5.8.34</hutool.version>
+        <flowable.version>7.1.0</flowable.version>
     </properties>
 
     <!-- 依赖声明 -->
@@ -49,7 +50,7 @@
             <!-- 阿里数据库连接池 -->
             <dependency>
                 <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-4-starter</artifactId>
+                <artifactId>druid-spring-boot-3-starter</artifactId>
                 <version>${druid.version}</version>
             </dependency>
 
@@ -60,11 +61,11 @@
                 <version>${yauaa.version}</version>
             </dependency>
 
-            <!-- pagehelper 分页插件 -->
+            <!-- MyBatis-Flex 框架 -->
             <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>${pagehelper.boot.version}</version>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
+                <version>${mybatis-flex.version}</version>
             </dependency>
 
             <dependency>
@@ -124,8 +125,20 @@
             <!-- Token生成与解析-->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
+                <artifactId>jjwt-api</artifactId>
                 <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
             </dependency>
 
             <!-- 验证码 -->
@@ -156,6 +169,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 工作流模块-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-workflow</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
             <!-- 系统模块-->
             <dependency>
                 <groupId>com.ruoyi</groupId>
@@ -170,8 +190,45 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Hutool Java工具类库 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- Flowable 工作流引擎 -->
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-process</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- 所有子模块继承的依赖 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+            <!-- Hutool Java工具类库 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+    </dependencies>
 
     <modules>
         <module>ruoyi-admin</module>
@@ -180,6 +237,7 @@
         <module>ruoyi-quartz</module>
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
+        <module>ruoyi-workflow</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -194,6 +252,13 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>

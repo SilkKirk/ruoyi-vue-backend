@@ -1,21 +1,20 @@
 package com.ruoyi.common.core.domain.model;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import lombok.Data;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * 登录用户身份权限
  * 
  * @author ruoyi
  */
+@Data
 public class LoginUser implements UserDetails
 {
     private static final long serialVersionUID = 1L;
@@ -263,16 +262,9 @@ public class LoginUser implements UserDetails
     }
 
     @Override
-    @JSONField(serialize = false)
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        if (permissions == null || permissions.isEmpty())
-        {
-            return Collections.emptyList();
-        }
-        return permissions.stream()
-            .filter(Objects::nonNull)
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
+        return null;
     }
 }
+

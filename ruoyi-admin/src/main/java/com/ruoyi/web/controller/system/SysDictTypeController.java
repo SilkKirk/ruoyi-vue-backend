@@ -1,15 +1,15 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.Arrays;
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +18,9 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDictType;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.service.ISysDictTypeService;
 
@@ -38,9 +40,7 @@ public class SysDictTypeController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysDictType dictType)
     {
-        startPage();
-        List<SysDictType> list = dictTypeService.selectDictTypeList(dictType);
-        return getDataTable(list);
+        return getDataTable(dictTypeService.selectDictTypePage(startPage(SysDictType.class), dictType));
     }
 
     @Log(title = "字典类型", businessType = BusinessType.EXPORT)
@@ -60,7 +60,7 @@ public class SysDictTypeController extends BaseController
     @GetMapping(value = "/{dictId}")
     public AjaxResult getInfo(@PathVariable Long dictId)
     {
-        return success(dictTypeService.selectDictTypeById(dictId));
+        return success(dictTypeService.getById(dictId));
     }
 
     /**
@@ -76,7 +76,12 @@ public class SysDictTypeController extends BaseController
             return error("新增字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setCreateBy(getUsername());
-        return toAjax(dictTypeService.insertDictType(dict));
+        if (dictTypeService.save(dict))
+        {
+            DictUtils.setDictCache(dict.getDictType(), null);
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -84,7 +89,7 @@ public class SysDictTypeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dict:edit')")
     @Log(title = "字典类型", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     public AjaxResult edit(@Validated @RequestBody SysDictType dict)
     {
         if (!dictTypeService.checkDictTypeUnique(dict))
@@ -92,7 +97,12 @@ public class SysDictTypeController extends BaseController
             return error("修改字典'" + dict.getDictName() + "'失败，字典类型已存在");
         }
         dict.setUpdateBy(getUsername());
-        return toAjax(dictTypeService.updateDictType(dict));
+        if (dictTypeService.updateById(dict))
+        {
+            DictUtils.removeDictCache(dict.getDictType());
+            return success();
+        }
+        return error();
     }
 
     /**
@@ -100,10 +110,17 @@ public class SysDictTypeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dict:remove')")
     @Log(title = "字典类型", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{dictIds}")
+    @PostMapping("/{dictIds}")
     public AjaxResult remove(@PathVariable Long[] dictIds)
     {
-        dictTypeService.deleteDictTypeByIds(dictIds);
+        for (Long dictId : dictIds)
+        {
+            SysDictType dictType = dictTypeService.getById(dictId);
+            if (dictTypeService.hasDictDataByType(dictType.getDictType()))
+                return warn(dictType.getDictName() + "已分配,不能删除");
+            DictUtils.removeDictCache(dictType.getDictType());
+        }
+        dictTypeService.removeByIds(Arrays.asList(dictIds));
         return success();
     }
 
@@ -112,7 +129,7 @@ public class SysDictTypeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dict:remove')")
     @Log(title = "字典类型", businessType = BusinessType.CLEAN)
-    @DeleteMapping("/refreshCache")
+    @PostMapping("/refreshCache")
     public AjaxResult refreshCache()
     {
         dictTypeService.resetDictCache();
@@ -125,7 +142,8 @@ public class SysDictTypeController extends BaseController
     @GetMapping("/optionselect")
     public AjaxResult optionselect()
     {
-        List<SysDictType> dictTypes = dictTypeService.selectDictTypeAll();
+        List<SysDictType> dictTypes = dictTypeService.list();
         return success(dictTypes);
     }
 }
+

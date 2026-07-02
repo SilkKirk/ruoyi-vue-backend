@@ -14,10 +14,10 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.ServletUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.web.service.TokenService;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 自定义退出处理类 返回成功
@@ -40,7 +40,7 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler
             throws IOException, ServletException
     {
         LoginUser loginUser = tokenService.getLoginUser(request);
-        if (StringUtils.isNotNull(loginUser))
+        if (ObjectUtil.isNotNull(loginUser))
         {
             String userName = loginUser.getUsername();
             // 删除用户缓存记录

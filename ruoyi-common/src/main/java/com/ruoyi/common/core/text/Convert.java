@@ -5,9 +5,8 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.text.NumberFormat;
 import java.util.Set;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 类型转换器
@@ -27,15 +26,7 @@ public class Convert
      */
     public static String toStr(Object value, String defaultValue)
     {
-        if (null == value)
-        {
-            return defaultValue;
-        }
-        if (value instanceof String)
-        {
-            return (String) value;
-        }
-        return value.toString();
+        return cn.hutool.core.convert.Convert.toStr(value, defaultValue);
     }
 
     /**
@@ -62,17 +53,7 @@ public class Convert
      */
     public static Character toChar(Object value, Character defaultValue)
     {
-        if (null == value)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Character)
-        {
-            return (Character) value;
-        }
-
-        final String valueStr = toStr(value, null);
-        return StringUtils.isEmpty(valueStr) ? defaultValue : valueStr.charAt(0);
+        return cn.hutool.core.convert.Convert.toChar(value, defaultValue);
     }
 
     /**
@@ -99,31 +80,7 @@ public class Convert
      */
     public static Byte toByte(Object value, Byte defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Byte)
-        {
-            return (Byte) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).byteValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return Byte.parseByte(valueStr);
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toByte(value, defaultValue);
     }
 
     /**
@@ -150,31 +107,7 @@ public class Convert
      */
     public static Short toShort(Object value, Short defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Short)
-        {
-            return (Short) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).shortValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return Short.parseShort(valueStr.trim());
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toShort(value, defaultValue);
     }
 
     /**
@@ -201,27 +134,7 @@ public class Convert
      */
     public static Number toNumber(Object value, Number defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Number)
-        {
-            return (Number) value;
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return NumberFormat.getInstance().parse(valueStr);
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toNumber(value, defaultValue);
     }
 
     /**
@@ -248,31 +161,7 @@ public class Convert
      */
     public static Integer toInt(Object value, Integer defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Integer)
-        {
-            return (Integer) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).intValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return Integer.parseInt(valueStr.trim());
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toInt(value, defaultValue);
     }
 
     /**
@@ -314,12 +203,12 @@ public class Convert
      * 转换为Integer数组<br>
      *
      * @param split 分隔符
-     * @param split 被转换的值
+     * @param str 被转换的值
      * @return 结果
      */
     public static Integer[] toIntArray(String split, String str)
     {
-        if (StringUtils.isEmpty(str))
+        if (StrUtil.isEmpty(str))
         {
             return new Integer[] {};
         }
@@ -342,7 +231,7 @@ public class Convert
      */
     public static Long[] toLongArray(String split, String str)
     {
-        if (StringUtils.isEmpty(str))
+        if (StrUtil.isEmpty(str))
         {
             return new Long[] {};
         }
@@ -364,7 +253,7 @@ public class Convert
      */
     public static String[] toStrArray(String str)
     {
-        if (StringUtils.isEmpty(str))
+        if (StrUtil.isEmpty(str))
         {
             return new String[] {};
         }
@@ -375,7 +264,7 @@ public class Convert
      * 转换为String数组<br>
      *
      * @param split 分隔符
-     * @param split 被转换的值
+     * @param str 被转换的值
      * @return 结果
      */
     public static String[] toStrArray(String split, String str)
@@ -394,32 +283,7 @@ public class Convert
      */
     public static Long toLong(Object value, Long defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Long)
-        {
-            return (Long) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).longValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            // 支持科学计数法
-            return new BigDecimal(valueStr.trim()).longValue();
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toLong(value, defaultValue);
     }
 
     /**
@@ -446,32 +310,7 @@ public class Convert
      */
     public static Double toDouble(Object value, Double defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Double)
-        {
-            return (Double) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).doubleValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            // 支持科学计数法
-            return new BigDecimal(valueStr.trim()).doubleValue();
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toDouble(value, defaultValue);
     }
 
     /**
@@ -498,31 +337,7 @@ public class Convert
      */
     public static Float toFloat(Object value, Float defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Float)
-        {
-            return (Float) value;
-        }
-        if (value instanceof Number)
-        {
-            return ((Number) value).floatValue();
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return Float.parseFloat(valueStr.trim());
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toFloat(value, defaultValue);
     }
 
     /**
@@ -549,36 +364,7 @@ public class Convert
      */
     public static Boolean toBool(Object value, Boolean defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof Boolean)
-        {
-            return (Boolean) value;
-        }
-        String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        valueStr = valueStr.trim().toLowerCase();
-        switch (valueStr)
-        {
-            case "true":
-            case "yes":
-            case "ok":
-            case "1":
-            case "是":
-                return true;
-            case "false":
-            case "no":
-            case "0":
-            case "否":
-                return false;
-            default:
-                return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toBool(value, defaultValue);
     }
 
     /**
@@ -605,29 +391,7 @@ public class Convert
      */
     public static <E extends Enum<E>> E toEnum(Class<E> clazz, Object value, E defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (clazz.isAssignableFrom(value.getClass()))
-        {
-            @SuppressWarnings("unchecked")
-            E myE = (E) value;
-            return myE;
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return Enum.valueOf(clazz, valueStr);
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toEnum(clazz, value, defaultValue);
     }
 
     /**
@@ -654,31 +418,7 @@ public class Convert
      */
     public static BigInteger toBigInteger(Object value, BigInteger defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof BigInteger)
-        {
-            return (BigInteger) value;
-        }
-        if (value instanceof Long)
-        {
-            return BigInteger.valueOf((Long) value);
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return new BigInteger(valueStr);
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toBigInteger(value, defaultValue);
     }
 
     /**
@@ -705,39 +445,7 @@ public class Convert
      */
     public static BigDecimal toBigDecimal(Object value, BigDecimal defaultValue)
     {
-        if (value == null)
-        {
-            return defaultValue;
-        }
-        if (value instanceof BigDecimal)
-        {
-            return (BigDecimal) value;
-        }
-        if (value instanceof Long)
-        {
-            return new BigDecimal((Long) value);
-        }
-        if (value instanceof Double)
-        {
-            return BigDecimal.valueOf((Double) value);
-        }
-        if (value instanceof Integer)
-        {
-            return new BigDecimal((Integer) value);
-        }
-        final String valueStr = toStr(value, null);
-        if (StringUtils.isEmpty(valueStr))
-        {
-            return defaultValue;
-        }
-        try
-        {
-            return new BigDecimal(valueStr);
-        }
-        catch (Exception e)
-        {
-            return defaultValue;
-        }
+        return cn.hutool.core.convert.Convert.toBigDecimal(value, defaultValue);
     }
 
     /**
@@ -762,7 +470,7 @@ public class Convert
      */
     public static String utf8Str(Object obj)
     {
-        return str(obj, CharsetKit.CHARSET_UTF_8);
+        return cn.hutool.core.convert.Convert.toStr(obj);
     }
 
     /**
@@ -831,7 +539,7 @@ public class Convert
      */
     public static String str(byte[] bytes, String charset)
     {
-        return str(bytes, StringUtils.isEmpty(charset) ? Charset.defaultCharset() : Charset.forName(charset));
+        return str(bytes, StrUtil.isEmpty(charset) ? Charset.defaultCharset() : Charset.forName(charset));
     }
 
     /**
@@ -914,7 +622,6 @@ public class Convert
         {
             if (null != notConvertSet && notConvertSet.contains(c[i]))
             {
-                // 跳过不替换的字符
                 continue;
             }
 
@@ -925,7 +632,6 @@ public class Convert
             else if (c[i] < '\177')
             {
                 c[i] = (char) (c[i] + 65248);
-
             }
         }
         return new String(c);
@@ -956,7 +662,6 @@ public class Convert
         {
             if (null != notConvertSet && notConvertSet.contains(c[i]))
             {
-                // 跳过不替换的字符
                 continue;
             }
 
@@ -990,7 +695,6 @@ public class Convert
         String s = "";
         for (int i = 0; i < fraction.length; i++)
         {
-            // 优化double计算精度丢失问题
             BigDecimal nNum = new BigDecimal(n);
             BigDecimal decimal = new BigDecimal(10);
             BigDecimal scale = nNum.multiply(decimal).setScale(2, RoundingMode.HALF_EVEN);

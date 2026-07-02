@@ -9,7 +9,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.ArrayUtil;
 
 /**
  * spring工具类 方便在非spring管理环境中获取bean
@@ -147,7 +147,7 @@ public final class SpringUtils implements BeanFactoryPostProcessor, ApplicationC
     public static String getActiveProfile()
     {
         final String[] activeProfiles = getActiveProfiles();
-        return StringUtils.isNotEmpty(activeProfiles) ? activeProfiles[0] : null;
+        return ArrayUtil.isNotEmpty(activeProfiles) ? activeProfiles[0] : null;
     }
 
     /**

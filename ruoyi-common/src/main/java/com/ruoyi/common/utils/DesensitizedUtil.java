@@ -1,5 +1,7 @@
 package com.ruoyi.common.utils;
 
+import cn.hutool.core.util.StrUtil;
+
 /**
  * 脱敏工具类
  *
@@ -15,11 +17,11 @@ public class DesensitizedUtil
      */
     public static String password(String password)
     {
-        if (StringUtils.isBlank(password))
+        if (StrUtil.isBlank(password))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
-        return StringUtils.repeat('*', password.length());
+        return StrUtil.repeat('*', password.length());
     }
 
     /**
@@ -30,19 +32,19 @@ public class DesensitizedUtil
      */
     public static String carLicense(String carLicense)
     {
-        if (StringUtils.isBlank(carLicense))
+        if (StrUtil.isBlank(carLicense))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         // 普通车牌
         if (carLicense.length() == 7)
         {
-            carLicense = StringUtils.hide(carLicense, 3, 6);
+            carLicense = StrUtil.hide(carLicense, 3, 6);
         }
         else if (carLicense.length() == 8)
         {
             // 新能源车牌
-            carLicense = StringUtils.hide(carLicense, 3, 7);
+            carLicense = StrUtil.hide(carLicense, 3, 7);
         }
         return carLicense;
     }

@@ -1,12 +1,15 @@
 package com.ruoyi.framework.web.domain.server;
 
-import com.ruoyi.common.utils.Arith;
+
+import lombok.Data;
+import cn.hutool.core.util.NumberUtil;
 
 /**
  * CPU相关信息
  * 
  * @author ruoyi
  */
+@Data
 public class Cpu
 {
     /**
@@ -51,7 +54,7 @@ public class Cpu
 
     public double getTotal()
     {
-        return Arith.round(Arith.mul(total, 100), 2);
+        return NumberUtil.round(NumberUtil.mul(total, 100), 2).doubleValue();
     }
 
     public void setTotal(double total)
@@ -61,7 +64,7 @@ public class Cpu
 
     public double getSys()
     {
-        return Arith.round(Arith.mul(sys / total, 100), 2);
+        return NumberUtil.round(NumberUtil.mul(sys / total, 100), 2).doubleValue();
     }
 
     public void setSys(double sys)
@@ -71,7 +74,7 @@ public class Cpu
 
     public double getUsed()
     {
-        return Arith.round(Arith.mul(used / total, 100), 2);
+        return NumberUtil.round(NumberUtil.mul(used / total, 100), 2).doubleValue();
     }
 
     public void setUsed(double used)
@@ -81,7 +84,7 @@ public class Cpu
 
     public double getWait()
     {
-        return Arith.round(Arith.mul(wait / total, 100), 2);
+        return NumberUtil.round(NumberUtil.mul(wait / total, 100), 2).doubleValue();
     }
 
     public void setWait(double wait)
@@ -91,7 +94,7 @@ public class Cpu
 
     public double getFree()
     {
-        return Arith.round(Arith.mul(free / total, 100), 2);
+        return NumberUtil.round(NumberUtil.mul(free / total, 100), 2).doubleValue();
     }
 
     public void setFree(double free)
@@ -99,3 +102,4 @@ public class Cpu
         this.free = free;
     }
 }
+

@@ -18,15 +18,16 @@ import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
 import com.ruoyi.common.exception.user.UserNotExistsException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.MessageUtils;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.security.context.AuthenticationContextHolder;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 登录校验方法
@@ -136,7 +137,7 @@ public class SysLoginService
     public void loginPreCheck(String username, String password)
     {
         // 用户名或密码为空 错误
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
+        if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password))
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("not.null")));
             throw new UserNotExistsException();
@@ -171,6 +172,6 @@ public class SysLoginService
      */
     public void recordLoginInfo(Long userId)
     {
-        userService.updateLoginInfo(userId, IpUtils.getIpAddr(), DateUtils.getNowDate());
+        userService.updateLoginInfo(userId, IpUtils.getIpAddr(), DateUtil.date());
     }
 }

@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.system.domain.SysUserOnline;
 
@@ -45,4 +46,6 @@ public interface ISysUserOnlineService
      * @return 在线用户
      */
     public SysUserOnline loginUserToUserOnline(LoginUser user);
+
+    public Page<SysUserOnline> selectUserOnlinePage(Page<SysUserOnline> page, SysUserOnline userOnline);
 }

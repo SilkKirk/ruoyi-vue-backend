@@ -1,9 +1,11 @@
 package com.ruoyi.framework.web.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +16,16 @@ import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.ServletUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.UserAgentUtils;
 import com.ruoyi.common.utils.ip.AddressUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
+import cn.hutool.core.util.IdUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * token验证处理
@@ -64,7 +67,7 @@ public class TokenService
     {
         // 获取请求携带的令牌
         String token = getToken(request);
-        if (StringUtils.isNotEmpty(token))
+        if (StrUtil.isNotEmpty(token))
         {
             try
             {
@@ -88,7 +91,7 @@ public class TokenService
      */
     public void setLoginUser(LoginUser loginUser)
     {
-        if (StringUtils.isNotNull(loginUser) && StringUtils.isNotEmpty(loginUser.getToken()))
+        if (ObjectUtil.isNotNull(loginUser) && StrUtil.isNotEmpty(loginUser.getToken()))
         {
             refreshToken(loginUser);
         }
@@ -99,7 +102,7 @@ public class TokenService
      */
     public void delLoginUser(String token)
     {
-        if (StringUtils.isNotEmpty(token))
+        if (StrUtil.isNotEmpty(token))
         {
             String userKey = getTokenKey(token);
             redisCache.deleteObject(userKey);
@@ -114,7 +117,7 @@ public class TokenService
      */
     public String createToken(LoginUser loginUser)
     {
-        String token = IdUtils.fastUUID();
+        String token = IdUtil.fastUUID();
         loginUser.setToken(token);
         setUserAgent(loginUser);
         refreshToken(loginUser);
@@ -178,10 +181,11 @@ public class TokenService
      */
     private String createToken(Map<String, Object> claims)
     {
-        String token = Jwts.builder()
-                .setClaims(claims)
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
-        return token;
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .claims(claims)
+                .signWith(key)
+                .compact();
     }
 
     /**
@@ -192,10 +196,12 @@ public class TokenService
      */
     private Claims parseToken(String token)
     {
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**
@@ -219,7 +225,7 @@ public class TokenService
     private String getToken(HttpServletRequest request)
     {
         String token = request.getHeader(header);
-        if (StringUtils.isNotEmpty(token) && token.startsWith(Constants.TOKEN_PREFIX))
+        if (StrUtil.isNotEmpty(token) && token.startsWith(Constants.TOKEN_PREFIX))
         {
             token = token.replace(Constants.TOKEN_PREFIX, "");
         }

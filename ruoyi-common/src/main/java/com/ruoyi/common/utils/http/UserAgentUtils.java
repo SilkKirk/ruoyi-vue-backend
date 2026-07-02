@@ -2,9 +2,9 @@ package com.ruoyi.common.utils.http;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.ruoyi.common.utils.StringUtils;
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * UserAgent解析工具类
@@ -51,7 +51,7 @@ public class UserAgentUtils
     {
         UserAgent.ImmutableUserAgent iua = userAgentAnalyzer.parse(userAgent);
         String agentNameVersion = iua.get(UserAgent.AGENT_NAME_VERSION).getValue();
-        if (StringUtils.isBlank(agentNameVersion) || agentNameVersion.contains("??"))
+        if (StrUtil.isBlank(agentNameVersion) || agentNameVersion.contains("??"))
         {
             return formatBrowser(userAgent);
         }
@@ -65,7 +65,7 @@ public class UserAgentUtils
     {
         UserAgent.ImmutableUserAgent iua = userAgentAnalyzer.parse(userAgent);
         String operatingSystemNameVersion = iua.get(UserAgent.OPERATING_SYSTEM_NAME_VERSION).getValue();
-        if (StringUtils.isBlank(operatingSystemNameVersion) || operatingSystemNameVersion.contains("??"))
+        if (StrUtil.isBlank(operatingSystemNameVersion) || operatingSystemNameVersion.contains("??"))
         {
             return formatOperatingSystem(userAgent);
         }
@@ -194,9 +194,9 @@ public class UserAgentUtils
      */
     private static String extractMajorVersion(String fullVersion)
     {
-        if (StringUtils.isEmpty(fullVersion))
+        if (StrUtil.isEmpty(fullVersion))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         try
         {

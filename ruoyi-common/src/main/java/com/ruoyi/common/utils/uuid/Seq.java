@@ -1,7 +1,7 @@
 package com.ruoyi.common.utils.uuid;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.StringUtils;
 
 /**
@@ -58,7 +58,7 @@ public class Seq
      */
     public static String getId(AtomicInteger atomicInt, int length)
     {
-        String result = DateUtils.dateTimeNow();
+        String result = DateUtil.now();
         result += machineCode;
         result += getSeq(atomicInt, length);
         return result;

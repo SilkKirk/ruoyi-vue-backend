@@ -9,6 +9,8 @@ import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 字典工具类
@@ -42,7 +44,7 @@ public class DictUtils
     public static List<SysDictData> getDictCache(String key)
     {
         JSONArray arrayCache = SpringUtils.getBean(RedisCache.class).getCacheObject(getCacheKey(key));
-        if (StringUtils.isNotNull(arrayCache))
+        if (ObjectUtil.isNotNull(arrayCache))
         {
             return arrayCache.toList(SysDictData.class);
         }
@@ -58,9 +60,9 @@ public class DictUtils
      */
     public static String getDictLabel(String dictType, String dictValue)
     {
-        if (StringUtils.isEmpty(dictValue))
+        if (StrUtil.isEmpty(dictValue))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         return getDictLabel(dictType, dictValue, SEPARATOR);
     }
@@ -74,9 +76,9 @@ public class DictUtils
      */
     public static String getDictValue(String dictType, String dictLabel)
     {
-        if (StringUtils.isEmpty(dictLabel))
+        if (StrUtil.isEmpty(dictLabel))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         return getDictValue(dictType, dictLabel, SEPARATOR);
     }
@@ -92,14 +94,14 @@ public class DictUtils
     public static String getDictLabel(String dictType, String dictValue, String separator)
     {
         List<SysDictData> datas = getDictCache(dictType);
-        if (StringUtils.isNull(datas) || StringUtils.isEmpty(dictValue))
+        if (ObjectUtil.isNull(datas) || StrUtil.isEmpty(dictValue))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         Map<String, String> dictMap = datas.stream().collect(HashMap::new, (map, dict) -> map.put(dict.getDictValue(), dict.getDictLabel()), Map::putAll);
-        if (!StringUtils.contains(dictValue, separator))
+        if (!StrUtil.contains(dictValue, separator))
         {
-            return dictMap.getOrDefault(dictValue, StringUtils.EMPTY);
+            return dictMap.getOrDefault(dictValue, StrUtil.EMPTY);
         }
         StringBuilder labelBuilder = new StringBuilder();
         for (String seperatedValue : dictValue.split(separator))
@@ -109,7 +111,7 @@ public class DictUtils
                 labelBuilder.append(dictMap.get(seperatedValue)).append(separator);
             }
         }
-        return StringUtils.removeEnd(labelBuilder.toString(), separator);
+        return StrUtil.removeSuffix(labelBuilder.toString(), separator);
     }
 
     /**
@@ -123,14 +125,14 @@ public class DictUtils
     public static String getDictValue(String dictType, String dictLabel, String separator)
     {
         List<SysDictData> datas = getDictCache(dictType);
-        if (StringUtils.isNull(datas) || StringUtils.isEmpty(dictLabel))
+        if (ObjectUtil.isNull(datas) || StrUtil.isEmpty(dictLabel))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         Map<String, String> dictMap = datas.stream().collect(HashMap::new, (map, dict) -> map.put(dict.getDictLabel(), dict.getDictValue()), Map::putAll);
-        if (!StringUtils.contains(dictLabel, separator))
+        if (!StrUtil.contains(dictLabel, separator))
         {
-            return dictMap.getOrDefault(dictLabel, StringUtils.EMPTY);
+            return dictMap.getOrDefault(dictLabel, StrUtil.EMPTY);
         }
         StringBuilder valueBuilder = new StringBuilder();
         for (String seperatedValue : dictLabel.split(separator))
@@ -140,7 +142,7 @@ public class DictUtils
                 valueBuilder.append(dictMap.get(seperatedValue)).append(separator);
             }
         }
-        return StringUtils.removeEnd(valueBuilder.toString(), separator);
+        return StrUtil.removeSuffix(valueBuilder.toString(), separator);
     }
 
     /**
@@ -153,9 +155,9 @@ public class DictUtils
     {
         StringBuilder propertyString = new StringBuilder();
         List<SysDictData> datas = getDictCache(dictType);
-        if (StringUtils.isNull(datas))
+        if (ObjectUtil.isNull(datas))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         for (SysDictData dict : datas)
         {
@@ -174,9 +176,9 @@ public class DictUtils
     {
         StringBuilder propertyString = new StringBuilder();
         List<SysDictData> datas = getDictCache(dictType);
-        if (StringUtils.isNull(datas))
+        if (ObjectUtil.isNull(datas))
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         for (SysDictData dict : datas)
         {

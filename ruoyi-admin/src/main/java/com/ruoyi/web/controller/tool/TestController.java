@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.utils.StringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * swagger 用户测试方法
@@ -62,7 +60,7 @@ public class TestController extends BaseController
     @PostMapping("/save")
     public R<String> save(UserEntity user)
     {
-        if (StringUtils.isNull(user) || StringUtils.isNull(user.getUserId()))
+        if (ObjectUtil.isNull(user) || ObjectUtil.isNull(user.getUserId()))
         {
             return R.fail("用户ID不能为空");
         }
@@ -71,11 +69,11 @@ public class TestController extends BaseController
     }
     
     @Operation(summary = "更新用户")
-    @PutMapping("/update")
+    @PostMapping("/update")
     public R<String> update(@RequestBody
     UserEntity user)
     {
-        if (StringUtils.isNull(user) || StringUtils.isNull(user.getUserId()))
+        if (ObjectUtil.isNull(user) || ObjectUtil.isNull(user.getUserId()))
         {
             return R.fail("用户ID不能为空");
         }
@@ -89,7 +87,7 @@ public class TestController extends BaseController
     }
     
     @Operation(summary = "删除用户信息")
-    @DeleteMapping("/{userId}")
+    @PostMapping("/{userId}")
     public R<String> delete(@PathVariable(name = "userId")
     Integer userId)
     {

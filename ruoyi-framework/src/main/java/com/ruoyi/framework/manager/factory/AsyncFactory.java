@@ -1,20 +1,22 @@
 package com.ruoyi.framework.manager.factory;
 
 import java.util.TimerTask;
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.LogUtils;
 import com.ruoyi.common.utils.ServletUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.UserAgentUtils;
 import com.ruoyi.common.utils.ip.AddressUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysLogininfor;
 import com.ruoyi.system.domain.SysOperLog;
 import com.ruoyi.system.service.ISysLogininforService;
 import com.ruoyi.system.service.ISysOperLogService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 异步工厂（产生任务用）
@@ -44,7 +46,7 @@ public class AsyncFactory
             @Override
             public void run()
             {
-                String address = AddressUtils.getRealAddressByIP(ip);
+                String address = RuoYiConfig.isAddressEnabled() ? AddressUtils.getRealAddressByIP(ip) : "内网IP";
                 StringBuilder s = new StringBuilder();
                 s.append(LogUtils.getBlock(ip));
                 s.append(address);
@@ -65,8 +67,10 @@ public class AsyncFactory
                 logininfor.setBrowser(browser);
                 logininfor.setOs(os);
                 logininfor.setMsg(message);
+                // 设置访问时间
+                logininfor.setLoginTime(new Date());
                 // 日志状态
-                if (StringUtils.equalsAny(status, Constants.LOGIN_SUCCESS, Constants.LOGOUT, Constants.REGISTER))
+                if (StrUtil.equalsAny(status, Constants.LOGIN_SUCCESS, Constants.LOGOUT, Constants.REGISTER))
                 {
                     logininfor.setStatus(Constants.SUCCESS);
                 }
@@ -94,7 +98,9 @@ public class AsyncFactory
             public void run()
             {
                 // 远程查询操作地点
-                operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
+                if (RuoYiConfig.isAddressEnabled()) {
+                    operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
+                }
                 SpringUtils.getBean(ISysOperLogService.class).insertOperlog(operLog);
             }
         };

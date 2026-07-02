@@ -1,7 +1,9 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.Date;
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.entity.SysUser;
 
 /**
@@ -9,7 +11,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  * 
  * @author ruoyi
  */
-public interface ISysUserService
+public interface ISysUserService extends IService<SysUser>
 {
     /**
      * 根据条件分页查询用户列表
@@ -34,6 +36,12 @@ public interface ISysUserService
      * @return 用户信息集合信息
      */
     public List<SysUser> selectUnallocatedList(SysUser user);
+
+    public Page<SysUser> selectUserPage(Page<SysUser> page, SysUser user);
+
+    public Page<SysUser> selectAllocatedPage(Page<SysUser> page, SysUser user);
+
+    public Page<SysUser> selectUnallocatedPage(Page<SysUser> page, SysUser user);
 
     /**
      * 通过用户名查询用户
@@ -106,28 +114,12 @@ public interface ISysUserService
     public void checkUserDataScope(Long userId);
 
     /**
-     * 新增用户信息
-     * 
-     * @param user 用户信息
-     * @return 结果
-     */
-    public int insertUser(SysUser user);
-
-    /**
      * 注册用户信息
      * 
      * @param user 用户信息
      * @return 结果
      */
     public boolean registerUser(SysUser user);
-
-    /**
-     * 修改用户信息
-     * 
-     * @param user 用户信息
-     * @return 结果
-     */
-    public int updateUser(SysUser user);
 
     /**
      * 用户授权角色
@@ -188,22 +180,6 @@ public interface ISysUserService
      * @return 结果
      */
     public int resetUserPwd(Long userId, String password);
-
-    /**
-     * 通过用户ID删除用户
-     * 
-     * @param userId 用户ID
-     * @return 结果
-     */
-    public int deleteUserById(Long userId);
-
-    /**
-     * 批量删除用户信息
-     * 
-     * @param userIds 需要删除的用户ID
-     * @return 结果
-     */
-    public int deleteUserByIds(Long[] userIds);
 
     /**
      * 导入用户数据

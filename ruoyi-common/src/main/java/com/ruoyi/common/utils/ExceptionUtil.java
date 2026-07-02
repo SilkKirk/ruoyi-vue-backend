@@ -2,7 +2,7 @@ package com.ruoyi.common.utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 错误信息处理类。
@@ -23,7 +23,7 @@ public class ExceptionUtil
 
     public static String getRootErrorMessage(Exception e)
     {
-        Throwable root = ExceptionUtils.getRootCause(e);
+        Throwable root = cn.hutool.core.exceptions.ExceptionUtil.getRootCause(e);
         root = (root == null ? e : root);
         if (root == null)
         {
@@ -34,6 +34,6 @@ public class ExceptionUtil
         {
             return "null";
         }
-        return StringUtils.defaultString(msg);
+        return StrUtil.nullToEmpty(msg);
     }
 }

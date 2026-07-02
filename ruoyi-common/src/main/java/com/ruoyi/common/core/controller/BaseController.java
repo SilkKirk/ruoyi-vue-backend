@@ -7,19 +7,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.PageUtils;
+import cn.hutool.core.date.DateUtil;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.sql.SqlUtil;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * web层通用数据处理
@@ -42,51 +39,32 @@ public class BaseController
             @Override
             public void setAsText(String text)
             {
-                setValue(DateUtils.parseDate(text));
+                setValue(DateUtil.parse(text.toString()));
             }
         });
     }
 
     /**
-     * 设置请求分页数据
+     * 获取 MyBatis-Flex 分页对象（从请求参数构建）
      */
-    protected void startPage()
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected <T> Page<T> startPage(Class<T> clazz)
     {
-        PageUtils.startPage();
-    }
-
-    /**
-     * 设置请求排序数据
-     */
-    protected void startOrderBy()
-    {
-        PageDomain pageDomain = TableSupport.buildPageRequest();
-        if (StringUtils.isNotEmpty(pageDomain.getOrderBy()))
-        {
-            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
-            PageHelper.orderBy(orderBy);
-        }
-    }
-
-    /**
-     * 清理分页的线程变量
-     */
-    protected void clearPage()
-    {
-        PageUtils.clearPage();
+        PageDomain pd = TableSupport.buildPageRequest();
+        return Page.of(pd.getPageNum(), pd.getPageSize());
     }
 
     /**
      * 响应请求分页数据
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected TableDataInfo getDataTable(List<?> list)
+    protected TableDataInfo getDataTable(Page<?> page)
     {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
-        rspData.setRows(list);
-        rspData.setTotal(new PageInfo(list).getTotal());
+        rspData.setRows(page.getRecords());
+        rspData.setTotal(page.getTotalRow());
         return rspData;
     }
 
@@ -165,7 +143,7 @@ public class BaseController
      */
     public String redirect(String url)
     {
-        return StringUtils.format("redirect:{}", url);
+        return StrUtil.format("redirect:{}", url);
     }
 
     /**

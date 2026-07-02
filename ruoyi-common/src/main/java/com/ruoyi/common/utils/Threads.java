@@ -18,18 +18,11 @@ public class Threads
     private static final Logger logger = LoggerFactory.getLogger(Threads.class);
 
     /**
-     * sleep等待,单位为毫秒
+     * sleep等待,单位为毫秒（委托 Hutool ThreadUtil）
      */
     public static void sleep(long milliseconds)
     {
-        try
-        {
-            Thread.sleep(milliseconds);
-        }
-        catch (InterruptedException e)
-        {
-            return;
-        }
+        cn.hutool.core.thread.ThreadUtil.sleep(milliseconds);
     }
 
     /**

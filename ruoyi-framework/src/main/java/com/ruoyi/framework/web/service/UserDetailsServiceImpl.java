@@ -12,33 +12,23 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.enums.UserStatus;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysUserService;
+import cn.hutool.core.util.ObjectUtil;
 
-/**
- * 用户验证处理
- *
- * @author ruoyi
- */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService
 {
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
-    @Autowired
-    private ISysUserService userService;
-    
-    @Autowired
-    private SysPasswordService passwordService;
-
-    @Autowired
-    private SysPermissionService permissionService;
+    @Autowired private ISysUserService userService;
+    @Autowired private SysPasswordService passwordService;
+    @Autowired private SysPermissionService permissionService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         SysUser user = userService.selectUserByUserName(username);
-        if (StringUtils.isNull(user))
+        if (ObjectUtil.isNull(user))
         {
             log.info("登录用户：{} 不存在.", username);
             throw new ServiceException(MessageUtils.message("user.not.exists"));
@@ -53,9 +43,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
             log.info("登录用户：{} 已被停用.", username);
             throw new ServiceException(MessageUtils.message("user.blocked"));
         }
-
         passwordService.validate(user);
-
         return createLoginUser(user);
     }
 

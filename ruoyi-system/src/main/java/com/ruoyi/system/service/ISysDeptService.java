@@ -1,5 +1,6 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -9,7 +10,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
  * 
  * @author ruoyi
  */
-public interface ISysDeptService
+public interface ISysDeptService extends IService<SysDept>
 {
     /**
      * 查询部门管理数据
@@ -52,14 +53,6 @@ public interface ISysDeptService
     public List<Long> selectDeptListByRoleId(Long roleId);
 
     /**
-     * 根据部门ID查询信息
-     * 
-     * @param deptId 部门ID
-     * @return 部门信息
-     */
-    public SysDept selectDeptById(Long deptId);
-
-    /**
      * 根据ID查询所有子部门（正常状态）
      * 
      * @param deptId 部门ID
@@ -97,36 +90,12 @@ public interface ISysDeptService
      * @param deptId 部门id
      */
     public void checkDeptDataScope(Long deptId);
-
-    /**
-     * 新增保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    public int insertDept(SysDept dept);
-
-    /**
-     * 修改保存部门信息
-     * 
-     * @param dept 部门信息
-     * @return 结果
-     */
-    public int updateDept(SysDept dept);
-
-    /**
+/**
      * 保存部门排序
      *
      * @param deptIds 部门ID数组
      * @param orderNums 排序数组
      */
     public void updateDeptSort(String[] deptIds, String[] orderNums);
-
-    /**
-     * 删除部门管理信息
-     * 
-     * @param deptId 部门ID
-     * @return 结果
-     */
-    public int deleteDeptById(Long deptId);
 }
+

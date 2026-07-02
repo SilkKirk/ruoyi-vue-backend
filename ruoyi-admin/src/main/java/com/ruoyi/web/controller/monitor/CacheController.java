@@ -12,15 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysCache;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 缓存监控
@@ -62,8 +62,8 @@ public class CacheController
         commandStats.stringPropertyNames().forEach(key -> {
             Map<String, String> data = new HashMap<>(2);
             String property = commandStats.getProperty(key);
-            data.put("name", StringUtils.removeStart(key, "cmdstat_"));
-            data.put("value", StringUtils.substringBetween(property, "calls=", ",usec"));
+            data.put("name", StrUtil.removePrefix(key, "cmdstat_"));
+            data.put("value", StrUtil.subBetween(property, "calls=", ",usec"));
             pieList.add(data);
         });
         result.put("commandStats", pieList);
@@ -95,7 +95,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheName/{cacheName}")
+    @PostMapping("/clearCacheName/{cacheName}")
     public AjaxResult clearCacheName(@PathVariable String cacheName)
     {
         Collection<String> cacheKeys = redisTemplate.keys(cacheName + "*");
@@ -104,7 +104,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheKey/{cacheKey}")
+    @PostMapping("/clearCacheKey/{cacheKey}")
     public AjaxResult clearCacheKey(@PathVariable String cacheKey)
     {
         redisTemplate.delete(cacheKey);
@@ -112,7 +112,7 @@ public class CacheController
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")
-    @DeleteMapping("/clearCacheAll")
+    @PostMapping("/clearCacheAll")
     public AjaxResult clearCacheAll()
     {
         Collection<String> cacheKeys = redisTemplate.keys("*");

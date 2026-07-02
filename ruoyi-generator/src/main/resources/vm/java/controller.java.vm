@@ -21,6 +21,7 @@ import ${packageName}.service.I${ClassName}Service;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 #if($table.crud || $table.sub)
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.mybatisflex.core.paginate.Page;
 #elseif($table.tree)
 #end
 
@@ -45,14 +46,13 @@ public class ${ClassName}Controller extends BaseController
 #if($table.crud || $table.sub)
     public TableDataInfo list(${ClassName} ${className})
     {
-        startPage();
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
-        return getDataTable(list);
+        Page<${ClassName}> page = startPage(${ClassName}.class);
+        return getDataTable(${className}Service.select${BusinessName}Page(page, ${className}));
     }
 #elseif($table.tree)
     public AjaxResult list(${ClassName} ${className})
     {
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
+        List<${ClassName}> list = ${className}Service.select${BusinessName}List(${className});
         return success(list);
     }
 #end
@@ -65,7 +65,7 @@ public class ${ClassName}Controller extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, ${ClassName} ${className})
     {
-        List<${ClassName}> list = ${className}Service.select${ClassName}List(${className});
+        List<${ClassName}> list = ${className}Service.select${BusinessName}List(${className});
         ExcelUtil<${ClassName}> util = new ExcelUtil<${ClassName}>(${ClassName}.class);
         util.exportExcel(response, list, "${functionName}数据");
     }
@@ -77,7 +77,7 @@ public class ${ClassName}Controller extends BaseController
     @GetMapping(value = "/{${pkColumn.javaField}}")
     public AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField})
     {
-        return success(${className}Service.select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaField}));
+        return success(${className}Service.getById(${pkColumn.javaField}));
     }
 
     /**
@@ -88,7 +88,7 @@ public class ${ClassName}Controller extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody ${ClassName} ${className})
     {
-        return toAjax(${className}Service.insert${ClassName}(${className}));
+        return toAjax(${className}Service.save(${className}));
     }
 
     /**
@@ -99,7 +99,7 @@ public class ${ClassName}Controller extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody ${ClassName} ${className})
     {
-        return toAjax(${className}Service.update${ClassName}(${className}));
+        return toAjax(${className}Service.updateById(${className}));
     }
 
     /**
@@ -110,6 +110,6 @@ public class ${ClassName}Controller extends BaseController
 	@DeleteMapping("/{${pkColumn.javaField}s}")
     public AjaxResult remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s)
     {
-        return toAjax(${className}Service.delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaField}s));
+        return toAjax(${className}Service.removeByIds(Arrays.asList(${pkColumn.javaField}s)));
     }
 }

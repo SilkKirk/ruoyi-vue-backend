@@ -1,5 +1,6 @@
 package com.ruoyi.quartz.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
 import org.quartz.JobDataMap;
@@ -9,6 +10,8 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.exception.job.TaskException;
 import com.ruoyi.quartz.domain.SysJob;
@@ -16,6 +19,8 @@ import com.ruoyi.quartz.mapper.SysJobMapper;
 import com.ruoyi.quartz.service.ISysJobService;
 import com.ruoyi.quartz.util.CronUtils;
 import com.ruoyi.quartz.util.ScheduleUtils;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 定时任务调度信息 服务层
@@ -23,7 +28,7 @@ import com.ruoyi.quartz.util.ScheduleUtils;
  * @author ruoyi
  */
 @Service
-public class SysJobServiceImpl implements ISysJobService
+public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJob> implements ISysJobService
 {
     @Autowired
     private Scheduler scheduler;
@@ -38,7 +43,7 @@ public class SysJobServiceImpl implements ISysJobService
     public void init() throws SchedulerException, TaskException
     {
         scheduler.clear();
-        List<SysJob> jobList = jobMapper.selectJobAll();
+        List<SysJob> jobList = jobMapper.selectListByQuery(QueryWrapper.create());
         for (SysJob job : jobList)
         {
             ScheduleUtils.createScheduleJob(scheduler, job);
@@ -54,7 +59,27 @@ public class SysJobServiceImpl implements ISysJobService
     @Override
     public List<SysJob> selectJobList(SysJob job)
     {
-        return jobMapper.selectJobList(job);
+        QueryWrapper qw = buildJobQuery(job);
+        return jobMapper.selectListByQuery(qw);
+    }
+
+    private QueryWrapper buildJobQuery(SysJob job) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StrUtil.isNotEmpty(job.getJobName())) qw.like(SysJob::getJobName, job.getJobName());
+        if (StrUtil.isNotEmpty(job.getJobGroup())) qw.eq(SysJob::getJobGroup, job.getJobGroup());
+        if (StrUtil.isNotEmpty(job.getStatus())) qw.eq(SysJob::getStatus, job.getStatus());
+        if (StrUtil.isNotEmpty(job.getInvokeTarget())) qw.like(SysJob::getInvokeTarget, job.getInvokeTarget());
+        if (ObjectUtil.isNotNull(job.getParams().get("beginTime"))) qw.ge(SysJob::getCreateTime, job.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(job.getParams().get("endTime"))) qw.le(SysJob::getCreateTime, job.getParams().get("endTime"));
+        qw.orderBy(SysJob::getCreateTime, false);
+        return qw;
+    }
+
+    @Override
+    public Page<SysJob> selectJobPage(Page<SysJob> page, SysJob job)
+    {
+        QueryWrapper qw = buildJobQuery(job);
+        return jobMapper.paginate(page, qw);
     }
 
     /**
@@ -66,7 +91,7 @@ public class SysJobServiceImpl implements ISysJobService
     @Override
     public SysJob selectJobById(Long jobId)
     {
-        return jobMapper.selectJobById(jobId);
+        return jobMapper.selectOneById(jobId);
     }
 
     /**
@@ -81,7 +106,7 @@ public class SysJobServiceImpl implements ISysJobService
         Long jobId = job.getJobId();
         String jobGroup = job.getJobGroup();
         job.setStatus(ScheduleConstants.Status.PAUSE.getValue());
-        int rows = jobMapper.updateJob(job);
+        int rows = jobMapper.update(job);
         if (rows > 0)
         {
             scheduler.pauseJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -101,7 +126,7 @@ public class SysJobServiceImpl implements ISysJobService
         Long jobId = job.getJobId();
         String jobGroup = job.getJobGroup();
         job.setStatus(ScheduleConstants.Status.NORMAL.getValue());
-        int rows = jobMapper.updateJob(job);
+        int rows = jobMapper.update(job);
         if (rows > 0)
         {
             scheduler.resumeJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -120,7 +145,7 @@ public class SysJobServiceImpl implements ISysJobService
     {
         Long jobId = job.getJobId();
         String jobGroup = job.getJobGroup();
-        int rows = jobMapper.deleteJobById(jobId);
+        int rows = jobMapper.deleteById(jobId);
         if (rows > 0)
         {
             scheduler.deleteJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -140,7 +165,7 @@ public class SysJobServiceImpl implements ISysJobService
     {
         for (Long jobId : jobIds)
         {
-            SysJob job = jobMapper.selectJobById(jobId);
+            SysJob job = jobMapper.selectOneById(jobId);
             deleteJob(job);
         }
     }
@@ -202,7 +227,7 @@ public class SysJobServiceImpl implements ISysJobService
     public int insertJob(SysJob job) throws SchedulerException, TaskException
     {
         job.setStatus(ScheduleConstants.Status.PAUSE.getValue());
-        int rows = jobMapper.insertJob(job);
+        int rows = jobMapper.insertSelective(job);
         if (rows > 0)
         {
             ScheduleUtils.createScheduleJob(scheduler, job);
@@ -220,7 +245,7 @@ public class SysJobServiceImpl implements ISysJobService
     public int updateJob(SysJob job) throws SchedulerException, TaskException
     {
         SysJob properties = selectJobById(job.getJobId());
-        int rows = jobMapper.updateJob(job);
+        int rows = jobMapper.update(job);
         if (rows > 0)
         {
             updateSchedulerJob(job, properties.getJobGroup());

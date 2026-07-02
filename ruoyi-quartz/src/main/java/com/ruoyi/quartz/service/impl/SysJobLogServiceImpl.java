@@ -1,11 +1,17 @@
 package com.ruoyi.quartz.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.quartz.domain.SysJobLog;
 import com.ruoyi.quartz.mapper.SysJobLogMapper;
 import com.ruoyi.quartz.service.ISysJobLogService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 定时任务调度日志信息 服务层
@@ -13,7 +19,7 @@ import com.ruoyi.quartz.service.ISysJobLogService;
  * @author ruoyi
  */
 @Service
-public class SysJobLogServiceImpl implements ISysJobLogService
+public class SysJobLogServiceImpl extends ServiceImpl<SysJobLogMapper, SysJobLog> implements ISysJobLogService
 {
     @Autowired
     private SysJobLogMapper jobLogMapper;
@@ -27,61 +33,32 @@ public class SysJobLogServiceImpl implements ISysJobLogService
     @Override
     public List<SysJobLog> selectJobLogList(SysJobLog jobLog)
     {
-        return jobLogMapper.selectJobLogList(jobLog);
+        QueryWrapper qw = buildJobLogQuery(jobLog);
+        return jobLogMapper.selectListByQuery(qw);
     }
 
-    /**
-     * 通过调度任务日志ID查询调度信息
-     * 
-     * @param jobLogId 调度任务日志ID
-     * @return 调度任务日志对象信息
-     */
+    private QueryWrapper buildJobLogQuery(SysJobLog jobLog) {
+        QueryWrapper qw = QueryWrapper.create();
+        if (StrUtil.isNotEmpty(jobLog.getJobName())) qw.like(SysJobLog::getJobName, jobLog.getJobName());
+        if (StrUtil.isNotEmpty(jobLog.getJobGroup())) qw.eq(SysJobLog::getJobGroup, jobLog.getJobGroup());
+        if (StrUtil.isNotEmpty(jobLog.getStatus())) qw.eq(SysJobLog::getStatus, jobLog.getStatus());
+        if (StrUtil.isNotEmpty(jobLog.getInvokeTarget())) qw.like(SysJobLog::getInvokeTarget, jobLog.getInvokeTarget());
+        if (ObjectUtil.isNotNull(jobLog.getParams().get("beginTime"))) qw.ge(SysJobLog::getCreateTime, jobLog.getParams().get("beginTime"));
+        if (ObjectUtil.isNotNull(jobLog.getParams().get("endTime"))) qw.le(SysJobLog::getCreateTime, jobLog.getParams().get("endTime"));
+        qw.orderBy(SysJobLog::getJobLogId, false);
+        return qw;
+    }
+
     @Override
-    public SysJobLog selectJobLogById(Long jobLogId)
+    public Page<SysJobLog> selectJobLogPage(Page<SysJobLog> page, SysJobLog jobLog)
     {
-        return jobLogMapper.selectJobLogById(jobLogId);
+        QueryWrapper qw = buildJobLogQuery(jobLog);
+        return jobLogMapper.paginate(page, qw);
     }
 
-    /**
-     * 新增任务日志
-     * 
-     * @param jobLog 调度日志信息
-     */
-    @Override
-    public void addJobLog(SysJobLog jobLog)
-    {
-        jobLogMapper.insertJobLog(jobLog);
-    }
-
-    /**
-     * 批量删除调度日志信息
-     * 
-     * @param logIds 需要删除的数据ID
-     * @return 结果
-     */
-    @Override
-    public int deleteJobLogByIds(Long[] logIds)
-    {
-        return jobLogMapper.deleteJobLogByIds(logIds);
-    }
-
-    /**
-     * 删除任务日志
-     * 
-     * @param jobId 调度日志ID
-     */
-    @Override
-    public int deleteJobLogById(Long jobId)
-    {
-        return jobLogMapper.deleteJobLogById(jobId);
-    }
-
-    /**
-     * 清空任务日志
-     */
     @Override
     public void cleanJobLog()
     {
-        jobLogMapper.cleanJobLog();
+        jobLogMapper.deleteByQuery(QueryWrapper.create());
     }
 }

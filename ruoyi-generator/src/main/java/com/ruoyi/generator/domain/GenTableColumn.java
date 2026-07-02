@@ -2,18 +2,28 @@ package com.ruoyi.generator.domain;
 
 import jakarta.validation.constraints.NotBlank;
 import com.ruoyi.common.core.domain.BaseEntity;
-import com.ruoyi.common.utils.StringUtils;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Column;
+import cn.hutool.core.util.StrUtil;
+import lombok.Data;
+import lombok.ToString;
 
 /**
  * 代码生成业务字段表 gen_table_column
  * 
  * @author ruoyi
  */
+@Table("gen_table_column")
+@Data
+@ToString(callSuper = true)
 public class GenTableColumn extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 编号 */
+@Id
     private Long columnId;
 
     /** 归属表编号 */
@@ -68,89 +78,13 @@ public class GenTableColumn extends BaseEntity
     /** 排序 */
     private Integer sort;
 
-    public void setColumnId(Long columnId)
-    {
-        this.columnId = columnId;
-    }
-
-    public Long getColumnId()
-    {
-        return columnId;
-    }
-
-    public void setTableId(Long tableId)
-    {
-        this.tableId = tableId;
-    }
-
-    public Long getTableId()
-    {
-        return tableId;
-    }
-
-    public void setColumnName(String columnName)
-    {
-        this.columnName = columnName;
-    }
-
-    public String getColumnName()
-    {
-        return columnName;
-    }
-
-    public void setColumnComment(String columnComment)
-    {
-        this.columnComment = columnComment;
-    }
-
-    public String getColumnComment()
-    {
-        return columnComment;
-    }
-
-    public void setColumnType(String columnType)
-    {
-        this.columnType = columnType;
-    }
-
-    public String getColumnType()
-    {
-        return columnType;
-    }
-
-    public void setJavaType(String javaType)
-    {
-        this.javaType = javaType;
-    }
-
-    public String getJavaType()
-    {
-        return javaType;
-    }
-
-    public void setJavaField(String javaField)
-    {
-        this.javaField = javaField;
-    }
-
-    public String getJavaField()
-    {
-        return javaField;
-    }
+    /** 备注 */
+    @Column(ignore = true)
+    private String remark;
 
     public String getCapJavaField()
     {
-        return StringUtils.capitalize(javaField);
-    }
-
-    public void setIsPk(String isPk)
-    {
-        this.isPk = isPk;
-    }
-
-    public String getIsPk()
-    {
-        return isPk;
+        return StrUtil.upperFirst(javaField);
     }
 
     public boolean isPk()
@@ -158,19 +92,9 @@ public class GenTableColumn extends BaseEntity
         return isPk(this.isPk);
     }
 
-    public boolean isPk(String isPk)
+    public static boolean isPk(String isPk)
     {
-        return isPk != null && StringUtils.equals("1", isPk);
-    }
-
-    public String getIsIncrement()
-    {
-        return isIncrement;
-    }
-
-    public void setIsIncrement(String isIncrement)
-    {
-        this.isIncrement = isIncrement;
+        return isPk != null && StrUtil.equals("1", isPk);
     }
 
     public boolean isIncrement()
@@ -178,19 +102,9 @@ public class GenTableColumn extends BaseEntity
         return isIncrement(this.isIncrement);
     }
 
-    public boolean isIncrement(String isIncrement)
+    public static boolean isIncrement(String isIncrement)
     {
-        return isIncrement != null && StringUtils.equals("1", isIncrement);
-    }
-
-    public void setIsRequired(String isRequired)
-    {
-        this.isRequired = isRequired;
-    }
-
-    public String getIsRequired()
-    {
-        return isRequired;
+        return isIncrement != null && StrUtil.equals("1", isIncrement);
     }
 
     public boolean isRequired()
@@ -198,19 +112,9 @@ public class GenTableColumn extends BaseEntity
         return isRequired(this.isRequired);
     }
 
-    public boolean isRequired(String isRequired)
+    public static boolean isRequired(String isRequired)
     {
-        return isRequired != null && StringUtils.equals("1", isRequired);
-    }
-
-    public void setIsInsert(String isInsert)
-    {
-        this.isInsert = isInsert;
-    }
-
-    public String getIsInsert()
-    {
-        return isInsert;
+        return isRequired != null && StrUtil.equals("1", isRequired);
     }
 
     public boolean isInsert()
@@ -218,19 +122,9 @@ public class GenTableColumn extends BaseEntity
         return isInsert(this.isInsert);
     }
 
-    public boolean isInsert(String isInsert)
+    public static boolean isInsert(String isInsert)
     {
-        return isInsert != null && StringUtils.equals("1", isInsert);
-    }
-
-    public void setIsEdit(String isEdit)
-    {
-        this.isEdit = isEdit;
-    }
-
-    public String getIsEdit()
-    {
-        return isEdit;
+        return isInsert != null && StrUtil.equals("1", isInsert);
     }
 
     public boolean isEdit()
@@ -238,19 +132,9 @@ public class GenTableColumn extends BaseEntity
         return isInsert(this.isEdit);
     }
 
-    public boolean isEdit(String isEdit)
+    public static boolean isEdit(String isEdit)
     {
-        return isEdit != null && StringUtils.equals("1", isEdit);
-    }
-
-    public void setIsList(String isList)
-    {
-        this.isList = isList;
-    }
-
-    public String getIsList()
-    {
-        return isList;
+        return isEdit != null && StrUtil.equals("1", isEdit);
     }
 
     public boolean isList()
@@ -258,19 +142,9 @@ public class GenTableColumn extends BaseEntity
         return isList(this.isList);
     }
 
-    public boolean isList(String isList)
+    public static boolean isList(String isList)
     {
-        return isList != null && StringUtils.equals("1", isList);
-    }
-
-    public void setIsQuery(String isQuery)
-    {
-        this.isQuery = isQuery;
-    }
-
-    public String getIsQuery()
-    {
-        return isQuery;
+        return isList != null && StrUtil.equals("1", isList);
     }
 
     public boolean isQuery()
@@ -278,49 +152,9 @@ public class GenTableColumn extends BaseEntity
         return isQuery(this.isQuery);
     }
 
-    public boolean isQuery(String isQuery)
+    public static boolean isQuery(String isQuery)
     {
-        return isQuery != null && StringUtils.equals("1", isQuery);
-    }
-
-    public void setQueryType(String queryType)
-    {
-        this.queryType = queryType;
-    }
-
-    public String getQueryType()
-    {
-        return queryType;
-    }
-
-    public String getHtmlType()
-    {
-        return htmlType;
-    }
-
-    public void setHtmlType(String htmlType)
-    {
-        this.htmlType = htmlType;
-    }
-
-    public void setDictType(String dictType)
-    {
-        this.dictType = dictType;
-    }
-
-    public String getDictType()
-    {
-        return dictType;
-    }
-
-    public void setSort(Integer sort)
-    {
-        this.sort = sort;
-    }
-
-    public Integer getSort()
-    {
-        return sort;
+        return isQuery != null && StrUtil.equals("1", isQuery);
     }
 
     public boolean isSuperColumn()
@@ -330,7 +164,7 @@ public class GenTableColumn extends BaseEntity
 
     public static boolean isSuperColumn(String javaField)
     {
-        return StringUtils.equalsAnyIgnoreCase(javaField,
+        return StrUtil.equalsAnyIgnoreCase(javaField,
                 // BaseEntity
                 "createBy", "createTime", "updateBy", "updateTime", "remark",
                 // TreeEntity
@@ -345,18 +179,18 @@ public class GenTableColumn extends BaseEntity
     public static boolean isUsableColumn(String javaField)
     {
         // isSuperColumn()中的名单用于避免生成多余Domain属性，若某些属性在生成页面时需要用到不能忽略，则放在此处白名单
-        return StringUtils.equalsAnyIgnoreCase(javaField, "parentId", "orderNum", "remark");
+        return StrUtil.equalsAnyIgnoreCase(javaField, "parentId", "orderNum", "remark");
     }
 
     public String readConverterExp()
     {
-        String remarks = StringUtils.substringBetween(this.columnComment, "（", "）");
+        String remarks = StrUtil.subBetween(this.columnComment, "（", "）");
         StringBuffer sb = new StringBuffer();
-        if (StringUtils.isNotEmpty(remarks))
+        if (StrUtil.isNotEmpty(remarks))
         {
             for (String value : remarks.split(" "))
             {
-                if (StringUtils.isNotEmpty(value))
+                if (StrUtil.isNotEmpty(value))
                 {
                     Object startStr = value.subSequence(0, 1);
                     String endStr = value.substring(1);

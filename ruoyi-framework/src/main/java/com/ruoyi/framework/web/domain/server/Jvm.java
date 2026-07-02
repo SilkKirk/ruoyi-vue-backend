@@ -1,14 +1,18 @@
 package com.ruoyi.framework.web.domain.server;
 
+
+import lombok.Data;
 import java.lang.management.ManagementFactory;
-import com.ruoyi.common.utils.Arith;
+import cn.hutool.core.util.NumberUtil;
 import com.ruoyi.common.utils.DateUtils;
+import cn.hutool.core.date.DateUtil;
 
 /**
  * JVM相关信息
  * 
  * @author ruoyi
  */
+@Data
 public class Jvm
 {
     /**
@@ -38,7 +42,7 @@ public class Jvm
 
     public double getTotal()
     {
-        return Arith.div(total, (1024 * 1024), 2);
+        return NumberUtil.div(total, (1024 * 1024), 2);
     }
 
     public void setTotal(double total)
@@ -48,7 +52,7 @@ public class Jvm
 
     public double getMax()
     {
-        return Arith.div(max, (1024 * 1024), 2);
+        return NumberUtil.div(max, (1024 * 1024), 2);
     }
 
     public void setMax(double max)
@@ -58,7 +62,7 @@ public class Jvm
 
     public double getFree()
     {
-        return Arith.div(free, (1024 * 1024), 2);
+        return NumberUtil.div(free, (1024 * 1024), 2);
     }
 
     public void setFree(double free)
@@ -68,12 +72,12 @@ public class Jvm
 
     public double getUsed()
     {
-        return Arith.div(total - free, (1024 * 1024), 2);
+        return NumberUtil.div(total - free, (1024 * 1024), 2);
     }
 
     public double getUsage()
     {
-        return Arith.mul(Arith.div(total - free, total, 4), 100);
+        return NumberUtil.mul(NumberUtil.div(total - free, total, 4), 100);
     }
 
     /**
@@ -109,7 +113,7 @@ public class Jvm
      */
     public String getStartTime()
     {
-        return DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, DateUtils.getServerStartDate());
+        return DateUtil.format(DateUtils.getServerStartDate(), DateUtils.YYYY_MM_DD_HH_MM_SS);
     }
 
     /**
@@ -117,7 +121,7 @@ public class Jvm
      */
     public String getRunTime()
     {
-        return DateUtils.timeDistance(DateUtils.getNowDate(), DateUtils.getServerStartDate());
+        return DateUtils.timeDistance(DateUtil.date(), DateUtils.getServerStartDate());
     }
 
     /**
@@ -128,3 +132,4 @@ public class Jvm
         return ManagementFactory.getRuntimeMXBean().getInputArguments().toString();
     }
 }
+

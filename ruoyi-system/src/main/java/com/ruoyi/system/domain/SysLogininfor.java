@@ -4,14 +4,21 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
-import com.ruoyi.common.core.domain.BaseEntity;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * 系统访问记录表 sys_logininfor
  * 
  * @author ruoyi
  */
-public class SysLogininfor extends BaseEntity
+@Data
+public class SysLogininfor implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -47,98 +54,16 @@ public class SysLogininfor extends BaseEntity
     @Excel(name = "提示消息")
     private String msg;
 
+    /** 请求参数 */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Getter(AccessLevel.NONE)
+    private Map<String, Object> params;
+
+    public Map<String, Object> getParams() { if (params == null) params = new HashMap<>(); return params; }
+    public void setParams(Map<String, Object> params) { this.params = params; }
+
     /** 访问时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "访问时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date loginTime;
-
-    public Long getInfoId()
-    {
-        return infoId;
-    }
-
-    public void setInfoId(Long infoId)
-    {
-        this.infoId = infoId;
-    }
-
-    public String getUserName()
-    {
-        return userName;
-    }
-
-    public void setUserName(String userName)
-    {
-        this.userName = userName;
-    }
-
-    public String getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(String status)
-    {
-        this.status = status;
-    }
-
-    public String getIpaddr()
-    {
-        return ipaddr;
-    }
-
-    public void setIpaddr(String ipaddr)
-    {
-        this.ipaddr = ipaddr;
-    }
-
-    public String getLoginLocation()
-    {
-        return loginLocation;
-    }
-
-    public void setLoginLocation(String loginLocation)
-    {
-        this.loginLocation = loginLocation;
-    }
-
-    public String getBrowser()
-    {
-        return browser;
-    }
-
-    public void setBrowser(String browser)
-    {
-        this.browser = browser;
-    }
-
-    public String getOs()
-    {
-        return os;
-    }
-
-    public void setOs(String os)
-    {
-        this.os = os;
-    }
-
-    public String getMsg()
-    {
-        return msg;
-    }
-
-    public void setMsg(String msg)
-    {
-        this.msg = msg;
-    }
-
-    public Date getLoginTime()
-    {
-        return loginTime;
-    }
-
-    public void setLoginTime(Date loginTime)
-    {
-        this.loginTime = loginTime;
-    }
 }

@@ -1,10 +1,10 @@
 package com.ruoyi.common.xss;
 
-import com.ruoyi.common.utils.StringUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 自定义xss校验注解实现
@@ -18,7 +18,7 @@ public class XssValidator implements ConstraintValidator<Xss, String>
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext)
     {
-        if (StringUtils.isBlank(value))
+        if (StrUtil.isBlank(value))
         {
             return true;
         }

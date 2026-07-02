@@ -5,16 +5,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
+import cn.hutool.core.io.IoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +26,8 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.text.Convert;
+import com.ruoyi.common.core.page.TableSupport;
+import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.sql.SqlUtil;
@@ -59,9 +59,7 @@ public class GenController extends BaseController
     @GetMapping("/list")
     public TableDataInfo genList(GenTable genTable)
     {
-        startPage();
-        List<GenTable> list = genTableService.selectGenTableList(genTable);
-        return getDataTable(list);
+        return getDataTable(genTableService.selectGenTablePage(startPage(GenTable.class), genTable));
     }
 
     /**
@@ -88,9 +86,7 @@ public class GenController extends BaseController
     @GetMapping("/db/list")
     public TableDataInfo dataList(GenTable genTable)
     {
-        startPage();
-        List<GenTable> list = genTableService.selectDbTableList(genTable);
-        return getDataTable(list);
+        return getDataTable(genTableService.selectDbTablePage(startPage(GenTable.class), genTable));
     }
 
     /**
@@ -164,7 +160,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:edit')")
     @Log(title = "代码生成", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     public AjaxResult editSave(@Validated @RequestBody GenTable genTable)
     {
         genTableService.validateEdit(genTable);
@@ -177,7 +173,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:remove')")
     @Log(title = "代码生成", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{tableIds}")
+    @PostMapping("/{tableIds}")
     public AjaxResult remove(@PathVariable Long[] tableIds)
     {
         genTableService.deleteGenTableByIds(tableIds);
@@ -259,6 +255,6 @@ public class GenController extends BaseController
         response.setHeader("Content-Disposition", "attachment; filename=\"ruoyi.zip\"");
         response.addHeader("Content-Length", "" + data.length);
         response.setContentType("application/octet-stream; charset=UTF-8");
-        IOUtils.write(data, response.getOutputStream());
+        IoUtil.write(response.getOutputStream(), false, data);
     }
 }

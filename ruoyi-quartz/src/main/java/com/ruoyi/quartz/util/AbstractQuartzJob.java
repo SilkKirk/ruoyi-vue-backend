@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.ScheduleConstants;
 import com.ruoyi.common.utils.ExceptionUtil;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.bean.BeanUtils;
+import cn.hutool.core.bean.BeanUtil;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.quartz.domain.SysJob;
 import com.ruoyi.quartz.domain.SysJobLog;
 import com.ruoyi.quartz.service.ISysJobLogService;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 抽象quartz调用
@@ -33,7 +33,7 @@ public abstract class AbstractQuartzJob implements Job
     public void execute(JobExecutionContext context)
     {
         SysJob sysJob = new SysJob();
-        BeanUtils.copyBeanProp(sysJob, context.getMergedJobDataMap().get(ScheduleConstants.TASK_PROPERTIES));
+        BeanUtil.copyProperties(sysJob, context.getMergedJobDataMap().get(ScheduleConstants.TASK_PROPERTIES));
         try
         {
             before(context, sysJob);
@@ -83,7 +83,7 @@ public abstract class AbstractQuartzJob implements Job
         if (e != null)
         {
             sysJobLog.setStatus(Constants.FAIL);
-            String errorMsg = StringUtils.substring(ExceptionUtil.getExceptionMessage(e), 0, 2000);
+            String errorMsg = StrUtil.sub(ExceptionUtil.getExceptionMessage(e), 0, 2000);
             sysJobLog.setExceptionInfo(errorMsg);
         }
         else
@@ -92,7 +92,7 @@ public abstract class AbstractQuartzJob implements Job
         }
 
         // 写入数据库当中
-        SpringUtils.getBean(ISysJobLogService.class).addJobLog(sysJobLog);
+        SpringUtils.getBean(ISysJobLogService.class).save(sysJobLog);
     }
 
     /**

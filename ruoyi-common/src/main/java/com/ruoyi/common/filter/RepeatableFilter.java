@@ -9,7 +9,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * Repeatable 过滤器
@@ -30,7 +30,7 @@ public class RepeatableFilter implements Filter
     {
         ServletRequest requestWrapper = null;
         if (request instanceof HttpServletRequest
-                && StringUtils.startsWithIgnoreCase(request.getContentType(), MediaType.APPLICATION_JSON_VALUE))
+                && StrUtil.startWithIgnoreCase(request.getContentType(), MediaType.APPLICATION_JSON_VALUE))
         {
             requestWrapper = new RepeatedlyRequestWrapper((HttpServletRequest) request, response);
         }

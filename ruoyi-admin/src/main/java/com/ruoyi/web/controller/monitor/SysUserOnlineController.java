@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +17,15 @@ import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysUserOnline;
 import com.ruoyi.system.service.ISysUserOnlineService;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 /**
  * 在线用户监控
@@ -47,15 +51,15 @@ public class SysUserOnlineController extends BaseController
         for (String key : keys)
         {
             LoginUser user = redisCache.getCacheObject(key);
-            if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName))
+            if (StrUtil.isNotEmpty(ipaddr) && StrUtil.isNotEmpty(userName))
             {
                 userOnlineList.add(userOnlineService.selectOnlineByInfo(ipaddr, userName, user));
             }
-            else if (StringUtils.isNotEmpty(ipaddr))
+            else if (StrUtil.isNotEmpty(ipaddr))
             {
                 userOnlineList.add(userOnlineService.selectOnlineByIpaddr(ipaddr, user));
             }
-            else if (StringUtils.isNotEmpty(userName) && StringUtils.isNotNull(user.getUser()))
+            else if (StrUtil.isNotEmpty(userName) && ObjectUtil.isNotNull(user.getUser()))
             {
                 userOnlineList.add(userOnlineService.selectOnlineByUserName(userName, user));
             }
@@ -66,7 +70,12 @@ public class SysUserOnlineController extends BaseController
         }
         Collections.reverse(userOnlineList);
         userOnlineList.removeAll(Collections.singleton(null));
-        return getDataTable(userOnlineList);
+        PageDomain pd = TableSupport.buildPageRequest();
+        @SuppressWarnings({"rawtypes","unchecked"})
+        Page<SysUserOnline> page = Page.of((int) pd.getPageNum(), (int) pd.getPageSize());
+        page.setRecords(userOnlineList);
+        page.setTotalRow(userOnlineList.size());
+        return getDataTable(page);
     }
 
     /**
@@ -74,7 +83,7 @@ public class SysUserOnlineController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")
     @Log(title = "在线用户", businessType = BusinessType.FORCE)
-    @DeleteMapping("/{tokenId}")
+    @PostMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)
     {
         redisCache.deleteObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);

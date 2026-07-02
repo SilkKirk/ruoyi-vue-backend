@@ -1,5 +1,7 @@
 package com.ruoyi.common.utils.uuid;
 
+import cn.hutool.core.util.IdUtil;
+
 /**
  * ID生成器工具类
  * 
@@ -14,7 +16,7 @@ public class IdUtils
      */
     public static String randomUUID()
     {
-        return UUID.randomUUID().toString();
+        return IdUtil.fastUUID();
     }
 
     /**
@@ -24,7 +26,7 @@ public class IdUtils
      */
     public static String simpleUUID()
     {
-        return UUID.randomUUID().toString(true);
+        return IdUtil.fastSimpleUUID();
     }
 
     /**
@@ -34,7 +36,7 @@ public class IdUtils
      */
     public static String fastUUID()
     {
-        return UUID.fastUUID().toString();
+        return IdUtil.fastUUID();
     }
 
     /**
@@ -44,6 +46,6 @@ public class IdUtils
      */
     public static String fastSimpleUUID()
     {
-        return UUID.fastUUID().toString(true);
+        return IdUtil.fastSimpleUUID();
     }
 }

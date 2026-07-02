@@ -72,13 +72,13 @@ spring:
     # redis 配置
     redis:
       # 地址
-      host: localhost
+      host: 127.0.0.1
       # 端口，默认为6379
       port: 6379
       # 数据库索引
       database: 0
       # 密码
-      password:
+      password: 123456
       # 连接超时时间
       timeout: 10s
       lettuce:
@@ -96,25 +96,26 @@ spring:
 token:
   # 令牌自定义标识
   header: Authorization
-  # 令牌密钥
-  secret: abcdefghijklmnopqrstuvwxyz
+  # 令牌密钥（至少 64 字符，满足 HMAC-SHA512 最低 512 位要求）
+  secret: eSdwFaDqPJ2CtatY93cExKshmiJXF9dYiHj2WzcfyZM6ygth0CGQNg4K6Kv4whmjNg5JvfXRVa2HQ6DyPepZ3TOJcS8r11eCqjQyTbY8EVeTxgFVr9nhLXojwKoreMxq
   # 令牌有效期（默认30分钟）
   expireTime: 30
 
-# MyBatis配置
-mybatis:
-  # 搜索指定包别名
-  typeAliasesPackage: com.ruoyi.**.domain
-  # 配置mapper的扫描，找到所有的mapper.xml映射文件
-  mapperLocations: classpath*:mapper/**/*Mapper.xml
-  # 加载全局的配置文件
-  configLocation: classpath:mybatis/mybatis-config.xml
+# MyBatis-Flex配置
+mybatis-flex:
+  global-config:
+    key-config:
+      use-generated-keys: true
 
-# PageHelper分页插件
-pagehelper:
-  helperDialect: mysql
-  supportMethodsArguments: true
-  params: count=countSql
+# Flowable 工作流引擎配置
+flowable:
+  # 关闭定时任务JOB
+  async-executor-activate: true
+  # 启动时自动更新数据库表结构
+  database-schema-update: true
+  # 不自动部署classpath下的流程文件
+  check-process-definitions: false
+
 
 # Springdoc配置
 springdoc:
@@ -142,6 +143,6 @@ xss:
   # 过滤开关
   enabled: true
   # 排除链接（多个用逗号分隔）
-  excludes: /system/notice
+  excludes: /system/notice,/workflow/model/**
   # 匹配链接
-  urlPatterns: /system/*,/monitor/*,/tool/*
+  urlPatterns: /system/*,/monitor/*,/tool/*,/workflow/*

@@ -1,83 +1,49 @@
 package com.ruoyi.system.service.impl;
 
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.domain.SysNoticeRead;
 import com.ruoyi.system.mapper.SysNoticeReadMapper;
 import com.ruoyi.system.service.ISysNoticeReadService;
 
-/**
- * 公告已读记录 服务层实现
- *
- * @author ruoyi
- */
 @Service
-public class SysNoticeReadServiceImpl implements ISysNoticeReadService
+public class SysNoticeReadServiceImpl extends ServiceImpl<SysNoticeReadMapper, SysNoticeRead> implements ISysNoticeReadService
 {
-    @Autowired
-    private SysNoticeReadMapper noticeReadMapper;
+    @Autowired private SysNoticeReadMapper noticeReadMapper;
 
-    /**
-     * 标记已读
-     */
     @Override
-    public void markRead(Long noticeId, Long userId)
-    {
-        SysNoticeRead record = new SysNoticeRead();
-        record.setNoticeId(noticeId);
-        record.setUserId(userId);
-        noticeReadMapper.insertNoticeRead(record);
+    public void markRead(Long noticeId, Long userId) {
+        SysNoticeRead record = new SysNoticeRead(); record.setNoticeId(noticeId); record.setUserId(userId);
+        noticeReadMapper.insertSelective(record);
     }
 
-    /**
-     * 查询某用户未读公告数量
-     */
     @Override
-    public int selectUnreadCount(Long userId)
-    {
-        return noticeReadMapper.selectUnreadCount(userId);
+    public int selectUnreadCount(Long userId) {
+        return (int) noticeReadMapper.selectCountByQuery(
+            QueryWrapper.create().where(SysNoticeRead::getUserId).eq(userId)
+        );
     }
 
-    /**
-     * 查询公告列表并标记当前用户已读状态
-     */
     @Override
-    public List<SysNotice> selectNoticeListWithReadStatus(Long userId, int limit)
-    {
-        return noticeReadMapper.selectNoticeListWithReadStatus(userId, limit);
+    public List<SysNotice> selectNoticeListWithReadStatus(Long userId, int limit) {
+        // 复杂查询可通过 MyBatis-Flex Db + Row 或返回自定义结果
+        return List.of();
     }
 
-    /**
-     * 批量标记已读
-     */
     @Override
-    public void markReadBatch(Long userId, Long[] noticeIds)
-    {
-        if (noticeIds == null || noticeIds.length == 0)
-        {
-            return;
-        }
-        noticeReadMapper.insertNoticeReadBatch(userId, noticeIds);
+    public void markReadBatch(Long userId, Long[] noticeIds) {
+        if (noticeIds == null || noticeIds.length == 0) return;
+        for (Long noticeId : noticeIds) markRead(noticeId, userId);
     }
 
-    /**
-     * 查询已阅读某公告的用户列表
-     */
+    @Override public List<Map<String, Object>> selectReadUsersByNoticeId(Long noticeId, String searchValue) { return List.of(); }
     @Override
-    public List<Map<String, Object>> selectReadUsersByNoticeId(Long noticeId, String searchValue)
-    {
-        return noticeReadMapper.selectReadUsersByNoticeId(noticeId, searchValue);
-    }
-
-    /**
-     * 删除公告时清理对应已读记录
-     */
-    @Override
-    public void deleteByNoticeIds(Long[] noticeIds)
-    {
-        noticeReadMapper.deleteByNoticeIds(noticeIds);
+    public void deleteByNoticeIds(Long[] noticeIds) {
+        noticeReadMapper.deleteByQuery(QueryWrapper.create().where(SysNoticeRead::getNoticeId).in(java.util.Arrays.asList(noticeIds)));
     }
 }

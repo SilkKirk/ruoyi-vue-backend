@@ -1,23 +1,23 @@
 package com.ruoyi.web.controller.system;
 
 import java.util.List;
+import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.text.Convert;
+import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.service.ISysNoticeReadService;
@@ -45,9 +45,7 @@ public class SysNoticeController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysNotice notice)
     {
-        startPage();
-        List<SysNotice> list = noticeService.selectNoticeList(notice);
-        return getDataTable(list);
+        return getDataTable(noticeService.selectNoticePage(startPage(SysNotice.class), notice));
     }
 
     /**
@@ -56,7 +54,7 @@ public class SysNoticeController extends BaseController
     @GetMapping(value = "/{noticeId}")
     public AjaxResult getInfo(@PathVariable Long noticeId)
     {
-        return success(noticeService.selectNoticeById(noticeId));
+        return success(noticeService.getById(noticeId));
     }
 
     /**
@@ -68,7 +66,7 @@ public class SysNoticeController extends BaseController
     public AjaxResult add(@Validated @RequestBody SysNotice notice)
     {
         notice.setCreateBy(getUsername());
-        return toAjax(noticeService.insertNotice(notice));
+        return toAjax(noticeService.save(notice));
     }
 
     /**
@@ -76,11 +74,11 @@ public class SysNoticeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:notice:edit')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/edit")
     public AjaxResult edit(@Validated @RequestBody SysNotice notice)
     {
         notice.setUpdateBy(getUsername());
-        return toAjax(noticeService.updateNotice(notice));
+        return toAjax(noticeService.updateById(notice));
     }
 
     /**
@@ -131,9 +129,13 @@ public class SysNoticeController extends BaseController
     @ResponseBody
     public TableDataInfo readUsersList(Long noticeId, String searchValue)
     {
-        startPage();
         List<?> list = noticeReadService.selectReadUsersByNoticeId(noticeId, searchValue);
-        return getDataTable(list);
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(HttpStatus.SUCCESS);
+        rspData.setMsg("查询成功");
+        rspData.setRows(list);
+        rspData.setTotal((long) list.size());
+        return rspData;
     }
 
     /**
@@ -141,10 +143,13 @@ public class SysNoticeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:notice:remove')")
     @Log(title = "通知公告", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{noticeIds}")
+    @PostMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds)
     {
         noticeReadService.deleteByNoticeIds(noticeIds);
-        return toAjax(noticeService.deleteNoticeByIds(noticeIds));
+        return toAjax(noticeService.removeByIds(java.util.Arrays.asList(noticeIds)));
     }
 }
+
+
+

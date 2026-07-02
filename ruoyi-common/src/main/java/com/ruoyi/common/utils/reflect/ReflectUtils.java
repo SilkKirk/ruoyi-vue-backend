@@ -7,13 +7,13 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Date;
-import org.apache.commons.lang3.Validate;
-import org.apache.poi.ss.usermodel.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.common.core.text.Convert;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.StringUtils;
 
 /**
  * 反射工具类. 提供调用getter/setter方法, 访问私有变量, 调用私有方法, 获取泛型类型Class, 被AOP过的真实类等工具函数.
@@ -39,9 +39,9 @@ public class ReflectUtils
     public static <E> E invokeGetter(Object obj, String propertyName)
     {
         Object object = obj;
-        for (String name : StringUtils.split(propertyName, "."))
+        for (String name : StrUtil.split(propertyName, "."))
         {
-            String getterMethodName = GETTER_PREFIX + StringUtils.capitalize(name);
+            String getterMethodName = GETTER_PREFIX + StrUtil.upperFirst(name);
             object = invokeMethod(object, getterMethodName, new Class[] {}, new Object[] {});
         }
         return (E) object;
@@ -54,17 +54,17 @@ public class ReflectUtils
     public static <E> void invokeSetter(Object obj, String propertyName, E value)
     {
         Object object = obj;
-        String[] names = StringUtils.split(propertyName, ".");
+        String[] names = StrUtil.split(propertyName, ".").toArray(new String[0]);
         for (int i = 0; i < names.length; i++)
         {
             if (i < names.length - 1)
             {
-                String getterMethodName = GETTER_PREFIX + StringUtils.capitalize(names[i]);
+                String getterMethodName = GETTER_PREFIX + StrUtil.upperFirst(names[i]);
                 object = invokeMethod(object, getterMethodName, new Class[] {}, new Object[] {});
             }
             else
             {
-                String setterMethodName = SETTER_PREFIX + StringUtils.capitalize(names[i]);
+                String setterMethodName = SETTER_PREFIX + StrUtil.upperFirst(names[i]);
                 invokeMethodByName(object, setterMethodName, new Object[] { value });
             }
         }
@@ -102,7 +102,6 @@ public class ReflectUtils
         Field field = getAccessibleField(obj, fieldName);
         if (field == null)
         {
-            // throw new IllegalArgumentException("在 [" + obj.getClass() + "] 中，没有找到 [" + fieldName + "] 字段 ");
             logger.debug("在 [" + obj.getClass() + "] 中，没有找到 [" + fieldName + "] 字段 ");
             return;
         }
@@ -157,13 +156,11 @@ public class ReflectUtils
         Method method = getAccessibleMethodByName(obj, methodName, args.length);
         if (method == null)
         {
-            // 如果为空不报错，直接返回空。
             logger.debug("在 [" + obj.getClass() + "] 中，没有找到 [" + methodName + "] 方法 ");
             return null;
         }
         try
         {
-            // 类型转换（将参数数据类型转换为目标方法参数类型）
             Class<?>[] cs = method.getParameterTypes();
             for (int i = 0; i < cs.length; i++)
             {
@@ -172,9 +169,9 @@ public class ReflectUtils
                     if (cs[i] == String.class)
                     {
                         args[i] = Convert.toStr(args[i]);
-                        if (StringUtils.endsWith((String) args[i], ".0"))
+                        if (StrUtil.endWith((String) args[i], ".0"))
                         {
-                            args[i] = StringUtils.substringBefore((String) args[i], ".0");
+                            args[i] = StrUtil.subBefore((String) args[i], ".0", false);
                         }
                     }
                     else if (cs[i] == Integer.class)
@@ -195,14 +192,14 @@ public class ReflectUtils
                     }
                     else if (cs[i] == Date.class)
                     {
-                        if (args[i] instanceof String)
-                        {
-                            args[i] = DateUtils.parseDate(args[i]);
-                        }
-                        else
-                        {
-                            args[i] = DateUtil.getJavaDate((Double) args[i]);
-                        }
+                    if (args[i] instanceof String)
+                    {
+                        args[i] = DateUtil.parse(args[i].toString());
+                    }
+                    else
+                    {
+                        args[i] = org.apache.poi.ss.usermodel.DateUtil.getJavaDate((Double) args[i]);
+                    }
                     }
                     else if (cs[i] == boolean.class || cs[i] == Boolean.class)
                     {
@@ -225,26 +222,7 @@ public class ReflectUtils
      */
     public static Field getAccessibleField(final Object obj, final String fieldName)
     {
-        // 为空不报错。直接返回 null
-        if (obj == null)
-        {
-            return null;
-        }
-        Validate.notBlank(fieldName, "fieldName can't be blank");
-        for (Class<?> superClass = obj.getClass(); superClass != Object.class; superClass = superClass.getSuperclass())
-        {
-            try
-            {
-                Field field = superClass.getDeclaredField(fieldName);
-                makeAccessible(field);
-                return field;
-            }
-            catch (NoSuchFieldException e)
-            {
-                continue;
-            }
-        }
-        return null;
+        return ReflectUtil.getField(obj.getClass(), fieldName);
     }
 
     /**
@@ -256,26 +234,7 @@ public class ReflectUtils
     public static Method getAccessibleMethod(final Object obj, final String methodName,
             final Class<?>... parameterTypes)
     {
-        // 为空不报错。直接返回 null
-        if (obj == null)
-        {
-            return null;
-        }
-        Validate.notBlank(methodName, "methodName can't be blank");
-        for (Class<?> searchType = obj.getClass(); searchType != Object.class; searchType = searchType.getSuperclass())
-        {
-            try
-            {
-                Method method = searchType.getDeclaredMethod(methodName, parameterTypes);
-                makeAccessible(method);
-                return method;
-            }
-            catch (NoSuchMethodException e)
-            {
-                continue;
-            }
-        }
-        return null;
+        return ReflectUtil.getMethod(obj.getClass(), methodName, parameterTypes);
     }
 
     /**
@@ -286,12 +245,7 @@ public class ReflectUtils
      */
     public static Method getAccessibleMethodByName(final Object obj, final String methodName, int argsNum)
     {
-        // 为空不报错。直接返回 null
-        if (obj == null)
-        {
-            return null;
-        }
-        Validate.notBlank(methodName, "methodName can't be blank");
+        Assert.notBlank(methodName, "methodName can't be blank");
         for (Class<?> searchType = obj.getClass(); searchType != Object.class; searchType = searchType.getSuperclass())
         {
             Method[] methods = searchType.getDeclaredMethods();
@@ -299,7 +253,7 @@ public class ReflectUtils
             {
                 if (method.getName().equals(methodName) && method.getParameterTypes().length == argsNum)
                 {
-                    makeAccessible(method);
+                    ReflectUtil.setAccessible(method);
                     return method;
                 }
             }
@@ -313,11 +267,7 @@ public class ReflectUtils
     @SuppressWarnings("deprecation")
     public static void makeAccessible(Method method)
     {
-        if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers()))
-                && !method.isAccessible())
-        {
-            method.setAccessible(true);
-        }
+        ReflectUtil.setAccessible(method);
     }
 
     /**
@@ -326,11 +276,7 @@ public class ReflectUtils
     @SuppressWarnings("deprecation")
     public static void makeAccessible(Field field)
     {
-        if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
-                || Modifier.isFinal(field.getModifiers())) && !field.isAccessible())
-        {
-            field.setAccessible(true);
-        }
+        ReflectUtil.setAccessible(field);
     }
 
     /**

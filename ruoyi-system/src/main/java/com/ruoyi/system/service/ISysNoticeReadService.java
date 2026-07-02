@@ -1,15 +1,17 @@
 package com.ruoyi.system.service;
 
+import com.mybatisflex.core.service.IService;
 import java.util.List;
 import java.util.Map;
 import com.ruoyi.system.domain.SysNotice;
+import com.ruoyi.system.domain.SysNoticeRead;
 
 /**
  * 公告已读记录 服务层
  *
  * @author ruoyi
  */
-public interface ISysNoticeReadService
+public interface ISysNoticeReadService extends IService<SysNoticeRead>
 {
     /**
      * 标记已读（幂等，重复调用不报错）

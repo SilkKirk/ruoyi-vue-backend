@@ -1,7 +1,7 @@
 package com.ruoyi.common.utils.file;
 
 import java.io.File;
-import org.apache.commons.lang3.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 文件类型工具类
@@ -22,7 +22,7 @@ public class FileTypeUtils
     {
         if (null == file)
         {
-            return StringUtils.EMPTY;
+            return StrUtil.EMPTY;
         }
         return getFileType(file.getName());
     }
