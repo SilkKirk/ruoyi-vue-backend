@@ -78,5 +78,38 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, 
 VALUES (2053, '请假修改', 2001, 3, '', 1, 0, 'F', '0', '0', 'workflow:leave:edit', '#', 'admin', sysdate());
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time) 
 VALUES (2054, '请假删除', 2001, 4, '', 1, 0, 'F', '0', '0', 'workflow:leave:remove', '#', 'admin', sysdate());
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time) 
-VALUES (2055, '请假提交审批', 2001, 5, '', 1, 0, 'F', '0', '0', 'workflow:leave:submit', '#', 'admin', sysdate());
+
+-- ==================== 6. 业务流程配置表 ====================
+DROP TABLE IF EXISTS `workflow_business_config`;
+CREATE TABLE `workflow_business_config` (
+  `id`           varchar(64)  NOT NULL COMMENT '主键',
+  `process_definition_key` varchar(50) NOT NULL COMMENT '流程定义Key（同时也是业务标识）',
+  `business_name`  varchar(100) NOT NULL COMMENT '业务名称',
+  `detail_route`   varchar(200) DEFAULT NULL COMMENT '前端详情路由前缀',
+  `service_bean_name` varchar(100) DEFAULT NULL COMMENT '业务Service的Spring Bean名称',
+  `status`         char(1) DEFAULT '0' COMMENT '状态(0=禁用,1=启用)',
+  `remark`         varchar(500) DEFAULT NULL COMMENT '备注',
+  `create_by`      varchar(64) DEFAULT NULL COMMENT '创建者',
+  `create_time`    datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by`      varchar(64) DEFAULT NULL COMMENT '更新者',
+  `update_time`    datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_process_def_key` (`process_definition_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务流程配置';
+
+-- 种子数据：请假业务
+INSERT INTO workflow_business_config (id, process_definition_key, business_name, detail_route, service_bean_name, status, create_by, create_time)
+VALUES (REPLACE(UUID(), '-', ''), 'leave', '请假申请', '/workflow/leave/detail/', 'leaveTestServiceImpl', '1', 'admin', sysdate());
+
+-- ==================== 7. 业务配置菜单及权限 ====================
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time)
+VALUES (2060, '流程业务配置', 2000, 7, 'businessConfig', 'workflow/businessConfig/index', 1, 0, 'C', '0', '0', 'workflow:businessConfig:list', 'example', 'admin', sysdate());
+
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time)
+VALUES (2061, '配置查询', 2060, 1, '', 1, 0, 'F', '0', '0', 'workflow:businessConfig:query', '#', 'admin', sysdate());
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time)
+VALUES (2062, '配置新增', 2060, 2, '', 1, 0, 'F', '0', '0', 'workflow:businessConfig:add', '#', 'admin', sysdate());
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time)
+VALUES (2063, '配置修改', 2060, 3, '', 1, 0, 'F', '0', '0', 'workflow:businessConfig:edit', '#', 'admin', sysdate());
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time)
+VALUES (2064, '配置删除', 2060, 4, '', 1, 0, 'F', '0', '0', 'workflow:businessConfig:remove', '#', 'admin', sysdate());

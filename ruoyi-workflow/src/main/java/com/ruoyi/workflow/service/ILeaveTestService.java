@@ -5,9 +5,9 @@ import com.ruoyi.workflow.domain.LeaveTest;
 
 public interface ILeaveTestService {
     Page<LeaveTest> selectLeaveTestList(Page<LeaveTest> page, LeaveTest leaveTest);
-    LeaveTest selectLeaveTestById(String id);
+    LeaveTest selectLeaveTestById(Long id);
     int insertLeaveTest(LeaveTest leaveTest);
     int updateLeaveTest(LeaveTest leaveTest);
-    int deleteLeaveTestById(String id);
+    int deleteLeaveTestById(Long id);
 
 }

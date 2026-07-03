@@ -17,6 +17,8 @@ import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.image.ProcessDiagramGenerator;
+import org.flowable.engine.task.Comment;
+import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +28,22 @@ import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.workflow.common.FlowableProcessConstants;
+import com.ruoyi.workflow.common.enums.FlowComment;
+import com.ruoyi.workflow.domain.WorkflowBusinessConfig;
 import com.ruoyi.workflow.domain.WorkflowTask;
 import com.ruoyi.workflow.handler.WorkflowBusinessHandler;
 import com.ruoyi.workflow.handler.WorkflowBusinessHandlerRegistry;
 import com.ruoyi.workflow.service.IWorkflowTaskService;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 流程任务 服务层实现
  *
  * @author ruoyi
  */
+@Slf4j
 @Service
 public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 {
@@ -106,19 +113,28 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         {
             histQuery.taskNameLike("%" + task.getTaskName() + "%");
         }
-        List<HistoricTaskInstance> taskList = histQuery
-                .orderByHistoricTaskInstanceEndTime().desc()
-                .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
-                        Math.toIntExact(page.getPageSize()));
 
-        org.flowable.task.api.history.HistoricTaskInstanceQuery histCountQuery = historyService.createHistoricTaskInstanceQuery()
-                .taskAssignee(username)
-                .finished();
-        if (StrUtil.isNotBlank(task.getTaskName()))
-        {
-            histCountQuery.taskNameLike("%" + task.getTaskName() + "%");
+        // 查询全部已办任务，按完成时间倒序
+        List<HistoricTaskInstance> allList = histQuery
+                .orderByHistoricTaskInstanceEndTime().desc()
+                .list();
+
+        // 按流程实例去重：同一流程在已办列表只展示最新一条
+        Map<String, HistoricTaskInstance> dedupMap = new LinkedHashMap<>();
+        for (HistoricTaskInstance hti : allList) {
+            dedupMap.putIfAbsent(hti.getProcessInstanceId(), hti);
         }
-        long count = histCountQuery.count();
+        List<HistoricTaskInstance> taskList = new ArrayList<>(dedupMap.values());
+
+        // 手动分页（去重后无法依赖 Flowable 原生分页）
+        long count = taskList.size();
+        int fromIndex = Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize());
+        int toIndex = Math.min(fromIndex + Math.toIntExact(page.getPageSize()), taskList.size());
+        if (fromIndex < taskList.size()) {
+            taskList = taskList.subList(fromIndex, toIndex);
+        } else {
+            taskList = Collections.emptyList();
+        }
 
         List<WorkflowTask> resultList = taskList.stream()
                 .map(this::convertHistoricTaskToWorkflowTask)
@@ -133,7 +149,6 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
     @Transactional(rollbackFor = Exception.class)
     public void completeTask(String taskId, Map<String, Object> variables, String comment)
     {
-        // 获取任务信息（记录业务key用于后续更新）
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String businessKey = null;
         String procInstId = null;
@@ -144,77 +159,68 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
             if (pi != null) businessKey = pi.getBusinessKey();
         }
 
-        if (StrUtil.isNotBlank(comment))
+        // 保存传入变量的快照（process 级别：approved 等），供流程结束回调使用
+        final Map<String, Object> processVars = new HashMap<>();
+        if (variables != null)
         {
-            if (variables != null)
-            {
-                variables.put("comment", comment);
-                variables.put("approved", true);
-            }
+            processVars.putAll(variables);
         }
 
-        // 将审批相关变量存为任务级别（task-local），每个任务独立保留
+        if (StrUtil.isNotBlank(comment))
+        {
+            // 通过意见存为 Flowable 原生评论（type="0" 对齐 approved=0）
+            if (task != null) {
+                taskService.addComment(taskId, task.getProcessInstanceId(),
+                        FlowComment.NORMAL.getType(), comment);
+            }
+            processVars.put(FlowableProcessConstants.COMMENT_VAR, comment);
+        }
+
         if (variables != null)
         {
             for (Map.Entry<String, Object> entry : variables.entrySet())
             {
-                taskService.setVariableLocal(taskId, entry.getKey(), entry.getValue());
+                if (FlowableProcessConstants.APPROVED_VAR.equals(entry.getKey()))
+                {
+                    // approved 设为 process 级别变量，供网关条件判断
+                    runtimeService.setVariable(procInstId, entry.getKey(), entry.getValue());
+                }
+                else
+                {
+                    taskService.setVariableLocal(taskId, entry.getKey(), entry.getValue());
+                }
             }
         }
 
         taskService.complete(taskId);
 
-        // 检查流程是否已结束，通过Handler回调更新业务状态
-        if (procInstId != null && businessKey != null) {
-            long runningCount = runtimeService.createProcessInstanceQuery()
-                    .processInstanceId(procInstId).count();
-            if (runningCount == 0) {
-                String businessType = (String) historyService.createHistoricVariableInstanceQuery()
-                        .processInstanceId(procInstId).variableName("businessType").singleResult().getValue();
-                if (businessType != null) {
-                    WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessType);
-                    Object businessData = handler.loadBusinessData(businessKey);
-                    if (businessData != null) {
-                        // 从最后完成的任务中读取审批结果（任务级别变量）
-                        List<HistoricTaskInstance> doneTasks = historyService.createHistoricTaskInstanceQuery()
-                                .processInstanceId(procInstId).finished()
-                                .orderByHistoricTaskInstanceEndTime().desc()
-                                .listPage(0, 1);
-                        boolean approved = false;
-                        if (!doneTasks.isEmpty()) {
-                            HistoricVariableInstance v = historyService.createHistoricVariableInstanceQuery()
-                                    .taskId(doneTasks.get(0).getId()).variableName("approved").singleResult();
-                            approved = v != null && Boolean.TRUE.equals(v.getValue());
-                        }
-                        handler.onProcessCompleted(businessData, procInstId, approved);
-                    }
-                }
-            }
-        }
+        handleProcessCompletion(procInstId, businessKey, processVars);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void submitForApproval(String businessType, String businessId, Map<String, Object> variables) {
-        WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessType);
+        WorkflowBusinessConfig config = handlerRegistry.getConfig(businessType);
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
-                .processDefinitionKey(handler.getProcessDefinitionKey())
+                .processDefinitionKey(config.getProcessDefinitionKey())
                 .latestVersion()
                 .singleResult();
         if (pd == null) {
-            throw new RuntimeException("未找到流程定义: " + handler.getProcessDefinitionKey());
+            throw new RuntimeException("未找到流程定义: " + config.getProcessDefinitionKey());
         }
         // 设置流程变量
         Map<String, Object> vars = variables != null ? variables : new HashMap<>();
-        vars.put("businessType", businessType);
-        // 设置流程发起人（确保 Flowable 记录 startUserId）
+        vars.put(FlowableProcessConstants.BUSINESS_TYPE_VAR, businessType);
+        // 设置流程发起人（存入流程变量供排他网关/Assignee表达式使用）
         String loginUsername = SecurityUtils.getUsername();
         if (StrUtil.isNotBlank(loginUsername)) {
             Authentication.setAuthenticatedUserId(loginUsername);
+            vars.put(FlowableProcessConstants.INITIATOR_VAR, loginUsername);
         }
         // 启动流程
         ProcessInstance pi = runtimeService.startProcessInstanceById(pd.getId(), businessId, vars);
         // 回调处理器
+        WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessType);
         Object businessData = handler.loadBusinessData(businessId);
         if (businessData != null) {
             handler.onProcessStarted(businessData, pi.getId());
@@ -231,60 +237,23 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
     @Transactional(rollbackFor = Exception.class)
     public void rejectTask(String taskId, String comment)
     {
-        // 获取当前任务
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (task == null)
-        {
+        if (task == null) {
             throw new RuntimeException("任务不存在");
         }
 
-        // 获取流程实例
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-                .processInstanceId(task.getProcessInstanceId()).singleResult();
-        if (processInstance == null)
-        {
-            throw new RuntimeException("流程实例不存在");
-        }
+        // 驳回意见存为 Flowable 原生评论（type="1" 对齐 approved=1 / ${approved == 1}）
+        taskService.addComment(taskId, task.getProcessInstanceId(),
+                FlowComment.REJECT.getType(), comment);
 
-        // 设置审批意见（任务级别变量）
-        taskService.setVariableLocal(taskId, "comment", comment);
-        taskService.setVariableLocal(taskId, "approved", false);
+        // approved=1 存 process 级别，供排他网关条件 ${approved == 1} 路由到"修改申请"
+        runtimeService.setVariable(task.getProcessInstanceId(), FlowableProcessConstants.APPROVED_VAR, 1);
 
-        // 获取历史活动节点，找到上一个用户任务节点
-        List<HistoricActivityInstance> historyList = historyService.createHistoricActivityInstanceQuery()
-                .processInstanceId(task.getProcessInstanceId())
-                .activityType("userTask")
-                .finished()
-                .orderByHistoricActivityInstanceEndTime().desc()
-                .list();
+        // 完成任务，网关已消费 approved 变量
+        taskService.complete(taskId);
 
-        if (historyList.size() < 2)
-        {
-            throw new RuntimeException("没有可驳回的上一个节点");
-        }
-
-        // 取倒数第二个（当前正在审批的是最后一个）
-        HistoricActivityInstance lastUserTask = null;
-        for (HistoricActivityInstance act : historyList)
-        {
-            // 找到当前任务之前的最后一个已完成用户任务
-            if (!act.getActivityId().equals(task.getTaskDefinitionKey()))
-            {
-                lastUserTask = act;
-                break;
-            }
-        }
-
-        if (lastUserTask == null)
-        {
-            throw new RuntimeException("没有可驳回的上一个节点");
-        }
-
-        // 驳回：修改流程实例，跳转到目标节点
-        runtimeService.createChangeActivityStateBuilder()
-                .processInstanceId(task.getProcessInstanceId())
-                .moveActivityIdTo(task.getTaskDefinitionKey(), lastUserTask.getActivityId())
-                .changeState();
+        // 清除 approved，后续流程不残留此变量
+        runtimeService.removeVariable(task.getProcessInstanceId(), FlowableProcessConstants.APPROVED_VAR);
     }
 
     @Override
@@ -299,96 +268,20 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
     public List<Map<String, Object>> getHistoryList(String instanceId) {
         List<Map<String, Object>> result = new ArrayList<>();
 
-        // 查询流程实例（开始/结束时间）
         HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
                 .processInstanceId(instanceId).singleResult();
 
-        // 流程开始事件
         if (hpi != null) {
-            // 查询发起人名称（优先用 initiator 流程变量）
-            String initiatorUserId = hpi.getStartUserId();
-            HistoricVariableInstance initVar = historyService.createHistoricVariableInstanceQuery()
-                    .processInstanceId(instanceId).variableName("initiator").singleResult();
-            if (initVar != null) {
-                initiatorUserId = (String) initVar.getValue();
-            }
-            // 查询发起人的昵称和部门
-            String initiatorName = initiatorUserId;
-            String initiatorDept = "";
-            if (StrUtil.isNotBlank(initiatorUserId)) {
-                SysUser initUser = sysUserService.selectUserByUserName(initiatorUserId);
-                if (initUser != null) {
-                    initiatorName = initUser.getNickName();
-                    if (initUser.getDept() != null) {
-                        initiatorDept = initUser.getDept().getDeptName();
-                    }
-                }
-            }
-            Map<String, Object> startEvent = new HashMap<>();
-            startEvent.put("taskName", "流程发起");
-            startEvent.put("assignee", initiatorUserId);
-            startEvent.put("assigneeName", initiatorName);
-            startEvent.put("assigneeDeptName", initiatorDept);
-            startEvent.put("startTime", hpi.getStartTime());
-            startEvent.put("endTime", hpi.getStartTime());
-            startEvent.put("comment", "");
-            startEvent.put("type", "start");
-            result.add(startEvent);
-        }
-
-        // 查询各任务级别的变量（comment/approved 每个任务独立保留）
-        Map<String, Map<String, Object>> taskVars = new HashMap<>();
-        for (HistoricVariableInstance v : historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(instanceId).list()) {
-            if (v.getTaskId() != null) {
-                taskVars.computeIfAbsent(v.getTaskId(), k -> new HashMap<>())
-                        .put(v.getVariableName(), v.getValue());
+            Map<String, Object> startEvent = buildStartEvent(hpi, instanceId);
+            if (startEvent != null) {
+                result.add(startEvent);
             }
         }
 
-        // 审批节点
-        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
-                .processInstanceId(instanceId)
-                .orderByHistoricTaskInstanceStartTime().asc()
-                .list();
-        for (HistoricTaskInstance hti : list) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("taskName", hti.getName());
-            item.put("assignee", hti.getAssignee());
-            // 查询审批人昵称和部门
-            String assigneeName = hti.getAssignee();
-            String assigneeDept = "";
-            if (StrUtil.isNotBlank(hti.getAssignee())) {
-                SysUser usr = sysUserService.selectUserByUserName(hti.getAssignee());
-                if (usr != null) {
-                    assigneeName = usr.getNickName();
-                    if (usr.getDept() != null) {
-                        assigneeDept = usr.getDept().getDeptName();
-                    }
-                }
-            }
-            item.put("assigneeName", assigneeName);
-            item.put("assigneeDeptName", assigneeDept);
-            item.put("startTime", hti.getCreateTime());
-            item.put("endTime", hti.getEndTime());
-            item.put("duration", hti.getDurationInMillis());
-            item.put("type", "task");
-            Map<String, Object> vars = taskVars.get(hti.getId());
-            item.put("comment", vars != null ? vars.getOrDefault("comment", "") : "");
-            item.put("approved", vars != null ? vars.get("approved") : null);
-            result.add(item);
-        }
+        result.addAll(buildTaskItems(instanceId));
 
-        // 流程结束事件
         if (hpi != null && hpi.getEndTime() != null) {
-            Map<String, Object> endEvent = new HashMap<>();
-            endEvent.put("taskName", "流程结束");
-            endEvent.put("assignee", "");
-            endEvent.put("startTime", hpi.getEndTime());
-            endEvent.put("endTime", hpi.getEndTime());
-            endEvent.put("comment", "");
-            endEvent.put("type", "end");
-            result.add(endEvent);
+            result.add(buildEndEvent(hpi));
         }
         return result;
     }
@@ -462,15 +355,56 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
                 .processInstanceId(task.getProcessInstanceId()).singleResult();
         if (pi != null) {
             wt.setBusinessKey(pi.getBusinessKey());
-            String bt = (String) runtimeService.getVariable(pi.getId(), "businessType");
+            String bt = (String) runtimeService.getVariable(pi.getId(), FlowableProcessConstants.BUSINESS_TYPE_VAR);
             wt.setBusinessType(bt);
             try {
+                WorkflowBusinessConfig cfg = handlerRegistry.getConfig(bt);
+                wt.setDetailRoute(cfg.getDetailRoute());
                 WorkflowBusinessHandler h = handlerRegistry.getHandler(bt);
-                wt.setDetailRoute(h.getDetailRoute());
                 wt.setBusinessSummary(h.getBusinessSummary(h.loadBusinessData(wt.getBusinessKey())));
             } catch (Exception e) {}
         }
+
+        // ----- 推导任务状态 -----
+        deriveTaskStatus(wt, task);
         return wt;
+    }
+
+    /**
+     * 推导任务状态：Created / Assigned / Delegated / Rejected / Returned
+     */
+    private void deriveTaskStatus(WorkflowTask wt, Task task) {
+        // 基础状态：Delegated / Assigned / Created
+        if (DelegationState.PENDING.equals(task.getDelegationState())) {
+            wt.setStatus("Delegated");
+        } else if (task.getAssignee() != null) {
+            wt.setStatus("Assigned");
+        } else {
+            wt.setStatus("Created");
+        }
+
+        // 检查上一个已完成的任务是否有驳回评论，有则当前任务是由驳回产生的"修改申请"
+        try {
+            HistoricTaskInstance lastFinished = historyService.createHistoricTaskInstanceQuery()
+                    .processInstanceId(task.getProcessInstanceId())
+                    .finished()
+                    .orderByHistoricTaskInstanceEndTime()
+                    .desc()
+                    .listPage(0, 1)
+                    .stream().findFirst().orElse(null);
+            if (lastFinished != null && lastFinished.getId() != null) {
+                // 用流程评论查询（ACT_HI_COMMENT 表），按任务 ID 过滤出驳回类型
+                boolean hasReject = taskService.getProcessInstanceComments(
+                        task.getProcessInstanceId(), FlowComment.REJECT.getType())
+                        .stream()
+                        .anyMatch(c -> lastFinished.getId().equals(c.getTaskId()));
+                if (hasReject) {
+                    wt.setStatus("Rejected");
+                }
+            }
+        } catch (Exception e) {
+            // 静默，保留基础状态
+        }
     }
 
     /**
@@ -496,6 +430,9 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
                 .processDefinitionId(task.getProcessDefinitionId()).singleResult();
         if (pd != null) wt.setProcessName(pd.getName());
 
+        // 已办任务状态固定为 Completed
+        wt.setStatus("Completed");
+
         // 获取业务Key和流程状态
         HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
                 .processInstanceId(task.getProcessInstanceId()).singleResult();
@@ -503,12 +440,14 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
             wt.setBusinessKey(hpi.getBusinessKey());
             wt.setProcessStatus(hpi.getEndTime() != null ? "COMPLETED" : "RUNNING");
             HistoricVariableInstance btVar = (HistoricVariableInstance) historyService.createHistoricVariableInstanceQuery()
-                    .processInstanceId(task.getProcessInstanceId()).variableName("businessType").singleResult();
+                    .processInstanceId(task.getProcessInstanceId()).variableName(FlowableProcessConstants.BUSINESS_TYPE_VAR).singleResult();
             wt.setBusinessType(btVar != null ? (String) btVar.getValue() : null);
             if (btVar != null) {
                 try {
-                    WorkflowBusinessHandler h = handlerRegistry.getHandler((String) btVar.getValue());
-                    wt.setDetailRoute(h.getDetailRoute());
+                    String bt = (String) btVar.getValue();
+                    WorkflowBusinessConfig cfg = handlerRegistry.getConfig(bt);
+                    wt.setDetailRoute(cfg.getDetailRoute());
+                    WorkflowBusinessHandler h = handlerRegistry.getHandler(bt);
                     wt.setBusinessSummary(h.getBusinessSummary(h.loadBusinessData(wt.getBusinessKey())));
                 } catch (Exception e) {}
             }
@@ -530,4 +469,121 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         }
     }
 
+    /**
+     * 流程结束回调：处理流程完成后的业务逻辑
+     */
+    private void handleProcessCompletion(String procInstId, String businessKey, Map<String, Object> processVars) {
+        long runningCount = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(procInstId).count();
+        if (runningCount == 0) {
+            String businessType = (String) historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(procInstId).variableName(FlowableProcessConstants.BUSINESS_TYPE_VAR).singleResult().getValue();
+            if (businessType != null) {
+                try {
+                    WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessType);
+                    Object businessData = handler.loadBusinessData(businessKey);
+                    if (businessData != null) {
+                        handler.onProcessCompleted(businessData, procInstId, processVars);
+                    }
+                } catch (Exception e) {
+                    log.warn("流程结束回调失败", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 构建流程开始事件
+     */
+    private Map<String, Object> buildStartEvent(HistoricProcessInstance hpi, String instanceId) {
+        String initiatorUserId = hpi.getStartUserId();
+        HistoricVariableInstance initVar = historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(instanceId).variableName(FlowableProcessConstants.INITIATOR_VAR).singleResult();
+        if (initVar != null) {
+            initiatorUserId = (String) initVar.getValue();
+        }
+        String initiatorName = initiatorUserId;
+        String initiatorDept = "";
+        if (StrUtil.isNotBlank(initiatorUserId)) {
+            SysUser initUser = sysUserService.selectUserByUserName(initiatorUserId);
+            if (initUser != null) {
+                initiatorName = initUser.getNickName();
+                if (initUser.getDept() != null) {
+                    initiatorDept = initUser.getDept().getDeptName();
+                }
+            }
+        }
+        Map<String, Object> event = new HashMap<>();
+        event.put("taskName", "流程发起");
+        event.put("assignee", initiatorUserId);
+        event.put("assigneeName", initiatorName);
+        event.put("assigneeDeptName", initiatorDept);
+        event.put("startTime", hpi.getStartTime());
+        event.put("endTime", hpi.getStartTime());
+        event.put("comment", "");
+        event.put("type", "start");
+        return event;
+    }
+
+    /**
+     * 构建审批节点列表
+     */
+    private List<Map<String, Object>> buildTaskItems(String instanceId) {
+        // 查询各任务级别的变量
+        Map<String, Map<String, Object>> taskVars = new HashMap<>();
+        for (HistoricVariableInstance v : historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(instanceId).list()) {
+            if (v.getTaskId() != null) {
+                taskVars.computeIfAbsent(v.getTaskId(), k -> new HashMap<>())
+                        .put(v.getVariableName(), v.getValue());
+            }
+        }
+
+        List<Map<String, Object>> items = new ArrayList<>();
+        List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery()
+                .processInstanceId(instanceId)
+                .orderByHistoricTaskInstanceStartTime().asc()
+                .list();
+        for (HistoricTaskInstance hti : list) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("taskName", hti.getName());
+            item.put("assignee", hti.getAssignee());
+            String assigneeName = hti.getAssignee();
+            String assigneeDept = "";
+            if (StrUtil.isNotBlank(hti.getAssignee())) {
+                SysUser usr = sysUserService.selectUserByUserName(hti.getAssignee());
+                if (usr != null) {
+                    assigneeName = usr.getNickName();
+                    if (usr.getDept() != null) {
+                        assigneeDept = usr.getDept().getDeptName();
+                    }
+                }
+            }
+            item.put("assigneeName", assigneeName);
+            item.put("assigneeDeptName", assigneeDept);
+            item.put("startTime", hti.getCreateTime());
+            item.put("endTime", hti.getEndTime());
+            item.put("duration", hti.getDurationInMillis());
+            item.put("type", "task");
+            Map<String, Object> vars = taskVars.get(hti.getId());
+            item.put(FlowableProcessConstants.COMMENT_VAR, vars != null ? vars.getOrDefault(FlowableProcessConstants.COMMENT_VAR, "") : "");
+            item.put(FlowableProcessConstants.APPROVED_VAR, vars != null ? vars.get(FlowableProcessConstants.APPROVED_VAR) : null);
+            items.add(item);
+        }
+        return items;
+    }
+
+    /**
+     * 构建流程结束事件
+     */
+    private Map<String, Object> buildEndEvent(HistoricProcessInstance hpi) {
+        Map<String, Object> event = new HashMap<>();
+        event.put("taskName", "流程结束");
+        event.put("assignee", "");
+        event.put("startTime", hpi.getEndTime());
+        event.put("endTime", hpi.getEndTime());
+        event.put("comment", "");
+        event.put("type", "end");
+        return event;
+    }
 }

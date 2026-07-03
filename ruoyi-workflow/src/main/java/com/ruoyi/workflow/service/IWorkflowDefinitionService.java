@@ -3,6 +3,9 @@ package com.ruoyi.workflow.service;
 import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.workflow.domain.WorkflowDefinition;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 流程定义 服务层
  *
@@ -29,4 +32,9 @@ public interface IWorkflowDefinitionService
      * 获取流程定义BPMN XML
      */
     String getDefinitionBpmnXml(String definitionId);
+
+    /**
+     * 获取所有已部署流程定义的Key和名称列表（用于下拉选择）
+     */
+    List<Map<String, String>> getProcessDefinitionKeys();
 }

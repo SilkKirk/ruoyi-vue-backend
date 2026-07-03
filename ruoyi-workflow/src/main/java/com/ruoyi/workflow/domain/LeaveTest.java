@@ -2,6 +2,7 @@ package com.ruoyi.workflow.domain;
 
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.KeyType;
 import com.ruoyi.common.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,8 +13,8 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Table("leave_test")
 public class LeaveTest extends BaseEntity {
-    @Id
-    private String id;
+    @Id(keyType = KeyType.Auto)
+    private Long id;
     private String userName;
     private String leaveType;
     private Date startDate;

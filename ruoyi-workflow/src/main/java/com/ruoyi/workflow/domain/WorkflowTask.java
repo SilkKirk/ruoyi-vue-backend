@@ -82,4 +82,10 @@ public class WorkflowTask extends BaseEntity
 
     /** 业务摘要（如 "张三的请假申请"） */
     private String businessSummary;
+
+    /**
+     * 任务状态
+     * Created / Assigned / Delegated / Completed / Rejected / Returned
+     */
+    private String status;
 }

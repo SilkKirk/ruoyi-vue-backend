@@ -2,8 +2,7 @@ package com.ruoyi.workflow.service.impl;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.Deployment;
@@ -15,15 +14,20 @@ import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.workflow.domain.WorkflowDefinition;
 import com.ruoyi.workflow.service.IWorkflowDefinitionService;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 流程定义 服务层实现
  *
  * @author ruoyi
  */
+@Slf4j
 @Service
 public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
 {
+    private static final int SUSPEND_STATE = 1;
+    private static final int ACTIVE_STATE = 2;
+
     @Autowired
     private RepositoryService repositoryService;
 
@@ -64,11 +68,11 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
     public int updateState(String definitionId, int state)
     {
         // state: 1=挂起(suspend), 2=激活(activate)
-        if (state == 1)
+        if (state == SUSPEND_STATE)
         {
             repositoryService.suspendProcessDefinitionById(definitionId);
         }
-        else if (state == 2)
+        else if (state == ACTIVE_STATE)
         {
             repositoryService.activateProcessDefinitionById(definitionId);
         }
@@ -121,6 +125,19 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
         return null;
     }
 
+    @Override
+    public List<Map<String, String>> getProcessDefinitionKeys() {
+        List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery()
+                .latestVersion()
+                .list();
+        return list.stream().map(pd -> {
+            Map<String, String> item = new HashMap<>();
+            item.put("key", pd.getKey());
+            item.put("name", pd.getName());
+            return item;
+        }).collect(Collectors.toList());
+    }
+
     /**
      * 将Flowable ProcessDefinition转换为WorkflowDefinition
      */
@@ -147,7 +164,7 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
         }
         catch (Exception e)
         {
-            // 部署时间查询失败不影响主流程
+            log.warn("部署时间查询失败", e);
         }
         return def;
     }
