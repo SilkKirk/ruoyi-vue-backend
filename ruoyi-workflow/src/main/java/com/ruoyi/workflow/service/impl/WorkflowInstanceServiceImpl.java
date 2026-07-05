@@ -114,13 +114,14 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
     {
         String username = SecurityUtils.getUsername();
 
-        // 同时查运行中和已完成的流程实例（按发起人筛选）
-        List<HistoricProcessInstance> histList = createMyInstanceQuery(username)
+        org.flowable.engine.history.HistoricProcessInstanceQuery histQuery = createMyInstanceQuery(username, instance);
+
+        List<HistoricProcessInstance> histList = histQuery
                 .orderByProcessInstanceStartTime().desc()
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createMyInstanceQuery(username).count();
+        long count = createMyInstanceQuery(username, instance).count();
 
         // 组装结果
         List<WorkflowInstance> resultList = histList.stream()
@@ -159,8 +160,22 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         return q;
     }
 
-    private org.flowable.engine.history.HistoricProcessInstanceQuery createMyInstanceQuery(String username) {
-        return historyService.createHistoricProcessInstanceQuery().startedBy(username);
+    private org.flowable.engine.history.HistoricProcessInstanceQuery createMyInstanceQuery(String username, WorkflowInstance instance) {
+        org.flowable.engine.history.HistoricProcessInstanceQuery q = historyService
+                .createHistoricProcessInstanceQuery().startedBy(username);
+        if (instance != null) {
+            if (StrUtil.isNotBlank(instance.getProcessName())) {
+                q.processDefinitionName(instance.getProcessName());
+            }
+            if (StrUtil.isNotBlank(instance.getStatus())) {
+                if (FlowableProcessConstants.INSTANCE_COMPLETED.equals(instance.getStatus())) {
+                    q.finished();
+                } else if (FlowableProcessConstants.INSTANCE_RUNNING.equals(instance.getStatus())) {
+                    q.unfinished();
+                }
+            }
+        }
+        return q;
     }
 
     private HistoricVariableInstance queryHistoricVar(String processInstanceId, String varName) {
