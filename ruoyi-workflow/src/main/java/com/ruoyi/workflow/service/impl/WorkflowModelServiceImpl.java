@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.Model;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.mybatisflex.core.paginate.Page;
@@ -14,36 +13,27 @@ import com.ruoyi.workflow.domain.WorkflowModel;
 import com.ruoyi.workflow.service.IWorkflowModelService;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 流程模型 服务层实现
  *
  * @author ruoyi
  */
+@RequiredArgsConstructor
 @Service
 public class WorkflowModelServiceImpl implements IWorkflowModelService
 {
-    @Autowired
-    private RepositoryService repositoryService;
+    private final RepositoryService repositoryService;
 
     @Override
     public Page<WorkflowModel> selectModelList(Page<WorkflowModel> page, WorkflowModel model)
     {
-        org.flowable.engine.repository.ModelQuery modelQuery = repositoryService.createModelQuery();
-        if (StrUtil.isNotBlank(model.getName()))
-        {
-            modelQuery.modelNameLike("%" + model.getName() + "%");
-        }
-        List<Model> modelList = modelQuery
+        List<Model> modelList = createModelQuery(model.getName())
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        org.flowable.engine.repository.ModelQuery countQuery = repositoryService.createModelQuery();
-        if (StrUtil.isNotBlank(model.getName()))
-        {
-            countQuery.modelNameLike("%" + model.getName() + "%");
-        }
-        long count = countQuery.count();
+        long count = createModelQuery(model.getName()).count();
 
         List<WorkflowModel> workflowModels = modelList.stream().map(this::convertToWorkflowModel)
                 .collect(Collectors.toList());
@@ -66,7 +56,7 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         byte[] bpmnBytes = repositoryService.getModelEditorSource(modelId);
         if (bpmnBytes != null)
         {
-            workflowModel.setBpmnXml(new String(bpmnBytes, StandardCharsets.UTF_8));
+            workflowModel.setBpmnXml(StrUtil.utf8Str(bpmnBytes));
         }
         return workflowModel;
     }
@@ -80,22 +70,23 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         newModel.setKey(model.getKey());
         newModel.setCategory(model.getCategory());
         newModel.setMetaInfo(JSONUtil.toJsonStr(JSONUtil.createObj().set("description",
-                model.getDescription() != null ? model.getDescription() : "")));
+                StrUtil.emptyIfNull(model.getDescription()))));
 
         repositoryService.saveModel(newModel);
 
-        // 创建空的BPMN XML
-        String emptyBpmnXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        String emptyBpmnXml = StrUtil.format(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                 + "<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\""
                 + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                 + " xmlns:flowable=\"http://flowable.org/bpmn\""
                 + " targetNamespace=\"http://www.flowable.org/processdef\">"
-                + " <process id=\"" + model.getKey() + "\" name=\"" + model.getName() + "\" isExecutable=\"true\">"
+                + " <process id=\"{}\" name=\"{}\" isExecutable=\"true\">"
                 + "   <startEvent id=\"startEvent\" name=\"开始\"></startEvent>"
                 + "   <endEvent id=\"endEvent\" name=\"结束\"></endEvent>"
                 + "   <sequenceFlow id=\"flow1\" sourceRef=\"startEvent\" targetRef=\"endEvent\"></sequenceFlow>"
                 + " </process>"
-                + "</definitions>";
+                + "</definitions>",
+                model.getKey(), model.getName());
 
         repositoryService.addModelEditorSource(newModel.getId(), emptyBpmnXml.getBytes(StandardCharsets.UTF_8));
 
@@ -115,7 +106,7 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         byte[] bpmnBytes = repositoryService.getModelEditorSource(modelId);
         if (bpmnBytes != null)
         {
-            return new String(bpmnBytes, StandardCharsets.UTF_8);
+            return StrUtil.utf8Str(bpmnBytes);
         }
         return null;
     }
@@ -144,7 +135,7 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
             throw new RuntimeException("模型BPMN XML为空，请先设计流程图");
         }
 
-        String bpmnXml = new String(bpmnBytes, StandardCharsets.UTF_8);
+        String bpmnXml = StrUtil.utf8Str(bpmnBytes);
 
         // 直接部署XML字符串
         Deployment deployment = repositoryService.createDeployment()
@@ -158,6 +149,14 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         repositoryService.saveModel(model);
 
         return deployment.getId();
+    }
+
+    private org.flowable.engine.repository.ModelQuery createModelQuery(String name) {
+        org.flowable.engine.repository.ModelQuery query = repositoryService.createModelQuery();
+        if (StrUtil.isNotBlank(name)) {
+            query.modelNameLike("%" + name + "%");
+        }
+        return query;
     }
 
     /**
@@ -174,10 +173,7 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
         workflowModel.setDescription(model.getMetaInfo());
         workflowModel.setDeploymentId(model.getDeploymentId());
 
-        if (model.getCreateTime() != null)
-        {
-            workflowModel.setCreateTime(model.getCreateTime());
-        }
+        workflowModel.setCreateTime(model.getCreateTime());
         return workflowModel;
     }
 }

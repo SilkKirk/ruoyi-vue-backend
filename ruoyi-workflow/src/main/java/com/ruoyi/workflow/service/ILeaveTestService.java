@@ -1,13 +1,10 @@
 package com.ruoyi.workflow.service;
 
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.service.IService;
 import com.ruoyi.workflow.domain.LeaveTest;
 
-public interface ILeaveTestService {
+public interface ILeaveTestService extends IService<LeaveTest> {
     Page<LeaveTest> selectLeaveTestList(Page<LeaveTest> page, LeaveTest leaveTest);
-    LeaveTest selectLeaveTestById(Long id);
-    int insertLeaveTest(LeaveTest leaveTest);
-    int updateLeaveTest(LeaveTest leaveTest);
-    int deleteLeaveTestById(Long id);
-
+    boolean insertLeaveTest(LeaveTest leaveTest);
 }

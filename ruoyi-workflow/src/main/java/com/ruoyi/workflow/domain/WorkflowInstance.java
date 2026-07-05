@@ -58,8 +58,8 @@ public class WorkflowInstance extends BaseEntity
     /** 流程版本 */
     private Integer version;
 
-    /** 业务类型（如 leave） */
-    private String businessType;
+    /** 业务 Code（即 serviceBeanName，对应 WorkflowBusinessHandler 实现类的 Spring Bean 名称） */
+    private String businessCode;
 
     /** 业务详情前端路由 */
     private String detailRoute;

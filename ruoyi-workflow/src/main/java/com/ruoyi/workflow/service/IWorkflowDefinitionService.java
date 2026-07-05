@@ -2,9 +2,10 @@ package com.ruoyi.workflow.service;
 
 import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.workflow.domain.WorkflowDefinition;
+import com.ruoyi.workflow.domain.vo.ProcessDiagramVo;
+import com.ruoyi.workflow.domain.vo.ProcessDefinitionKey;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 流程定义 服务层
@@ -29,12 +30,12 @@ public interface IWorkflowDefinitionService
     int deleteDefinitionById(String definitionId);
 
     /**
-     * 获取流程定义BPMN XML
+     * 获取流程图数据（BPMN XML + 可选活动状态）
      */
-    String getDefinitionBpmnXml(String definitionId);
+    ProcessDiagramVo getDiagramInfo(String definitionId, String instanceId);
 
     /**
      * 获取所有已部署流程定义的Key和名称列表（用于下拉选择）
      */
-    List<Map<String, String>> getProcessDefinitionKeys();
+    List<ProcessDefinitionKey> getProcessDefinitionKeys();
 }

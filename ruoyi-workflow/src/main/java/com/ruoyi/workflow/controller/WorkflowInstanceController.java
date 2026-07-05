@@ -1,9 +1,6 @@
 package com.ruoyi.workflow.controller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,19 +15,21 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.workflow.domain.WorkflowInstance;
 import com.ruoyi.workflow.service.IWorkflowInstanceService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 流程实例 控制器
  *
  * @author ruoyi
  */
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/instance")
 public class WorkflowInstanceController extends BaseController
 {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowInstanceController.class);
-    @Autowired
-    private IWorkflowInstanceService workflowInstanceService;
+    private final IWorkflowInstanceService workflowInstanceService;
 
     /**
      * 分页查询流程实例列表
@@ -72,7 +71,8 @@ public class WorkflowInstanceController extends BaseController
         }
         catch (Exception e)
         {
-            return error(e.getMessage());
+            log.error("启动流程实例失败", e);
+            return error("启动流程实例失败");
         }
     }
 
@@ -103,14 +103,4 @@ public class WorkflowInstanceController extends BaseController
         return success();
     }
 
-    /**
-     * 获取流程图高亮跟踪
-     */
-    @PreAuthorize("@ss.hasPermi('workflow:instance:query')")
-    @GetMapping("/diagram/{instanceId}")
-    public AjaxResult diagram(@PathVariable String instanceId)
-    {
-        String base64 = workflowInstanceService.getInstanceDiagram(instanceId);
-        return AjaxResult.success("操作成功", base64);
-    }
 }

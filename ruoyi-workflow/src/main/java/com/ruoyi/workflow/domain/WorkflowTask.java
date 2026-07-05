@@ -3,6 +3,7 @@ package com.ruoyi.workflow.domain;
 import java.util.Date;
 import java.util.Map;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -47,16 +48,12 @@ public class WorkflowTask extends BaseEntity
     /** 任务办理人部门 */
     private String deptName;
 
-    /** 候选人IDs（逗号分隔） */
-    private String candidateUsers;
-
-    /** 候选组IDs（逗号分隔） */
-    private String candidateGroups;
-
     /** 任务创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
     /** 任务完成时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date completeTime;
 
     /** 审批意见 */
@@ -74,8 +71,8 @@ public class WorkflowTask extends BaseEntity
     /** 流程状态（RUNNING/COMPLETED） */
     private String processStatus;
 
-    /** 业务类型（如 leave） */
-    private String businessType;
+    /** 业务 Code（即 serviceBeanName，对应 WorkflowBusinessHandler 实现类的 Spring Bean 名称） */
+    private String businessCode;
 
     /** 业务详情前端路由 */
     private String detailRoute;

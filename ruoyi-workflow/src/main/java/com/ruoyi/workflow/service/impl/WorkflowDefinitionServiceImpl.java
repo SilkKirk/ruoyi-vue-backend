@@ -1,56 +1,52 @@
 package com.ruoyi.workflow.service.impl;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.history.HistoricActivityInstance;
+import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.flowable.engine.runtime.ProcessInstance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.mybatisflex.core.paginate.Page;
+import com.ruoyi.workflow.common.FlowableProcessConstants;
 import com.ruoyi.workflow.domain.WorkflowDefinition;
+import com.ruoyi.workflow.domain.vo.ProcessDiagramVo;
+import com.ruoyi.workflow.domain.vo.ProcessDefinitionKey;
 import com.ruoyi.workflow.service.IWorkflowDefinitionService;
+import com.ruoyi.workflow.common.utils.FlowableDiagramUtils;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * 流程定义 服务层实现
- *
- * @author ruoyi
- */
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
 {
-    private static final int SUSPEND_STATE = 1;
-    private static final int ACTIVE_STATE = 2;
+    private final RepositoryService repositoryService;
 
-    @Autowired
-    private RepositoryService repositoryService;
+    private final RuntimeService runtimeService;
+
+    private final HistoryService historyService;
 
     @Override
     public Page<WorkflowDefinition> selectDefinitionList(Page<WorkflowDefinition> page, WorkflowDefinition definition)
     {
-        org.flowable.engine.repository.ProcessDefinitionQuery pdQuery = repositoryService.createProcessDefinitionQuery();
-        if (StrUtil.isNotBlank(definition.getName()))
-        {
-            pdQuery.processDefinitionNameLike("%" + definition.getName() + "%");
-        }
-        List<ProcessDefinition> definitionList = pdQuery
+        List<ProcessDefinition> definitionList = createDefinitionQuery(definition.getName())
                 .latestVersion()
                 .orderByProcessDefinitionVersion().desc()
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        org.flowable.engine.repository.ProcessDefinitionQuery countQuery = repositoryService.createProcessDefinitionQuery();
-        if (StrUtil.isNotBlank(definition.getName()))
-        {
-            countQuery.processDefinitionNameLike("%" + definition.getName() + "%");
-        }
-        long count = countQuery
+        long count = createDefinitionQuery(definition.getName())
                 .latestVersion()
                 .count();
 
@@ -67,12 +63,11 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
     @Transactional(rollbackFor = Exception.class)
     public int updateState(String definitionId, int state)
     {
-        // state: 1=挂起(suspend), 2=激活(activate)
-        if (state == SUSPEND_STATE)
+        if (state == FlowableProcessConstants.SUSPEND_STATE)
         {
             repositoryService.suspendProcessDefinitionById(definitionId);
         }
-        else if (state == ACTIVE_STATE)
+        else if (state == FlowableProcessConstants.ACTIVE_STATE)
         {
             repositoryService.activateProcessDefinitionById(definitionId);
         }
@@ -88,14 +83,75 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
         if (processDefinition != null)
         {
             String deploymentId = processDefinition.getDeploymentId();
-            // 级联删除（包括流程实例）
             repositoryService.deleteDeployment(deploymentId, true);
         }
         return 1;
     }
 
     @Override
-    public String getDefinitionBpmnXml(String definitionId)
+    public ProcessDiagramVo getDiagramInfo(String definitionId, String instanceId)
+    {
+        if (StrUtil.isNotBlank(instanceId))
+        {
+            ProcessInstance pi = runtimeService.createProcessInstanceQuery()
+                    .processInstanceId(instanceId).singleResult();
+
+            String defId;
+            if (pi != null) {
+                defId = pi.getProcessDefinitionId();
+            } else {
+                HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
+                        .processInstanceId(instanceId).singleResult();
+                if (hpi == null) return null;
+                defId = hpi.getProcessDefinitionId();
+            }
+
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(defId);
+            if (bpmnModel == null) return null;
+
+            List<HistoricActivityInstance> completedActInstList = historyService.createHistoricActivityInstanceQuery()
+                    .processInstanceId(instanceId)
+                    .finished()
+                    .orderByHistoricActivityInstanceEndTime().asc()
+                    .list();
+
+            List<String> completedActivityIds = completedActInstList.stream()
+                    .map(HistoricActivityInstance::getActivityId)
+                    .collect(Collectors.toList());
+
+            List<String> activeActivityIds = pi != null
+                    ? runtimeService.getActiveActivityIds(instanceId)
+                    : Collections.emptyList();
+
+            List<String> completedFlowIds = FlowableDiagramUtils.computeCompletedFlowIds(
+                    completedActivityIds, activeActivityIds, bpmnModel);
+
+            String bpmnXml = readBpmnXml(defId);
+
+            ProcessDiagramVo vo = new ProcessDiagramVo();
+            vo.setBpmnXml(bpmnXml);
+            vo.setCompletedActivityIds(completedActivityIds);
+            vo.setActiveActivityIds(activeActivityIds);
+            vo.setCompletedFlowIds(completedFlowIds);
+            return vo;
+        }
+
+        if (StrUtil.isNotBlank(definitionId))
+        {
+            String bpmnXml = readBpmnXml(definitionId);
+            if (bpmnXml == null) return null;
+            ProcessDiagramVo vo = new ProcessDiagramVo();
+            vo.setBpmnXml(bpmnXml);
+            vo.setCompletedActivityIds(Collections.emptyList());
+            vo.setActiveActivityIds(Collections.emptyList());
+            vo.setCompletedFlowIds(Collections.emptyList());
+            return vo;
+        }
+
+        return null;
+    }
+
+    private String readBpmnXml(String definitionId)
     {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(definitionId).singleResult();
@@ -109,15 +165,11 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
                 {
                     try (InputStream is = repositoryService.getResourceAsStream(deploymentId, resourceName))
                     {
-                        if (is != null)
-                        {
-                            byte[] bytes = is.readAllBytes();
-                            return new String(bytes, StandardCharsets.UTF_8);
-                        }
+                        if (is != null) return IoUtil.readUtf8(is);
                     }
                     catch (Exception e)
                     {
-                        throw new RuntimeException("读取BPMN XML失败", e);
+                        log.error("读取BPMN XML失败", e);
                     }
                 }
             }
@@ -126,21 +178,22 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
     }
 
     @Override
-    public List<Map<String, String>> getProcessDefinitionKeys() {
+    public List<ProcessDefinitionKey> getProcessDefinitionKeys() {
         List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery()
                 .latestVersion()
                 .list();
-        return list.stream().map(pd -> {
-            Map<String, String> item = new HashMap<>();
-            item.put("key", pd.getKey());
-            item.put("name", pd.getName());
-            return item;
-        }).collect(Collectors.toList());
+        return list.stream().map(pd -> new ProcessDefinitionKey(pd.getKey(), pd.getName()))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * 将Flowable ProcessDefinition转换为WorkflowDefinition
-     */
+    private org.flowable.engine.repository.ProcessDefinitionQuery createDefinitionQuery(String name) {
+        org.flowable.engine.repository.ProcessDefinitionQuery q = repositoryService.createProcessDefinitionQuery();
+        if (StrUtil.isNotBlank(name)) {
+            q.processDefinitionNameLike("%" + name + "%");
+        }
+        return q;
+    }
+
     private WorkflowDefinition convertToWorkflowDefinition(ProcessDefinition pd)
     {
         WorkflowDefinition def = new WorkflowDefinition();
@@ -152,7 +205,6 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
         def.setDescription(pd.getDescription());
         def.setDeploymentId(pd.getDeploymentId());
         def.setSuspended(pd.isSuspended() ? 1 : 0);
-        // 查询部署时间
         try
         {
             Deployment deployment = repositoryService.createDeploymentQuery()

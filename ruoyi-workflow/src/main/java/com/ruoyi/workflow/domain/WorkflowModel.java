@@ -36,7 +36,8 @@ public class WorkflowModel extends BaseEntity
     private String description;
 
     /** 部署时间 */
-    private String deployTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date deployTime;
 
     /** 部署ID（已部署时非空） */
     private String deploymentId;

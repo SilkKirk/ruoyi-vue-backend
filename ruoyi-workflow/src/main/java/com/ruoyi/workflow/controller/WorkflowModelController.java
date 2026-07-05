@@ -1,8 +1,5 @@
 package com.ruoyi.workflow.controller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +16,21 @@ import com.ruoyi.workflow.domain.WorkflowModel;
 import com.ruoyi.workflow.service.IWorkflowModelService;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 流程模型 控制器
  *
  * @author ruoyi
  */
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/model")
 public class WorkflowModelController extends BaseController
 {
-    private static final Logger log = LoggerFactory.getLogger(WorkflowModelController.class);
-    @Autowired
-    private IWorkflowModelService workflowModelService;
+    private final IWorkflowModelService workflowModelService;
 
     /**
      * 分页查询模型列表
@@ -115,7 +114,8 @@ public class WorkflowModelController extends BaseController
         }
         catch (Exception e)
         {
-            return error(e.getMessage());
+            log.error("部署模型失败", e);
+            return error("部署模型失败");
         }
     }
 }

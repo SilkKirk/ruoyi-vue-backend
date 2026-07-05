@@ -1,12 +1,12 @@
 package com.ruoyi.workflow.controller;
 
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
@@ -16,18 +16,19 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.workflow.domain.WorkflowDefinition;
 import com.ruoyi.workflow.service.IWorkflowDefinitionService;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 流程定义 控制器
  *
  * @author ruoyi
  */
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/workflow/definition")
 public class WorkflowDefinitionController extends BaseController
 {
-    @Autowired
-    private IWorkflowDefinitionService workflowDefinitionService;
+    private final IWorkflowDefinitionService workflowDefinitionService;
 
     /**
      * 分页查询流程定义列表
@@ -37,16 +38,6 @@ public class WorkflowDefinitionController extends BaseController
     public TableDataInfo list(WorkflowDefinition definition)
     {
         return getDataTable(workflowDefinitionService.selectDefinitionList(startPage(WorkflowDefinition.class), definition));
-    }
-
-    /**
-     * 获取流程定义BPMN XML
-     */
-    @PreAuthorize("@ss.hasPermi('workflow:definition:query')")
-    @GetMapping("/bpmnXml/{definitionId}")
-    public AjaxResult getBpmnXml(@PathVariable String definitionId)
-    {
-        return AjaxResult.success("操作成功", workflowDefinitionService.getDefinitionBpmnXml(definitionId));
     }
 
     /**
@@ -68,6 +59,16 @@ public class WorkflowDefinitionController extends BaseController
     @GetMapping("/processDefinitionKeys")
     public AjaxResult getProcessDefinitionKeys() {
         return success(workflowDefinitionService.getProcessDefinitionKeys());
+    }
+
+    /**
+     * 获取流程图数据（BPMN XML + 可选活动状态）
+     */
+    @GetMapping("/diagramInfo")
+    public AjaxResult diagramInfo(@RequestParam(required=false) String definitionId,
+                                  @RequestParam(required=false) String instanceId)
+    {
+        return success(workflowDefinitionService.getDiagramInfo(definitionId, instanceId));
     }
 
     /**
