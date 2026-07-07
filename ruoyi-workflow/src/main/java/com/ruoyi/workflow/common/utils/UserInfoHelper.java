@@ -13,18 +13,11 @@ public class UserInfoHelper {
     private final ISysUserService sysUserService;
 
     public String getNickname(String username) {
-        if (StrUtil.isBlank(username)) return username;
-        SysUser user = sysUserService.selectUserByUserName(username);
-        return user != null ? user.getNickName() : username;
+        return getUserInfo(username).nickname();
     }
 
     public String getDeptName(String username) {
-        if (StrUtil.isBlank(username)) return "";
-        SysUser user = sysUserService.selectUserByUserName(username);
-        if (user != null && user.getDept() != null) {
-            return user.getDept().getDeptName();
-        }
-        return "";
+        return getUserInfo(username).deptName();
     }
 
     public UserInfoVo getUserInfo(String username) {

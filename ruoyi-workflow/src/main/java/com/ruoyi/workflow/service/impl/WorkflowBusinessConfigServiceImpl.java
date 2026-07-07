@@ -21,7 +21,6 @@ public class WorkflowBusinessConfigServiceImpl
     @Override
     public Page<WorkflowBusinessConfig> selectConfigList(Page<WorkflowBusinessConfig> page, WorkflowBusinessConfig config) {
         QueryWrapper qw = QueryWrapper.create()
-                .select()
                 .from(WorkflowBusinessConfig.class)
                 .orderBy(WorkflowBusinessConfig::getCreateTime, true);
         if (StrUtil.isNotBlank(config.getBusinessName())) {

@@ -15,8 +15,6 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     @Override
     public void configure(SpringProcessEngineConfiguration engineConfiguration)
     {
-        // 设置流程变量映射为下划线风格（与数据库列名匹配）
-        engineConfiguration.setDatabaseTablePrefix("");
         // 设置字体（用于流程图中文显示，使用逻辑字体名确保跨平台兼容）
         engineConfiguration.setActivityFontName("SansSerif");
         engineConfiguration.setLabelFontName("SansSerif");

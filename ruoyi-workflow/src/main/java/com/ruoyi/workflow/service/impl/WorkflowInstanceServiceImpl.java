@@ -44,13 +44,13 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
     @Override
     public Page<WorkflowInstance> selectInstanceList(Page<WorkflowInstance> page, WorkflowInstance instance)
     {
-        List<ProcessInstance> instanceList = createRunningInstanceQuery(instance.getProcessName())
-                .orderByStartTime().desc()
+        org.flowable.engine.runtime.ProcessInstanceQuery query = createRunningInstanceQuery(instance.getProcessName())
+                .orderByStartTime().desc();
+        List<ProcessInstance> instanceList = query
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createRunningInstanceQuery(instance.getProcessName())
-                .count();
+        long count = query.count();
 
         List<WorkflowInstance> resultList = instanceList.stream()
                 .map(this::convertRunningToWorkflowInstance)
@@ -114,14 +114,14 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
     {
         String username = SecurityUtils.getUsername();
 
-        org.flowable.engine.history.HistoricProcessInstanceQuery histQuery = createMyInstanceQuery(username, instance);
+        org.flowable.engine.history.HistoricProcessInstanceQuery histQuery = createMyInstanceQuery(username, instance)
+                .orderByProcessInstanceStartTime().desc();
 
         List<HistoricProcessInstance> histList = histQuery
-                .orderByProcessInstanceStartTime().desc()
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createMyInstanceQuery(username, instance).count();
+        long count = histQuery.count();
 
         // 组装结果
         List<WorkflowInstance> resultList = histList.stream()
@@ -200,7 +200,7 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
 
         wi.setBusinessCode((String) runtimeService.getVariable(pi.getId(), FlowableProcessConstants.BUSINESS_CODE_VAR));
         String initiator = (String) runtimeService.getVariable(pi.getId(), FlowableProcessConstants.INITIATOR_VAR);
-        wi.setStartUserName(initiator != null ? initiator : pi.getStartUserId());
+        wi.setStartUserName(StrUtil.blankToDefault(initiator, pi.getStartUserId()));
 
         populateCommonInstanceFields(wi, pi.getProcessDefinitionId());
 
@@ -234,13 +234,9 @@ public class WorkflowInstanceServiceImpl implements IWorkflowInstanceService
         populateCommonInstanceFields(wi, hpi.getProcessDefinitionId());
 
         if (hpi.getEndTime() == null) {
-            ProcessInstance runningPi = runtimeService.createProcessInstanceQuery()
-                    .processInstanceId(hpi.getId()).singleResult();
-            if (runningPi != null) {
-                wi.setCurrentActivity(resolveActivityNames(
-                        repositoryService.getBpmnModel(hpi.getProcessDefinitionId()),
-                        runtimeService.getActiveActivityIds(runningPi.getId())));
-            }
+            wi.setCurrentActivity(resolveActivityNames(
+                    repositoryService.getBpmnModel(hpi.getProcessDefinitionId()),
+                    runtimeService.getActiveActivityIds(hpi.getId())));
         }
         return wi;
     }

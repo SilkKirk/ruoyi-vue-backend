@@ -4,11 +4,12 @@ import java.util.Map;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.ruoyi.workflow.common.FlowableProcessConstants;
+import com.ruoyi.workflow.common.enums.FlowComment;
 import com.ruoyi.workflow.domain.WorkflowBaseEntity;
 import com.ruoyi.workflow.service.IWorkflowTaskService;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import cn.hutool.core.util.StrUtil;
 import lombok.Setter;
 
 public abstract class AbstractWorkflowAwareService<T extends WorkflowBaseEntity>
@@ -30,7 +31,7 @@ public abstract class AbstractWorkflowAwareService<T extends WorkflowBaseEntity>
     @Override
     public Object loadBusinessData(String businessId) {
         if (businessId == null) return null;
-        return getById(Long.valueOf(businessId));
+        return getById(businessId);
     }
 
     @Override
@@ -49,7 +50,7 @@ public abstract class AbstractWorkflowAwareService<T extends WorkflowBaseEntity>
         T entity = (T) businessData;
         Object approved = processVariables != null
                 ? processVariables.get(FlowableProcessConstants.APPROVED_VAR) : null;
-        entity.setStatus(approved != null && Integer.valueOf(0).equals(approved)
+        entity.setStatus(StrUtil.equals(FlowComment.REJECT.getType(), String.valueOf(approved))
                 ? FlowableProcessConstants.STATUS_REJECTED
                 : FlowableProcessConstants.STATUS_APPROVED);
         updateById(entity);

@@ -1,68 +1,94 @@
-# RuoYi 后端 (v3.9.2) — Agent 指令
+# RuoYi 后端 — Agent 指令
 
-## 项目结构
+Spring Boot 4.1 / JDK 17 / MyBatis-Flex 1.11 (**非 MyBatis**) / Flowable 8.0 / SpringDoc 3.0 / Hutool 5.8 / Lombok。
 
-Maven 多模块（7 个），JDK 17+，Spring Boot 4.1.0，MyBatis-Flex，Flowable 8.0.0，SpringDoc。
-
-| 模块 | 用途 |
-|------|------|
-| `ruoyi-admin` | Web 启动入口（Spring Boot main class） |
-| `ruoyi-framework` | 安全配置、拦截器、跨域、线程池 |
-| `ruoyi-system` | 系统业务服务（用户、角色、菜单等） |
-| `ruoyi-common` | 工具类、异常定义、过滤器 |
-| `ruoyi-quartz` | Quartz 定时任务 |
-| `ruoyi-generator` | 代码生成器 |
-| `ruoyi-workflow` | Flowable 工作流引擎 |
-
-## 常用命令
+## 构建与启动
 
 ```bash
-mvn clean package -DskipTests          # 构建（无测试配置，默认跳过）
-java -jar ruoyi-admin/target/ruoyi-admin.jar
-ry.sh start|stop|restart|status        # Linux 启停（仅 Linux 可用）
-docker compose up -d                   # Docker 一键部署（含前端）
+mvn clean install -DskipTests                                       # 编译（无测试）
+java -jar ruoyi-admin/target/ruoyi-admin.jar                         # 直接启动
+mvn spring-boot:run -f ruoyi-admin/pom.xml                           # Maven 启动
+ry.bat                                                               # Windows 菜单启停
 ```
+
+**启动流程（Windows）**：
+1. `cd ruoyi-vue-backend && mvn clean install -DskipTests`
+2. 杀旧进程：`netstat -ano | Select-String ":8080"` 取 PID 后 `Stop-Process -Id $pid -Force`
+3. `java -jar ruoyi-admin/target/ruoyi-admin.jar`（或用 `start-server` 后台运行）
+4. 轮询 8080 端口确认就绪
+
+## 项目布局
+
+| 模块 | 作用 |
+|------|------|
+| `ruoyi-admin` | 入口 `com.ruoyi.RuoYiApplication`，配置文件在此 |
+| `ruoyi-workflow` | **自定义模块**（非上游），Flowable 工作流 |
+
+其余 5 模块（framework/system/common/quartz/generator）为标准 RuoYi 结构。
 
 ## 关键配置文件
 
-- `ruoyi-admin/src/main/resources/application.yml` — 主配置（token/Redis/验证码/XSS/防盗链）
-- `ruoyi-admin/src/main/resources/application-druid.yml` — 数据源、Druid 监控台
-- `pom.xml` — 版本声明（所有依赖版本集中管理）
+- `ruoyi-admin/src/main/resources/application.yml` — 主配置 + Flowable + token
+- `ruoyi-admin/src/main/resources/application-druid.yml` — 数据源 + Druid 监控台
+- `pom.xml` — 依赖版本，阿里云镜像 `https://maven.aliyun.com/repository/public`
 
-## 架构要点
+## Controller 分页模式
 
-### 安全（SecurityConfig.java）
-- `/druid/**`、`/swagger-ui/**`、`/v3/api-docs/**`、`/swagger-ui/**`、`/profile/**` 均为 **`.permitAll()`**（第 103-106 行），无需认证即可访问
-- CORS：`addAllowedOriginPattern("*")` 允许所有来源（ResourcesConfig.java）
-- XSS 过滤器：仅对 JSON content-type 生效，表单参数和 query string 会绕过
-- 防盗链（RefererFilter）：`referer.contains(domain)` 可用子域名绕过；空域名列表使过滤器完全失效
-- 所有凭据硬编码在 yml 中（DB: ruoyi/123456, Redis: 123456, Druid 监控: ruoyi/123456, JWT secret 固定 64 字符）
+所有列表接口统一模式：
+```java
+return getDataTable(service.selectXxxList(startPage(Xxx.class), xxx));
+```
+`startPage(EntityClass)` 由 `BaseController` 提供，自动读取 `pageNum`/`pageSize` 查询参数并返回 MyBatis-Flex `Page` 对象。
 
-### MyBatis-Flex（非 MyBatis）
-- 使用 `QueryWrapper`、`@Table`、`@Column` 注解，非标准 MyBatis XML
-- Mapper XML 仍兼容，但推荐 Flex 原生 API
-- Druid 墙配置 `multi-statement-allow: true`（允许多语句 SQL）
+**常见陷阱**：查询参数（如 `processName`）会通过 Spring 绑定到实体类，但 **Service 层必须显式应用到 Flowable/MyBatis 查询中**，否则过滤无效。
 
-### Flowable 工作流
-- `database-schema-update: true` 启动时自动建表
-- `check-process-definitions: false` 不自动部署 classpath 下的 BPMN 文件
-- Flowable 8.0.0
+## 安全要点
 
-## 已知问题（来自代码审查）
+- 免认证路径：`/druid/**` `/swagger-ui/**` `/v3/api-docs/**` `/profile/**`
+- XSS 过滤器仅对 JSON content-type 生效（form/query 绕过）
+- 防盗链接口未启用（`referer.enabled: false`）
 
-- **路径穿越**：CommonController.download() 使用用户传入 fileName 拼接路径，`checkAllowDownload` 未防御绝对路径
-- **SQL 注入风险**：DataScopeHelper 中 `qw.and(condition)` 直接拼接原始 SQL 条件
-- **Quartz 任务丢失**：SysJobServiceImpl:45 `scheduler.clear()` 启动时清除所有已注册任务
-- **AsyncManager 泄漏**：shutdown() 方法从未被调用（无 @PreDestroy），线程池会被 JVM 直接终止
-- **Redis keys()**：TokenService、DictUtils、CacheController 在生产路径使用 O(N) 的 `keys()` 命令
-- **响应流提前关闭**：FileUtils.writeBytes() 中 `IoUtil.close(os)` 在上层 Servlet 完成写入前关闭了 OutputStream
-- **异常信息泄露**：多个 Controller 将 `e.getMessage()` 直接返回给前端
-- **TestController 并发**：静态 LinkedHashMap 在多线程 PUT/DELETE 下非线程安全
+### 硬编码凭据
+
+| 资源 | 凭据 |
+|------|------|
+| MySQL | `ruoyi / 123456` |
+| Redis | `123456` |
+| Druid 监控 | `ruoyi / 123456` |
+| JWT secret | 64 字符固定串 |
+| 管理员 | `admin / admin123` |
+
+## Flowable 工作流
+
+- `database-schema-update: true` 启动自动建表
+- `check-process-definitions: false` 不自动部署 BPMN
+- 模块入口：`ruoyi-workflow/src/main/java/com/ruoyi/workflow/`
+- **HistoricProcessInstanceQuery 无 processDefinitionNameLike 方法**，名称过滤只能用 `processDefinitionName(exactName)` 精确匹配
+- 状态过滤用 `.finished()` / `.unfinished()`，区分已结束和运行中
+
+## MyBatis-Flex 注意事项
+
+- 使用 `QueryWrapper`、`@Table`、`@Column` 注解，非标准 MyBatis XML（但兼容 XML）
+- 分页用 `Page<T>` 泛型类，非 `PageInfo` 或 `RowBounds`
+- Druid 配置 `multi-statement-allow: true`
+
+## 运维坑点
+
+- Maven 仓库缓存偶尔损坏（`E:\maven\maven-repository\com\ruoyi`），`mvn clean install` 重装可修复
+- `AsyncManager` 的 `shutdown()` 从未被调用（无 `@PreDestroy`）
+- `scheduler.clear()` 在启动时清除所有 Quartz 任务
+- Redis `keys(*)` 在 TokenService / DictUtils / CacheController 中使用（生产 O(N) 风险）
+
+## 已知代码缺陷
+
+- **路径穿越**：`CommonController.download()` 未防御绝对路径
+- **SQL 注入**：`DataScopeHelper` 中 `qw.and(condition)` 直接拼接原始 SQL
+- **异常泄露**：多个 Controller 将 `e.getMessage()` 返回给前端
+- **TestController 并发**：静态 `LinkedHashMap` 非线程安全
 
 ## 提交通知
 
-- 硬编码凭据（DB/Redis/JWT/监控台）必须先外置为环境变量
-- 不要将 `e.getMessage()` 返回给客户端
-- 空 `catch(Exception e) {}` 至少打一条日志
-- `@PathVariable` ID 参数需加 `@Min`/`@Max` 校验
-- 工具库 Hutool 5.8.46 可能有 SSRF 漏洞（CVE-2024-33681），考虑升级
+- 勿提交 `ruoyi-admin.err`、`*.log` 等运行产物
+- 勿将 `e.getMessage()` 返回给客户端
+- 空 `catch` 至少打一条日志
+- `@PathVariable` 加 `@Min`/`@Max` 校验

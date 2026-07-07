@@ -60,13 +60,13 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
     {
         String username = SecurityUtils.getUsername();
 
-        org.flowable.task.api.TaskQuery baseQuery = createTodoQuery(username, task.getTaskName());
-        List<Task> taskList = baseQuery
-                .orderByTaskCreateTime().desc()
+        org.flowable.task.api.TaskQuery query = createTodoQuery(username, task.getTaskName())
+                .orderByTaskCreateTime().desc();
+        List<Task> taskList = query
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createTodoQuery(username, task.getTaskName()).count();
+        long count = query.count();
 
         List<WorkflowTask> resultList = taskList.stream()
                 .map(this::convertTaskToWorkflowTask)
@@ -129,8 +129,8 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
         if (StrUtil.isNotBlank(comment))
         {
             // 通过意见存为 Flowable 原生评论（type="0" 对齐 approved=0）
-            if (task != null) {
-                taskService.addComment(taskId, task.getProcessInstanceId(),
+            if (procInstId != null) {
+                taskService.addComment(taskId, procInstId,
                         FlowComment.NORMAL.getType(), comment);
             }
             processVars.put(FlowableProcessConstants.COMMENT_VAR, comment);
@@ -203,7 +203,7 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
                 FlowComment.REJECT.getType(), comment);
 
         // approved=1 存 process 级别，供排他网关条件 ${approved == 1} 路由到"修改申请"
-        runtimeService.setVariable(task.getProcessInstanceId(), FlowableProcessConstants.APPROVED_VAR, 1);
+        runtimeService.setVariable(task.getProcessInstanceId(), FlowableProcessConstants.APPROVED_VAR, FlowComment.REJECT.getType());
 
         // 完成任务，网关已消费 approved 变量
         taskService.complete(taskId);

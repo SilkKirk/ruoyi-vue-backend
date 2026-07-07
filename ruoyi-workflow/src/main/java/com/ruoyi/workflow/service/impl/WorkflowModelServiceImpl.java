@@ -26,14 +26,28 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
 {
     private final RepositoryService repositoryService;
 
+    private static final String EMPTY_BPMN_TEMPLATE = ""
+            + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            + "<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\""
+            + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            + " xmlns:flowable=\"http://flowable.org/bpmn\""
+            + " targetNamespace=\"http://www.flowable.org/processdef\">"
+            + " <process id=\"{}\" name=\"{}\" isExecutable=\"true\">"
+            + "   <startEvent id=\"startEvent\" name=\"开始\"></startEvent>"
+            + "   <endEvent id=\"endEvent\" name=\"结束\"></endEvent>"
+            + "   <sequenceFlow id=\"flow1\" sourceRef=\"startEvent\" targetRef=\"endEvent\"></sequenceFlow>"
+            + " </process>"
+            + "</definitions>";
+
     @Override
     public Page<WorkflowModel> selectModelList(Page<WorkflowModel> page, WorkflowModel model)
     {
-        List<Model> modelList = createModelQuery(model.getName())
+        org.flowable.engine.repository.ModelQuery query = createModelQuery(model.getName());
+        List<Model> modelList = query
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createModelQuery(model.getName()).count();
+        long count = query.count();
 
         List<WorkflowModel> workflowModels = modelList.stream().map(this::convertToWorkflowModel)
                 .collect(Collectors.toList());
@@ -74,19 +88,7 @@ public class WorkflowModelServiceImpl implements IWorkflowModelService
 
         repositoryService.saveModel(newModel);
 
-        String emptyBpmnXml = StrUtil.format(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\""
-                + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-                + " xmlns:flowable=\"http://flowable.org/bpmn\""
-                + " targetNamespace=\"http://www.flowable.org/processdef\">"
-                + " <process id=\"{}\" name=\"{}\" isExecutable=\"true\">"
-                + "   <startEvent id=\"startEvent\" name=\"开始\"></startEvent>"
-                + "   <endEvent id=\"endEvent\" name=\"结束\"></endEvent>"
-                + "   <sequenceFlow id=\"flow1\" sourceRef=\"startEvent\" targetRef=\"endEvent\"></sequenceFlow>"
-                + " </process>"
-                + "</definitions>",
-                model.getKey(), model.getName());
+        String emptyBpmnXml = StrUtil.format(EMPTY_BPMN_TEMPLATE, model.getKey(), model.getName());
 
         repositoryService.addModelEditorSource(newModel.getId(), emptyBpmnXml.getBytes(StandardCharsets.UTF_8));
 

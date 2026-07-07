@@ -40,15 +40,14 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
     @Override
     public Page<WorkflowDefinition> selectDefinitionList(Page<WorkflowDefinition> page, WorkflowDefinition definition)
     {
-        List<ProcessDefinition> definitionList = createDefinitionQuery(definition.getName())
+        org.flowable.engine.repository.ProcessDefinitionQuery query = createDefinitionQuery(definition.getName())
                 .latestVersion()
-                .orderByProcessDefinitionVersion().desc()
+                .orderByProcessDefinitionVersion().desc();
+        List<ProcessDefinition> definitionList = query
                 .listPage(Math.toIntExact((page.getPageNumber() - 1) * page.getPageSize()),
                         Math.toIntExact(page.getPageSize()));
 
-        long count = createDefinitionQuery(definition.getName())
-                .latestVersion()
-                .count();
+        long count = query.count();
 
         List<WorkflowDefinition> resultList = definitionList.stream()
                 .map(this::convertToWorkflowDefinition)
@@ -91,88 +90,89 @@ public class WorkflowDefinitionServiceImpl implements IWorkflowDefinitionService
     @Override
     public ProcessDiagramVo getDiagramInfo(String definitionId, String instanceId)
     {
-        if (StrUtil.isNotBlank(instanceId))
-        {
-            ProcessInstance pi = runtimeService.createProcessInstanceQuery()
-                    .processInstanceId(instanceId).singleResult();
-
-            String defId;
-            if (pi != null) {
-                defId = pi.getProcessDefinitionId();
-            } else {
-                HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
-                        .processInstanceId(instanceId).singleResult();
-                if (hpi == null) return null;
-                defId = hpi.getProcessDefinitionId();
-            }
-
-            BpmnModel bpmnModel = repositoryService.getBpmnModel(defId);
-            if (bpmnModel == null) return null;
-
-            List<HistoricActivityInstance> completedActInstList = historyService.createHistoricActivityInstanceQuery()
-                    .processInstanceId(instanceId)
-                    .finished()
-                    .orderByHistoricActivityInstanceEndTime().asc()
-                    .list();
-
-            List<String> completedActivityIds = completedActInstList.stream()
-                    .map(HistoricActivityInstance::getActivityId)
-                    .collect(Collectors.toList());
-
-            List<String> activeActivityIds = pi != null
-                    ? runtimeService.getActiveActivityIds(instanceId)
-                    : Collections.emptyList();
-
-            List<String> completedFlowIds = FlowableDiagramUtils.computeCompletedFlowIds(
-                    completedActivityIds, activeActivityIds, bpmnModel);
-
-            String bpmnXml = readBpmnXml(defId);
-
-            ProcessDiagramVo vo = new ProcessDiagramVo();
-            vo.setBpmnXml(bpmnXml);
-            vo.setCompletedActivityIds(completedActivityIds);
-            vo.setActiveActivityIds(activeActivityIds);
-            vo.setCompletedFlowIds(completedFlowIds);
-            return vo;
+        if (StrUtil.isNotBlank(instanceId)) {
+            return buildDiagramForInstance(instanceId);
         }
-
-        if (StrUtil.isNotBlank(definitionId))
-        {
-            String bpmnXml = readBpmnXml(definitionId);
-            if (bpmnXml == null) return null;
-            ProcessDiagramVo vo = new ProcessDiagramVo();
-            vo.setBpmnXml(bpmnXml);
-            vo.setCompletedActivityIds(Collections.emptyList());
-            vo.setActiveActivityIds(Collections.emptyList());
-            vo.setCompletedFlowIds(Collections.emptyList());
-            return vo;
+        if (StrUtil.isNotBlank(definitionId)) {
+            return buildDiagramForDefinition(definitionId);
         }
-
         return null;
+    }
+
+    private ProcessDiagramVo buildDiagramForInstance(String instanceId)
+    {
+        ProcessInstance pi = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(instanceId).singleResult();
+
+        String defId;
+        if (pi != null) {
+            defId = pi.getProcessDefinitionId();
+        } else {
+            HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(instanceId).singleResult();
+            if (hpi == null) return null;
+            defId = hpi.getProcessDefinitionId();
+        }
+
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(defId);
+        if (bpmnModel == null) return null;
+
+        List<HistoricActivityInstance> completedActInstList = historyService.createHistoricActivityInstanceQuery()
+                .processInstanceId(instanceId)
+                .finished()
+                .orderByHistoricActivityInstanceEndTime().asc()
+                .list();
+
+        List<String> completedActivityIds = completedActInstList.stream()
+                .map(HistoricActivityInstance::getActivityId)
+                .collect(Collectors.toList());
+
+        List<String> activeActivityIds = pi != null
+                ? runtimeService.getActiveActivityIds(instanceId)
+                : Collections.emptyList();
+
+        List<String> completedFlowIds = FlowableDiagramUtils.computeCompletedFlowIds(
+                completedActivityIds, activeActivityIds, bpmnModel);
+
+        String bpmnXml = readBpmnXml(defId);
+
+        ProcessDiagramVo vo = new ProcessDiagramVo();
+        vo.setBpmnXml(bpmnXml);
+        vo.setCompletedActivityIds(completedActivityIds);
+        vo.setActiveActivityIds(activeActivityIds);
+        vo.setCompletedFlowIds(completedFlowIds);
+        return vo;
+    }
+
+    private ProcessDiagramVo buildDiagramForDefinition(String definitionId)
+    {
+        String bpmnXml = readBpmnXml(definitionId);
+        if (bpmnXml == null) return null;
+        ProcessDiagramVo vo = new ProcessDiagramVo();
+        vo.setBpmnXml(bpmnXml);
+        vo.setCompletedActivityIds(Collections.emptyList());
+        vo.setActiveActivityIds(Collections.emptyList());
+        vo.setCompletedFlowIds(Collections.emptyList());
+        return vo;
     }
 
     private String readBpmnXml(String definitionId)
     {
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+        ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(definitionId).singleResult();
-        if (processDefinition != null)
+        if (pd == null) return null;
+        String deploymentId = pd.getDeploymentId();
+        String resourceName = repositoryService.getDeploymentResourceNames(deploymentId).stream()
+                .filter(n -> n.endsWith(".bpmn") || n.endsWith(".bpmn20.xml"))
+                .findFirst().orElse(null);
+        if (resourceName == null) return null;
+        try (InputStream is = repositoryService.getResourceAsStream(deploymentId, resourceName))
         {
-            String deploymentId = processDefinition.getDeploymentId();
-            List<String> resourceNames = repositoryService.getDeploymentResourceNames(deploymentId);
-            for (String resourceName : resourceNames)
-            {
-                if (resourceName.endsWith(".bpmn") || resourceName.endsWith(".bpmn20.xml"))
-                {
-                    try (InputStream is = repositoryService.getResourceAsStream(deploymentId, resourceName))
-                    {
-                        if (is != null) return IoUtil.readUtf8(is);
-                    }
-                    catch (Exception e)
-                    {
-                        log.error("读取BPMN XML失败", e);
-                    }
-                }
-            }
+            if (is != null) return IoUtil.readUtf8(is);
+        }
+        catch (Exception e)
+        {
+            log.error("读取BPMN XML失败", e);
         }
         return null;
     }
