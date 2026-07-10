@@ -1,9 +1,7 @@
 package com.ruoyi.common.utils.http;
 
 import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import com.ruoyi.common.constant.Constants;
 import cn.hutool.core.util.StrUtil;
@@ -13,9 +11,9 @@ import cn.hutool.core.util.StrUtil;
  * 
  * @author ruoyi
  */
+@Slf4j
 public class HttpUtils
 {
-    private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 
     /**
      * 向指定 URL 发送GET方法的请求

@@ -12,7 +12,6 @@ import com.ruoyi.common.exception.file.FileNameLengthLimitExceededException;
 import com.ruoyi.common.exception.file.FileSizeLimitExceededException;
 import com.ruoyi.common.exception.file.InvalidExtensionException;
 import com.ruoyi.common.utils.DateUtils;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.IdUtil;
 import com.ruoyi.common.utils.uuid.Seq;
@@ -157,7 +156,7 @@ public class FileUploadUtils
 
     public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
     {
-        File desc = new File(uploadDir + File.separator + fileName);
+        File desc = FileUtil.file(uploadDir, fileName);
 
         if (!desc.exists())
         {

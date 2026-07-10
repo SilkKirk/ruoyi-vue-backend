@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import cn.hutool.core.util.URLUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import cn.hutool.core.io.FileUtil;
@@ -17,7 +17,6 @@ import cn.hutool.core.util.ArrayUtil;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.DateUtils;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.IdUtil;
 
@@ -214,16 +213,11 @@ public class FileUtils
     {
         String percentEncodedFileName = percentEncode(realFileName);
 
-        StringBuilder contentDispositionValue = new StringBuilder();
-        contentDispositionValue.append("attachment; filename=")
-                .append(percentEncodedFileName)
-                .append(";")
-                .append("filename*=")
-                .append("utf-8''")
-                .append(percentEncodedFileName);
+        String contentDispositionValue = StrUtil.format("attachment; filename={};filename*=utf-8''{}",
+            percentEncodedFileName, percentEncodedFileName);
 
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition,download-filename");
-        response.setHeader("Content-disposition", contentDispositionValue.toString());
+        response.setHeader("Content-disposition", contentDispositionValue);
         response.setHeader("download-filename", percentEncodedFileName);
     }
 
@@ -233,10 +227,9 @@ public class FileUtils
      * @param s 需要百分号编码的字符串
      * @return 百分号编码后的字符串
      */
-    public static String percentEncode(String s) throws UnsupportedEncodingException
+    public static String percentEncode(String s)
     {
-        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8.toString());
-        return encode.replaceAll("\\+", "%20");
+        return URLUtil.encode(s);
     }
 
     /**

@@ -23,7 +23,7 @@ public class GenTableColumn extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 编号 */
-@Id
+@Id(keyType = KeyType.Auto)
     private Long columnId;
 
     /** 归属表编号 */

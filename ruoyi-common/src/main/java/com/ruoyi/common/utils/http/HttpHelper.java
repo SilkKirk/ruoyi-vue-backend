@@ -1,55 +1,31 @@
 package com.ruoyi.common.utils.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import jakarta.servlet.ServletRequest;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.hutool.core.io.IoUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 通用http工具封装
  * 
  * @author ruoyi
  */
+@Slf4j
 public class HttpHelper
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpHelper.class);
 
     public static String getBodyString(ServletRequest request)
     {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = null;
         try (InputStream inputStream = request.getInputStream())
         {
-            reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String line = "";
-            while ((line = reader.readLine()) != null)
-            {
-                sb.append(line);
-            }
+            return IoUtil.read(inputStream, StandardCharsets.UTF_8);
         }
         catch (IOException e)
         {
-            LOGGER.warn("getBodyString出现问题！");
+            log.warn("getBodyString出现问题！");
+            return "";
         }
-        finally
-        {
-            if (reader != null)
-            {
-                try
-                {
-                    reader.close();
-                }
-                catch (IOException e)
-                {
-                    LOGGER.error(ExceptionUtil.getMessage(e));
-                }
-            }
-        }
-        return sb.toString();
     }
 }

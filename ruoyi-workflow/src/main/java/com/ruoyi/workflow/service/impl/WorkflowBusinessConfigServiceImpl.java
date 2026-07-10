@@ -10,7 +10,6 @@ import com.ruoyi.workflow.service.IWorkflowBusinessConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Service
@@ -35,7 +34,6 @@ public class WorkflowBusinessConfigServiceImpl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertConfig(WorkflowBusinessConfig config) {
-        config.setId(IdUtil.simpleUUID());
         if (config.getStatus() == null) {
             config.setStatus(FlowableProcessConstants.CONFIG_STATUS_ENABLED);
         }

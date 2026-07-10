@@ -16,7 +16,7 @@ import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.redis.RedisCache;
-import com.ruoyi.common.utils.sign.Base64;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.IdUtil;
 import com.ruoyi.system.service.ISysConfigService;
 

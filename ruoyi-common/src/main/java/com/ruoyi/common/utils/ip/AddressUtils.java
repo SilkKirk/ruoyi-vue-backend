@@ -1,23 +1,20 @@
 package com.ruoyi.common.utils.ip;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common.constant.Constants;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.ruoyi.common.constant.Constants;
 
 /**
  * 获取地址类
  * 
  * @author ruoyi
  */
+@Slf4j
 public class AddressUtils
 {
-    private static final Logger log = LoggerFactory.getLogger(AddressUtils.class);
 
     // IP地址查询
     public static final String IP_URL = "https://whois.pconline.com.cn/ipJson.jsp";

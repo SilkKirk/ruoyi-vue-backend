@@ -1,6 +1,7 @@
 package com.ruoyi.common.utils.file;
 
 import java.io.File;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 
 /**
@@ -42,7 +43,7 @@ public class FileTypeUtils
         {
             return "";
         }
-        return fileName.substring(separatorIndex + 1).toLowerCase();
+        return FileUtil.extName(fileName).toLowerCase();
     }
 
     /**

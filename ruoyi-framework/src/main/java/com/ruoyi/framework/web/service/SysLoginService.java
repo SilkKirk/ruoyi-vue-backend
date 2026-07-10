@@ -85,7 +85,7 @@ public class SysLoginService
             else
             {
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, e.getMessage()));
-                throw new ServiceException(e.getMessage());
+                throw new ServiceException("登录失败，请联系管理员");
             }
         }
         finally

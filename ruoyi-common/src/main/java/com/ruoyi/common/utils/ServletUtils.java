@@ -1,9 +1,6 @@
 package com.ruoyi.common.utils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.ruoyi.common.constant.Constants;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 
 /**
  * 客户端工具类
@@ -189,31 +186,11 @@ public class ServletUtils
      */
     public static String urlEncode(String str)
     {
-        try
-        {
-            return URLEncoder.encode(str, Constants.UTF8);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            return StrUtil.EMPTY;
-        }
+        return URLUtil.encode(str);
     }
 
-    /**
-     * 内容解码
-     * 
-     * @param str 内容
-     * @return 解码后的内容
-     */
     public static String urlDecode(String str)
     {
-        try
-        {
-            return URLDecoder.decode(str, Constants.UTF8);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            return StrUtil.EMPTY;
-        }
+        return URLUtil.decode(str);
     }
 }

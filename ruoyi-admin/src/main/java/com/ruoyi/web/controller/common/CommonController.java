@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,18 +17,18 @@ import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.framework.config.ServerConfig;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 通用请求处理
  * 
  * @author ruoyi
  */
+@Slf4j
 @RestController
 @RequestMapping("/common")
 public class CommonController
 {
-    private static final Logger log = LoggerFactory.getLogger(CommonController.class);
-
     @Autowired
     private ServerConfig serverConfig;
 
@@ -72,7 +70,7 @@ public class CommonController
      * 通用上传请求（单个）
      */
     @PostMapping("/upload")
-    public AjaxResult uploadFile(MultipartFile file) throws Exception
+    public AjaxResult uploadFile(MultipartFile file)
     {
         try
         {
@@ -90,7 +88,8 @@ public class CommonController
         }
         catch (Exception e)
         {
-            return AjaxResult.error(e.getMessage());
+            log.error("上传文件失败", e);
+            return AjaxResult.error("上传文件失败");
         }
     }
 
@@ -98,7 +97,7 @@ public class CommonController
      * 通用上传请求（多个）
      */
     @PostMapping("/uploads")
-    public AjaxResult uploadFiles(List<MultipartFile> files) throws Exception
+    public AjaxResult uploadFiles(List<MultipartFile> files)
     {
         try
         {
@@ -127,7 +126,8 @@ public class CommonController
         }
         catch (Exception e)
         {
-            return AjaxResult.error(e.getMessage());
+            log.error("上传文件失败", e);
+            return AjaxResult.error("上传文件失败");
         }
     }
 

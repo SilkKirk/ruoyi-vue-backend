@@ -8,7 +8,7 @@ import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.quartz.domain.SysJob;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.ruoyi.common.utils.StringUtils;
+
 
 /**
  * 任务执行工具
@@ -107,7 +107,7 @@ public class JobInvokeUtil
      */
     public static List<Object[]> getMethodParams(String invokeTarget)
     {
-        String methodStr = StringUtils.substringBetweenLast(invokeTarget, "(", ")");
+        String methodStr = StrUtil.subBetween(invokeTarget, "(", ")");
         if (StrUtil.isEmpty(methodStr))
         {
             return null;

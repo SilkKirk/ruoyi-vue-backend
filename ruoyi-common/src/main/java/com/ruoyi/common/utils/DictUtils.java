@@ -163,7 +163,7 @@ public class DictUtils
         {
             propertyString.append(dict.getDictValue()).append(SEPARATOR);
         }
-        return StringUtils.stripEnd(propertyString.toString(), SEPARATOR);
+        return StrUtil.removeSuffix(propertyString.toString(), SEPARATOR);
     }
 
     /**
@@ -184,7 +184,7 @@ public class DictUtils
         {
             propertyString.append(dict.getDictLabel()).append(SEPARATOR);
         }
-        return StringUtils.stripEnd(propertyString.toString(), SEPARATOR);
+        return StrUtil.removeSuffix(propertyString.toString(), SEPARATOR);
     }
 
     /**

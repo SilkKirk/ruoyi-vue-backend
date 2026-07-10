@@ -1,10 +1,8 @@
 package com.ruoyi.common.exception.job;
 
-/**
- * 计划策略异常
- * 
- * @author ruoyi
- */
+import lombok.Getter;
+
+@Getter
 public class TaskException extends Exception
 {
     private static final long serialVersionUID = 1L;
@@ -20,11 +18,6 @@ public class TaskException extends Exception
     {
         super(msg, nestedEx);
         this.code = code;
-    }
-
-    public Code getCode()
-    {
-        return code;
     }
 
     public enum Code

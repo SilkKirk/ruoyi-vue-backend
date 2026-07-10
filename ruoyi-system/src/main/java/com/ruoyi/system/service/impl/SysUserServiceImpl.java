@@ -5,27 +5,22 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.validation.Validator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.utils.DataScopeHelper;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
-import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.*;
-import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.system.service.*;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -33,9 +28,9 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.collection.CollUtil;
 
 @Service
+@Slf4j
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService
 {
-    private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
 
     @Autowired private SysUserMapper userMapper;
     @Autowired private SysDeptMapper deptMapper;
@@ -154,7 +149,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .leftJoin("sys_user").as("u").on("u.user_id = ur.user_id")
                 .where("u.user_name = ?", userName)
         );
-        return CollectionUtils.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysRole::getRoleName).collect(Collectors.joining(","));
+        return CollUtil.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysRole::getRoleName).collect(Collectors.joining(","));
     }
 
     @Override
@@ -166,7 +161,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .leftJoin("sys_user").as("u").on("u.user_id = up.user_id")
                 .where("u.user_name = ?", userName)
         );
-        return CollectionUtils.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysPost::getPostName).collect(Collectors.joining(","));
+        return CollUtil.isEmpty(list) ? StrUtil.EMPTY : list.stream().map(SysPost::getPostName).collect(Collectors.joining(","));
     }
 
     @Override
@@ -303,7 +298,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName) {
-        if (ObjectUtil.isNull(userList) || userList.isEmpty()) throw new ServiceException("导入用户数据不能为空！");
+        if (CollUtil.isEmpty(userList)) throw new ServiceException("导入用户数据不能为空！");
         int successNum = 0, failureNum = 0;
         StringBuilder successMsg = new StringBuilder(), failureMsg = new StringBuilder();
         for (SysUser user : userList) {

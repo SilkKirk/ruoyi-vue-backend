@@ -2,7 +2,6 @@ package com.ruoyi.framework.web.service;
 
 import java.util.Set;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.model.LoginUser;
@@ -10,6 +9,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.framework.security.context.PermissionContextHolder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 
 /**
  * RuoYi首创 自定义权限实现，ss取自SpringSecurity首字母
@@ -32,7 +32,7 @@ public class PermissionService
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
+        if (ObjectUtil.isNull(loginUser) || CollUtil.isEmpty(loginUser.getPermissions()))
         {
             return false;
         }
@@ -48,7 +48,7 @@ public class PermissionService
      */
     public boolean lacksPermi(String permission)
     {
-        return hasPermi(permission) != true;
+        return !hasPermi(permission);
     }
 
     /**
@@ -64,7 +64,7 @@ public class PermissionService
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getPermissions()))
+        if (ObjectUtil.isNull(loginUser) || CollUtil.isEmpty(loginUser.getPermissions()))
         {
             return false;
         }
@@ -93,7 +93,7 @@ public class PermissionService
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
+        if (ObjectUtil.isNull(loginUser) || CollUtil.isEmpty(loginUser.getUser().getRoles()))
         {
             return false;
         }
@@ -116,7 +116,7 @@ public class PermissionService
      */
     public boolean lacksRole(String role)
     {
-        return hasRole(role) != true;
+        return !hasRole(role);
     }
 
     /**
@@ -132,7 +132,7 @@ public class PermissionService
             return false;
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        if (ObjectUtil.isNull(loginUser) || CollectionUtils.isEmpty(loginUser.getUser().getRoles()))
+        if (ObjectUtil.isNull(loginUser) || CollUtil.isEmpty(loginUser.getUser().getRoles()))
         {
             return false;
         }

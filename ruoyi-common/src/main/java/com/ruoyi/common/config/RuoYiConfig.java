@@ -2,12 +2,16 @@ package com.ruoyi.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 读取项目相关配置
  * 
  * @author ruoyi
  */
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "ruoyi")
 public class RuoYiConfig
@@ -29,36 +33,6 @@ public class RuoYiConfig
 
     /** 验证码类型 */
     private static String captchaType;
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getVersion()
-    {
-        return version;
-    }
-
-    public void setVersion(String version)
-    {
-        this.version = version;
-    }
-
-    public String getCopyrightYear()
-    {
-        return copyrightYear;
-    }
-
-    public void setCopyrightYear(String copyrightYear)
-    {
-        this.copyrightYear = copyrightYear;
-    }
 
     public static String getProfile()
     {

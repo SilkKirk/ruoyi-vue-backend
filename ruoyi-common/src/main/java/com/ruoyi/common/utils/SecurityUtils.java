@@ -11,6 +11,7 @@ import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.common.exception.ServiceException;
 
 /**
@@ -155,7 +156,7 @@ public class SecurityUtils
      */
     public static boolean hasPermi(Collection<String> authorities, String permission)
     {
-        return authorities.stream().filter(StringUtils::hasText)
+        return authorities.stream().filter(StrUtil::isNotBlank)
                 .anyMatch(x -> Constants.ALL_PERMISSION.equals(x) || PatternMatchUtils.simpleMatch(x, permission));
     }
 
@@ -181,7 +182,7 @@ public class SecurityUtils
      */
     public static boolean hasRole(Collection<String> roles, String role)
     {
-        return roles.stream().filter(StringUtils::hasText)
+        return roles.stream().filter(StrUtil::isNotBlank)
                 .anyMatch(x -> Constants.SUPER_ADMIN.equals(x) || PatternMatchUtils.simpleMatch(x, role));
     }
 

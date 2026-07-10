@@ -15,6 +15,7 @@ import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.domain.SysNoticeRead;
 import com.ruoyi.system.mapper.SysNoticeReadMapper;
 import com.ruoyi.system.service.ISysNoticeReadService;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Service
@@ -61,8 +62,15 @@ public class SysNoticeReadServiceImpl extends ServiceImpl<SysNoticeReadMapper, S
 
     @Override
     public void markReadBatch(Long userId, Long[] noticeIds) {
-        if (noticeIds == null || noticeIds.length == 0) return;
-        for (Long noticeId : noticeIds) markRead(noticeId, userId);
+        if (ArrayUtil.isEmpty(noticeIds)) return;
+        Date now = new Date();
+        List<SysNoticeRead> list = new ArrayList<>();
+        for (Long noticeId : noticeIds) {
+            SysNoticeRead record = new SysNoticeRead();
+            record.setNoticeId(noticeId); record.setUserId(userId); record.setReadTime(now);
+            list.add(record);
+        }
+        noticeReadMapper.insertBatch(list);
     }
 
     @Override

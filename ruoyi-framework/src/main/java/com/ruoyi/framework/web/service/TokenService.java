@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +25,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.collection.CollUtil;
 
 /**
  * token验证处理
@@ -33,9 +33,9 @@ import cn.hutool.core.util.ObjectUtil;
  * @author ruoyi
  */
 @Component
+@Slf4j
 public class TokenService
 {
-    private static final Logger log = LoggerFactory.getLogger(TokenService.class);
 
     // 令牌自定义标识
     @Value("${token.header}")
@@ -248,7 +248,7 @@ public class TokenService
         // 扫描所有在线 token
         String pattern = CacheConstants.LOGIN_TOKEN_KEY + "*";
         Collection<String> keys = redisCache.keys(pattern);
-        if (keys == null || keys.isEmpty())
+        if (CollUtil.isEmpty(keys))
         {
             return;
         }

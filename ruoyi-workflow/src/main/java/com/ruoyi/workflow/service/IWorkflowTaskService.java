@@ -1,10 +1,12 @@
 package com.ruoyi.workflow.service;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import com.mybatisflex.core.paginate.Page;
 import com.ruoyi.workflow.domain.WorkflowTask;
 import com.ruoyi.workflow.domain.vo.HistoryEvent;
+import lombok.NonNull;
 
 /**
  * 流程任务 服务层
@@ -49,7 +51,7 @@ public interface IWorkflowTaskService
      * @param businessId 业务主键
      * @param variables 流程变量
      */
-    void startProcess(String businessCode, String businessId, Map<String, Object> variables);
+    void startProcess(String businessCode, @NonNull Serializable businessId, Map<String, Object> variables);
 
     /**
      * 通用查询业务数据（供待办/已办查看详情使用）
@@ -57,5 +59,5 @@ public interface IWorkflowTaskService
      * @param businessId 业务主键
      * @return 业务数据对象
      */
-    Object loadBusinessData(String businessCode, String businessId);
+    Object loadBusinessData(String businessCode, @NonNull Serializable businessId);
 }

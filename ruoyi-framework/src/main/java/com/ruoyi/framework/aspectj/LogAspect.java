@@ -11,8 +11,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -25,7 +24,7 @@ import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.enums.BusinessStatus;
 import com.ruoyi.common.enums.HttpMethod;
 import com.ruoyi.common.filter.PropertyPreExcludeFilter;
-import com.ruoyi.common.utils.ExceptionUtil;
+
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.ServletUtils;
 
@@ -44,9 +43,9 @@ import cn.hutool.core.map.MapUtil;
  */
 @Aspect
 @Component
+@Slf4j
 public class LogAspect
 {
-    private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
 
     /** 排除敏感属性字段 */
     public static final String[] EXCLUDE_PROPERTIES = { "password", "oldPassword", "newPassword", "confirmPassword" };
@@ -116,7 +115,7 @@ public class LogAspect
             if (e != null)
             {
                 operLog.setStatus(BusinessStatus.FAIL.ordinal());
-                operLog.setErrorMsg(StrUtil.sub(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+                operLog.setErrorMsg(StrUtil.sub(Convert.toStr(e.getMessage(), cn.hutool.core.exceptions.ExceptionUtil.stacktraceToString(e)), 0, 2000));
             }
             // 设置方法名称
             String className = joinPoint.getTarget().getClass().getName();
@@ -251,7 +250,7 @@ public class LogAspect
             Collection collection = (Collection) o;
             for (Object value : collection)
             {
-                return value instanceof MultipartFile;
+                if (value instanceof MultipartFile) return true;
             }
         }
         else if (Map.class.isAssignableFrom(clazz))
@@ -260,7 +259,7 @@ public class LogAspect
             for (Object value : map.entrySet())
             {
                 Map.Entry entry = (Map.Entry) value;
-                return entry.getValue() instanceof MultipartFile;
+                if (entry.getValue() instanceof MultipartFile) return true;
             }
         }
         return o instanceof MultipartFile || o instanceof HttpServletRequest || o instanceof HttpServletResponse

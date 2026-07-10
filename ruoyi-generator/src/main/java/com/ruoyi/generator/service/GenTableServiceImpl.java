@@ -20,11 +20,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,10 +53,10 @@ import cn.hutool.core.collection.CollUtil;
  * 
  * @author ruoyi
  */
+@Slf4j
 @Service
 public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> implements IGenTableService
 {
-    private static final Logger log = LoggerFactory.getLogger(GenTableServiceImpl.class);
 
     @Autowired
     private GenTableMapper genTableMapper;
@@ -176,13 +175,13 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
     public List<GenTable> selectDbTableListByNames(String[] tableNames)
     {
         if (tableNames == null || tableNames.length == 0) return new ArrayList<>();
-        String join = "'" + String.join("','", tableNames) + "'";
+        String placeholders = Arrays.stream(tableNames).map(n -> "?").collect(Collectors.joining(","));
         String sql = "select TABLE_NAME as table_name, TABLE_COMMENT as table_comment, "
             + "CREATE_TIME as create_time, UPDATE_TIME as update_time "
             + "from information_schema.tables "
             + "where table_name not like 'qrtz_%' and table_name not like 'gen_%' and table_schema = (select database()) "
-            + "and table_name in (" + join + ")";
-        return Db.selectListBySql(sql).stream()            .map(r -> {
+            + "and table_name in (" + placeholders + ")";
+        return Db.selectListBySql(sql, (Object[]) tableNames).stream().map(r -> {
                 GenTable t = new GenTable();
                 t.setTableName(r.getString("table_name"));
                 t.setTableComment(r.getString("table_comment"));
@@ -628,7 +627,8 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable> i
             + "COLUMN_COMMENT as column_comment, "
             + "(case when EXTRA = 'auto_increment' then '1' else '0' end) as is_increment, "
             + "COLUMN_TYPE as column_type "
-            + "from information_schema.columns where table_schema = (select database()) and table_name = '" + tableName + "' order by ORDINAL_POSITION"
+            + "from information_schema.columns where table_schema = (select database()) and table_name = ? order by ORDINAL_POSITION",
+            tableName
         );
         List<GenTableColumn> result = new ArrayList<>();
         for (Row r : rows) {

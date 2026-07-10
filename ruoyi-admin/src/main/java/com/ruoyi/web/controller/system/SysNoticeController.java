@@ -1,7 +1,6 @@
 package com.ruoyi.web.controller.system;
 
 import java.util.List;
-import com.mybatisflex.core.paginate.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;

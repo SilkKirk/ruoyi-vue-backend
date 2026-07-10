@@ -144,14 +144,7 @@ public class DateUtils
      */
     public static String timeDistance(Date endDate, Date startTime)
     {
-        long nd = 1000 * 24 * 60 * 60;
-        long nh = 1000 * 60 * 60;
-        long nm = 1000 * 60;
-        long diff = endDate.getTime() - startTime.getTime();
-        long day = diff / nd;
-        long hour = diff % nd / nh;
-        long min = diff % nd % nh / nm;
-        return day + "天" + hour + "小时" + min + "分钟";
+        return DateUtil.formatBetween(DateUtil.betweenMs(startTime, endDate));
     }
 
     /**

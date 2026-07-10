@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.service.impl;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import com.ruoyi.workflow.handler.WorkflowBusinessHandlerRegistry;
 import com.ruoyi.workflow.service.IWorkflowTaskService;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -159,7 +161,7 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void startProcess(String businessCode, String businessId, Map<String, Object> variables) {
+    public void startProcess(String businessCode, @NonNull Serializable businessId, Map<String, Object> variables) {
         WorkflowBusinessConfig config = handlerRegistry.getConfig(businessCode);
         ProcessDefinition pd = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionKey(config.getProcessDefinitionKey())
@@ -175,7 +177,8 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
             Authentication.setAuthenticatedUserId(loginUsername);
             vars.put(FlowableProcessConstants.INITIATOR_VAR, loginUsername);
         }
-        ProcessInstance pi = runtimeService.startProcessInstanceById(pd.getId(), businessId, vars);
+        String bizKey = String.valueOf(businessId);
+        ProcessInstance pi = runtimeService.startProcessInstanceById(pd.getId(), bizKey, vars);
         WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessCode);
         Object businessData = handler.loadBusinessData(businessId);
         if (businessData != null) {
@@ -184,7 +187,7 @@ public class WorkflowTaskServiceImpl implements IWorkflowTaskService
     }
 
     @Override
-    public Object loadBusinessData(String businessCode, String businessId) {
+    public Object loadBusinessData(String businessCode, @NonNull Serializable businessId) {
         WorkflowBusinessHandler handler = handlerRegistry.getHandler(businessCode);
         return handler.loadBusinessData(businessId);
     }

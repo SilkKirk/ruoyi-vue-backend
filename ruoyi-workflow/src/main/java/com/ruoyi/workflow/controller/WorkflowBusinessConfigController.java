@@ -1,6 +1,8 @@
 package com.ruoyi.workflow.controller;
 
+import java.util.List;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -33,7 +35,7 @@ public class WorkflowBusinessConfigController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('workflow:businessConfig:query')")
     @GetMapping("/{id}")
-    public AjaxResult getInfo(@PathVariable String id) {
+    public AjaxResult getInfo(@PathVariable Long id) {
         return success(configService.getById(id));
     }
 
@@ -63,7 +65,7 @@ public class WorkflowBusinessConfigController extends BaseController {
     @PreAuthorize("@ss.hasPermi('workflow:businessConfig:remove')")
     @Log(title = "流程业务配置", businessType = BusinessType.DELETE)
     @PostMapping("/{id}")
-    public AjaxResult remove(@PathVariable String id) {
+    public AjaxResult remove(@PathVariable Long id) {
         boolean ok = configService.removeById(id);
         if (ok) {
             eventPublisher.publishEvent(new ConfigChangeEvent());
@@ -74,5 +76,17 @@ public class WorkflowBusinessConfigController extends BaseController {
     @GetMapping("/handlerBeanNames")
     public AjaxResult getHandlerBeanNames() {
         return success(handlerRegistry.getAvailableHandlerBeanNames());
+    }
+
+    /** 获取所有已启用的业务详情路由（前端动态注入路由用，无需认证） */
+    @GetMapping("/detailRoutes")
+    public AjaxResult getDetailRoutes() {
+        List<WorkflowBusinessConfig> list = configService.list(
+                QueryWrapper.create()
+                        .select(WorkflowBusinessConfig::getDetailRoute)
+                        .from(WorkflowBusinessConfig.class)
+                        .where(WorkflowBusinessConfig::getStatus).eq("1")
+                        .and(WorkflowBusinessConfig::getDetailRoute).isNotNull());
+        return success(list.stream().map(WorkflowBusinessConfig::getDetailRoute).toList());
     }
 }

@@ -4,8 +4,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.TreeUtils;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +27,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
 
 @Service
+@Slf4j
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements ISysMenuService
 {
-    private static final Logger log = LoggerFactory.getLogger(SysMenuServiceImpl.class);
     public static final Long MENU_ROOT_ID = 0L;
 
     @Autowired private SysMenuMapper menuMapper;
@@ -64,7 +63,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         List<String> perms;
         if (SecurityUtils.isAdmin(userId)) {
             perms = menuMapper.selectListByQuery(
-                QueryWrapper.create().select("perms").where("perms is not null and perms != ''")
+                QueryWrapper.create().select(SysMenu::getPerms).where(SysMenu::getPerms).isNotNull().and(SysMenu::getPerms).ne("")
             ).stream().map(SysMenu::getPerms).collect(Collectors.toList());
         } else {
             perms = menuMapper.selectListByQuery(

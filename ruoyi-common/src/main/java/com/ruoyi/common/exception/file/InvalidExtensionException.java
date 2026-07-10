@@ -1,12 +1,14 @@
 package com.ruoyi.common.exception.file;
 
 import java.util.Arrays;
+import lombok.Getter;
 
 /**
  * 文件上传无效扩展名异常类
  * 
  * @author ruoyi
  */
+@Getter
 public class InvalidExtensionException extends FileUploadException
 {
     private static final long serialVersionUID = 1L;
@@ -21,21 +23,6 @@ public class InvalidExtensionException extends FileUploadException
         this.allowedExtension = allowedExtension;
         this.extension = extension;
         this.filename = filename;
-    }
-
-    public String[] getAllowedExtension()
-    {
-        return allowedExtension;
-    }
-
-    public String getExtension()
-    {
-        return extension;
-    }
-
-    public String getFilename()
-    {
-        return filename;
     }
 
     public static class InvalidImageExtensionException extends InvalidExtensionException

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import cn.hutool.core.io.IoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.page.TableSupport;
 import cn.hutool.core.convert.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -36,12 +34,14 @@ import com.ruoyi.generator.domain.GenTable;
 import com.ruoyi.generator.domain.GenTableColumn;
 import com.ruoyi.generator.service.IGenTableColumnService;
 import com.ruoyi.generator.service.IGenTableService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 代码生成 操作处理
  * 
  * @author ruoyi
  */
+@Slf4j
 @RestController
 @RequestMapping("/tool/gen")
 public class GenController extends BaseController
@@ -150,7 +150,7 @@ public class GenController extends BaseController
         }
         catch (Exception e)
         {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return AjaxResult.error("创建表结构异常");
         }
     }

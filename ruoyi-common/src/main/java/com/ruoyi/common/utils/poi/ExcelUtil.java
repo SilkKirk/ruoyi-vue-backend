@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletResponse;
 import cn.hutool.core.date.DateUtil;
@@ -68,8 +67,7 @@ import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
 import com.ruoyi.common.annotation.Excel.Type;
@@ -86,16 +84,17 @@ import com.ruoyi.common.utils.file.ImageUtils;
 import com.ruoyi.common.utils.reflect.ReflectUtils;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.ruoyi.common.utils.StringUtils;
+import cn.hutool.core.util.IdUtil;
+
 
 /**
  * Excel相关处理
  * 
  * @author ruoyi
  */
+@Slf4j
 public class ExcelUtil<T>
 {
-    private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
     public static final String SEPARATOR = ",";
 
@@ -520,7 +519,7 @@ public class ExcelUtil<T>
                                 String fileName = FileUtils.writeImportBytes(data);
                                 propertyString.append(fileName).append(SEPARATOR);
                             }
-                            val = StringUtils.stripEnd(propertyString.toString(), SEPARATOR);
+                            val = StrUtil.removeSuffix(propertyString.toString(), SEPARATOR);
                         }
                         ReflectUtils.invokeSetter(entity, propertyName, val);
                     }
@@ -1160,7 +1159,7 @@ public class ExcelUtil<T>
             String propertyValue = Convert.toStr(value);
             if (StrUtil.isNotEmpty(propertyValue))
             {
-                List<String> imagePaths = StringUtils.str2List(propertyValue, SEPARATOR);
+                List<String> imagePaths = StrUtil.split(propertyValue, SEPARATOR);
                 for (String imagePath : imagePaths)
                 {
                     byte[] data = ImageUtils.getImage(imagePath);
@@ -1474,7 +1473,7 @@ public class ExcelUtil<T>
                 }
             }
         }
-        return StringUtils.stripEnd(propertyString.toString(), separator);
+        return StrUtil.removeSuffix(propertyString.toString(), separator);
     }
 
     /**
@@ -1511,7 +1510,7 @@ public class ExcelUtil<T>
                 }
             }
         }
-        return StringUtils.stripEnd(propertyString.toString(), separator);
+        return StrUtil.removeSuffix(propertyString.toString(), separator);
     }
 
     /**
@@ -1613,7 +1612,7 @@ public class ExcelUtil<T>
      */
     public String encodingFilename(String filename)
     {
-        return UUID.randomUUID() + "_" + filename + ".xlsx";
+        return IdUtil.simpleUUID() + "_" + filename + ".xlsx";
     }
 
     /**
@@ -1643,7 +1642,7 @@ public class ExcelUtil<T>
      */
     private Object getTargetValue(T vo, Field field, Excel excel) throws Exception
     {
-        field.setAccessible(true);
+        ReflectUtil.setAccessible(field);
         Object o = field.get(vo);
         if (StrUtil.isNotEmpty(excel.targetAttr()))
         {
@@ -1678,7 +1677,7 @@ public class ExcelUtil<T>
         {
             Class<?> clazz = o.getClass();
             Field field = clazz.getDeclaredField(name);
-            field.setAccessible(true);
+            ReflectUtil.setAccessible(field);
             o = field.get(o);
         }
         return o;

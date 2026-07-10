@@ -2,8 +2,6 @@ package com.ruoyi.system.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.TreeUtils;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
-import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.service.ISysDeptService;
@@ -133,7 +130,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
         );
         for (SysDept child : children)
             child.setAncestors(child.getAncestors().replaceFirst(oldAncestors, newAncestors));
-        if (!children.isEmpty())
+        if (CollUtil.isNotEmpty(children))
             children.forEach(deptMapper::update);
     }
 

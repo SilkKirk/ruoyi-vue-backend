@@ -7,8 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import cn.hutool.core.io.IoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import cn.hutool.core.util.StrUtil;
@@ -18,10 +17,9 @@ import cn.hutool.core.util.StrUtil;
  *
  * @author ruoyi
  */
+@Slf4j
 public class ImageUtils
 {
-    private static final Logger log = LoggerFactory.getLogger(ImageUtils.class);
-
     public static byte[] getImage(String imagePath)
     {
         InputStream is = getFile(imagePath);

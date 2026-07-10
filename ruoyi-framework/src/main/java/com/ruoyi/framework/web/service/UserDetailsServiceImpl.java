@@ -1,7 +1,6 @@
 package com.ruoyi.framework.web.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,10 +14,10 @@ import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.system.service.ISysUserService;
 import cn.hutool.core.util.ObjectUtil;
 
+@Slf4j
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService
 {
-    private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     @Autowired private ISysUserService userService;
     @Autowired private SysPasswordService passwordService;

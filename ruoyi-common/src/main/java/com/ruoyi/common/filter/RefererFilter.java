@@ -11,6 +11,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import cn.hutool.core.util.StrUtil;
 
 /**
  * 防盗链过滤器
@@ -41,7 +42,7 @@ public class RefererFilter implements Filter
         String referer = req.getHeader("Referer");
 
         // 如果Referer为空，拒绝访问
-        if (referer == null || referer.isEmpty())
+        if (StrUtil.isEmpty(referer))
         {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied: Referer header is required");
             return;

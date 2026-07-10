@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.web.domain.server.Cpu;
@@ -167,26 +168,6 @@ public class Server
      */
     public String convertFileSize(long size)
     {
-        long kb = 1024;
-        long mb = kb * 1024;
-        long gb = mb * 1024;
-        if (size >= gb)
-        {
-            return String.format("%.1f GB", (float) size / gb);
-        }
-        else if (size >= mb)
-        {
-            float f = (float) size / mb;
-            return String.format(f > 100 ? "%.0f MB" : "%.1f MB", f);
-        }
-        else if (size >= kb)
-        {
-            float f = (float) size / kb;
-            return String.format(f > 100 ? "%.0f KB" : "%.1f KB", f);
-        }
-        else
-        {
-            return String.format("%d B", size);
-        }
+        return FileUtil.readableFileSize(size);
     }
 }

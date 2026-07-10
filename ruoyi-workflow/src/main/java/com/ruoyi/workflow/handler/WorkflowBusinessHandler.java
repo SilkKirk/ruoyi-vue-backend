@@ -1,6 +1,8 @@
 package com.ruoyi.workflow.handler;
 
+import java.io.Serializable;
 import java.util.Map;
+import lombok.NonNull;
 
 /**
  * 工作流业务处理器接口
@@ -10,7 +12,7 @@ import java.util.Map;
 public interface WorkflowBusinessHandler {
 
     /** 根据业务 ID 加载业务数据 */
-    Object loadBusinessData(String businessId);
+    Object loadBusinessData(@NonNull Serializable businessId);
 
     /** 流程启动回调 */
     default void onProcessStarted(Object businessData, String processInstanceId) {}

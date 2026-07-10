@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import com.alibaba.druid.pool.DruidDataSource;
+import lombok.extern.slf4j.Slf4j;
 import com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceBuilder;
 import com.alibaba.druid.spring.boot4.autoconfigure.properties.DruidStatProperties;
 import com.alibaba.druid.util.Utils;
@@ -29,9 +30,11 @@ import jakarta.servlet.ServletResponse;
  * 
  * @author ruoyi
  */
+@Slf4j
 @Configuration
 public class DruidConfig
 {
+
     @Bean
     @ConfigurationProperties("spring.datasource.druid.master")
     public DataSource masterDataSource(DruidProperties druidProperties)
@@ -75,6 +78,7 @@ public class DruidConfig
         }
         catch (Exception e)
         {
+            log.error("从数据源获取失败", e);
         }
     }
 

@@ -3,11 +3,10 @@ package com.ruoyi.quartz.util;
 import java.util.Date;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.ScheduleConstants;
-import com.ruoyi.common.utils.ExceptionUtil;
+
 import cn.hutool.core.bean.BeanUtil;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.quartz.domain.SysJob;
@@ -20,9 +19,9 @@ import cn.hutool.core.util.StrUtil;
  *
  * @author ruoyi
  */
+@Slf4j
 public abstract class AbstractQuartzJob implements Job
 {
-    private static final Logger log = LoggerFactory.getLogger(AbstractQuartzJob.class);
 
     /**
      * 线程本地变量
@@ -83,7 +82,7 @@ public abstract class AbstractQuartzJob implements Job
         if (e != null)
         {
             sysJobLog.setStatus(Constants.FAIL);
-            String errorMsg = StrUtil.sub(ExceptionUtil.getExceptionMessage(e), 0, 2000);
+            String errorMsg = StrUtil.sub(cn.hutool.core.exceptions.ExceptionUtil.stacktraceToString(e), 0, 2000);
             sysJobLog.setExceptionInfo(errorMsg);
         }
         else

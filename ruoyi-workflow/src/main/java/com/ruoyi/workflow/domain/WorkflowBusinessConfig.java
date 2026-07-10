@@ -1,6 +1,7 @@
 package com.ruoyi.workflow.domain;
 
 import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import com.ruoyi.common.core.domain.BaseEntity;
 import lombok.Data;
@@ -10,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Table("workflow_business_config")
 public class WorkflowBusinessConfig extends BaseEntity {
-    @Id
-    private String id;
+    @Id(keyType = KeyType.Auto)
+    private Long id;
     private String processDefinitionKey;
     private String businessName;
     private String detailRoute;

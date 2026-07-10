@@ -2,8 +2,7 @@ package com.ruoyi.framework.manager.factory;
 
 import java.util.TimerTask;
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.LogUtils;
 import com.ruoyi.common.utils.ServletUtils;
@@ -23,9 +22,9 @@ import cn.hutool.core.util.StrUtil;
  * 
  * @author ruoyi
  */
+@Slf4j(topic = "sys-user")
 public class AsyncFactory
 {
-    private static final Logger sys_user_logger = LoggerFactory.getLogger("sys-user");
 
     /**
      * 记录登录信息
@@ -54,7 +53,7 @@ public class AsyncFactory
                 s.append(LogUtils.getBlock(status));
                 s.append(LogUtils.getBlock(message));
                 // 打印信息到日志
-                sys_user_logger.info(s.toString(), args);
+                log.info(s.toString(), args);
                 // 获取客户端操作系统
                 String os = UserAgentUtils.getOperatingSystem(userAgent);
                 // 获取客户端浏览器

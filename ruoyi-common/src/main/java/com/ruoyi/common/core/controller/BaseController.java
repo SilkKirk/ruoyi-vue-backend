@@ -2,9 +2,6 @@ package com.ruoyi.common.core.controller;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import com.mybatisflex.core.paginate.Page;
@@ -25,8 +22,6 @@ import cn.hutool.core.util.StrUtil;
  */
 public class BaseController
 {
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     /**
      * 将前台传递过来的日期格式的字符串，自动转化为Date类型
      */

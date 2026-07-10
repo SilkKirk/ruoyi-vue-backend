@@ -1,13 +1,11 @@
 package com.ruoyi.framework.aspectj;
 
-import java.util.Objects;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -20,13 +18,12 @@ import cn.hutool.core.util.ObjectUtil;
  * 
  * @author ruoyi
  */
+@Slf4j
 @Aspect
 @Order(1)
 @Component
 public class DataSourceAspect
 {
-    protected Logger logger = LoggerFactory.getLogger(getClass());
-
     @Pointcut("@annotation(com.ruoyi.common.annotation.DataSource)"
             + "|| @within(com.ruoyi.common.annotation.DataSource)")
     public void dsPointCut()
@@ -62,7 +59,7 @@ public class DataSourceAspect
     {
         MethodSignature signature = (MethodSignature) point.getSignature();
         DataSource dataSource = AnnotationUtils.findAnnotation(signature.getMethod(), DataSource.class);
-        if (Objects.nonNull(dataSource))
+        if (ObjectUtil.isNotNull(dataSource))
         {
             return dataSource;
         }

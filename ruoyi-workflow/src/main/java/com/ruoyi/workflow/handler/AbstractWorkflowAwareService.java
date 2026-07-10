@@ -1,5 +1,6 @@
 package com.ruoyi.workflow.handler;
 
+import java.io.Serializable;
 import java.util.Map;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -10,6 +11,7 @@ import com.ruoyi.workflow.service.IWorkflowTaskService;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.hutool.core.util.StrUtil;
+import lombok.NonNull;
 import lombok.Setter;
 
 public abstract class AbstractWorkflowAwareService<T extends WorkflowBaseEntity>
@@ -22,15 +24,14 @@ public abstract class AbstractWorkflowAwareService<T extends WorkflowBaseEntity>
     @Autowired
     protected IWorkflowTaskService workflowTaskService;
 
-    protected void startWorkflow(String businessId) {
+    protected void startWorkflow(Serializable businessId) {
         if (beanName != null) {
             workflowTaskService.startProcess(beanName, businessId, null);
         }
     }
 
     @Override
-    public Object loadBusinessData(String businessId) {
-        if (businessId == null) return null;
+    public Object loadBusinessData(@NonNull Serializable businessId) {
         return getById(businessId);
     }
 

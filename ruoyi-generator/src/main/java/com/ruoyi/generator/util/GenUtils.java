@@ -1,6 +1,6 @@
 package com.ruoyi.generator.util;
 
-import java.util.Arrays;
+import cn.hutool.core.util.ArrayUtil;
 
 import com.ruoyi.common.constant.GenConstants;
 import com.ruoyi.generator.config.GenConfig;
@@ -139,7 +139,7 @@ public class GenUtils
      */
     public static boolean arraysContains(String[] arr, String targetValue)
     {
-        return Arrays.asList(arr).contains(targetValue);
+        return ArrayUtil.contains(arr, targetValue);
     }
 
     /**

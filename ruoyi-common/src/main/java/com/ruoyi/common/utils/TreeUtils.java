@@ -1,5 +1,6 @@
 package com.ruoyi.common.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
 import java.util.List;
@@ -32,7 +33,7 @@ public class TreeUtils {
                                         Function<T, Long> idGetter,
                                         Function<T, Long> parentIdGetter,
                                         BiConsumer<T, List<T>> childrenSetter) {
-        if (list == null || list.isEmpty()) return list;
+        if (CollUtil.isEmpty(list)) return list;
 
         List<Tree<Long>> treeList = TreeUtil.build(list, rootId, (entity, tree) -> {
             tree.setId(idGetter.apply(entity));
@@ -40,7 +41,7 @@ public class TreeUtils {
             tree.put("raw", entity);
         });
 
-        if (treeList == null || treeList.isEmpty()) return list;
+        if (CollUtil.isEmpty(treeList)) return list;
 
         return treeList.stream()
             .map(node -> treeToEntity(node, childrenSetter))
@@ -51,7 +52,7 @@ public class TreeUtils {
     private static <T> T treeToEntity(Tree<Long> node, BiConsumer<T, List<T>> childrenSetter) {
         T entity = (T) node.get("raw");
         List<Tree<Long>> children = node.getChildren();
-        if (children != null && !children.isEmpty()) {
+        if (CollUtil.isNotEmpty(children)) {
             List<T> childEntities = children.stream()
                 .map(child -> treeToEntity(child, childrenSetter))
                 .collect(Collectors.toList());
