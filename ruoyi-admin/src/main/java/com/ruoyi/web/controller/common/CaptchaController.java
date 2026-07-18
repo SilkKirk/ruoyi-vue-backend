@@ -84,7 +84,7 @@ public class CaptchaController
         }
         catch (IOException e)
         {
-            return AjaxResult.error(e.getMessage());
+            return AjaxResult.error("验证码生成失败");
         }
 
         ajax.put("uuid", uuid);
